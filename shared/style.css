@@ -36,11 +36,11 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { scroll-padding-top: env(safe-area-inset-top, 0px); -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.45; padding-inline: 16px; padding-block: calc(16px + env(safe-area-inset-top, 0px)) calc(32px + env(safe-area-inset-bottom, 0px)); -webkit-tap-highlight-color: transparent; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.45; padding-inline: 16px; padding-block: calc(12px + env(safe-area-inset-top, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)); -webkit-tap-highlight-color: transparent; }
 button, .tile, .key { touch-action: manipulation; -webkit-user-select: none; user-select: none; }
 .app, .stack { display: flex; flex-direction: column; }
-.app { max-width: 440px; margin-inline: auto; gap: 14px; }
-.stack { gap: 12px; }
+.app { max-width: 440px; margin-inline: auto; gap: 12px; }
+.stack { gap: 10px; }
 
 /* ---- header: the game's name, the How to play button, and the line that says which puzzle this is ---- */
 .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -62,7 +62,7 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 1.5rem; margin: 0
 .pip.zero { background: transparent; box-shadow: inset 0 0 0 2px var(--muted); }
 
 /* ---- the instruction line: what to find, then what to do. Ink, not grey, because it is read. ---- */
-.instr { margin: 0; padding: 10px 14px 12px; border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--ink); font-weight: 700; font-size: 1rem; line-height: 1.35; }
+.instr { margin: 0; padding: 8px 14px 10px; border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--ink); font-weight: 700; font-size: 1rem; line-height: 1.35; }
 .instr::before { content: "Instructions"; display: block; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; }
 .instr:empty { display: none; }
 /* When the instruction appears or changes, the block pulses once to draw the eye, then settles. */
@@ -76,25 +76,29 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 1.5rem; margin: 0
 .note { margin: 0; color: var(--muted); font-size: 0.88rem; }
 
 /* ---- the clue box, for games that show a clue above the letters ---- */
-.clue { margin: 0; padding: 12px 14px; background: var(--surface); border-radius: var(--radius-sm); }
+.clue { margin: 0; padding: 10px 14px; background: var(--surface); border-radius: var(--radius-sm); }
 .clue span { display: block; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
 .clue b { font-weight: 700; font-size: 1.05rem; }
 
 /* ---- tiles and words. Flat when read-only; raised (button.tile) when tappable. ---- */
 .tiles { display: flex; flex-direction: column; gap: 8px; }
+.tiles.wrap { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+.tiles.wrap .tile { flex: 1 1 auto; padding: 10px 14px; font-size: 1.15rem; text-align: center; }
 .tiles.row { flex-direction: row; gap: 6px; justify-content: center; }
 .tile { background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 13px 16px; font-family: var(--display); font-weight: 800; font-size: 1.3rem; letter-spacing: 0.04em; text-transform: uppercase; min-width: 0; overflow-wrap: anywhere; color: var(--ink); }
 .tile .link { color: var(--accent); }
 .tiles.solved .tile, .tile.solved { border-color: var(--good); background: var(--good-soft); }
 .tiles.missed .tile, .tile.missed { background: var(--surface); color: var(--muted); }
 .tiles.missed .tile .link { color: var(--ink); }
-.tiles.row .tile { flex: 1; max-width: 62px; aspect-ratio: 1; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 1.55rem; letter-spacing: 0; }
+.tiles.row .tile { flex: 1; max-width: 58px; aspect-ratio: 1; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 1.55rem; letter-spacing: 0; }
 button.tile { cursor: pointer; background: var(--btn); border-color: var(--btn-line); box-shadow: 0 1.5px 0 var(--btn-line); font-family: var(--display); }
 button.tile:disabled { cursor: default; color: var(--muted); box-shadow: none; }
 button.tile:not(:disabled):active { transform: translateY(1.5px); box-shadow: none; }
 button.tile.sel { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 1.5px 0 var(--accent-edge); }
 button.tile.hinted { border-color: var(--part); background: var(--part-soft); }
 .words { display: flex; flex-direction: column; gap: 8px; }
+.words.wrap { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+.words.wrap .word { flex: 1 1 auto; padding: 10px 14px; font-size: 1.15rem; text-align: center; }
 .word { background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 13px 16px; font-family: var(--display); font-weight: 800; font-size: 1.25rem; letter-spacing: 0.04em; text-transform: uppercase; overflow-wrap: anywhere; }
 
 /* ---- typing. The answer box carries the accent border: this is where you act. ---- */
@@ -121,14 +125,14 @@ button:focus-visible, .btn:focus-visible, a:focus-visible { outline: 3px solid v
 .row { display: flex; gap: 8px; flex-wrap: wrap; }
 .row > button, .row > .btn { flex: 1; }
 .opts { display: flex; flex-direction: column; gap: 8px; }
-.opt { justify-content: flex-start; text-align: left; font-weight: 600; min-height: 52px; }
+.opt { justify-content: flex-start; text-align: left; font-weight: 600; min-height: 48px; }
 .opt.wrong { background: var(--surface); border-color: var(--line); color: var(--muted); box-shadow: none; }
 .opt.wrong::before { content: "\2715"; font-size: 0.75rem; }
 .keys { display: grid; grid-template-columns: repeat(9, 1fr); gap: 5px; }
 .key { min-height: 44px; padding: 0; font-family: var(--display); font-weight: 800; font-size: 1rem; border-radius: var(--radius-sm); min-width: 0; }
 
 /* ---- the status line: what happened, in the state colour, with an icon so colour is never alone ---- */
-.status { margin: 0; display: flex; align-items: center; gap: 8px; min-height: 2.6em; padding: 8px 12px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.92rem; border: 1px solid transparent; }
+.status { margin: 0; display: flex; align-items: center; gap: 8px; min-height: 2.3em; padding: 8px 12px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.92rem; border: 1px solid transparent; }
 .status:empty { padding: 0; min-height: 1.4em; }
 .status::before { content: ""; display: none; width: 18px; height: 18px; border-radius: 50%; flex: none; place-items: center; font-size: 0.65rem; line-height: 1; color: var(--bg); }
 .status.good { background: var(--good-soft); color: var(--good); }
@@ -147,6 +151,8 @@ button:focus-visible, .btn:focus-visible, a:focus-visible { outline: 3px solid v
 .secs { font-family: var(--mono); font-weight: 700; font-variant-numeric: tabular-nums; min-width: 3ch; text-align: right; }
 
 /* ---- the ladder of solved words ---- */
+.rungs { margin: 0; font-family: var(--mono); font-weight: 700; font-size: 0.9rem; color: var(--muted); letter-spacing: 0.06em; text-align: center; }
+.rungs b { color: var(--good); }
 .ladder { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .ladder li { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); }
 .ladder .w { font-family: var(--display); font-weight: 800; font-size: 1.05rem; letter-spacing: 0.06em; overflow-wrap: anywhere; min-width: 0; }
@@ -185,12 +191,12 @@ h2 { font-family: var(--display); font-weight: 800; font-size: 1.15rem; margin: 
 .days a.today .n { color: var(--accent); }
 
 /* ---- How to play ---- */
-dialog.help { max-width: 420px; width: calc(100% - 32px); max-height: 86dvh; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); color: var(--ink); padding: 20px; margin: auto; }
+dialog.help { max-width: 420px; width: calc(100% - 32px); max-height: 90dvh; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); color: var(--ink); padding: 16px; margin: auto; font-size: 0.95rem; }
 dialog.help::backdrop { background: rgba(0, 0, 0, 0.5); }
 dialog.help h2 { margin: 0 0 10px; font-size: 1.3rem; }
 dialog.help .goal { font-weight: 700; margin: 0 0 10px; }
 dialog.help ul { margin: 0 0 12px; padding-left: 1.1rem; }
-dialog.help li { margin-bottom: 6px; }
+dialog.help li { margin-bottom: 4px; }
 dialog.help .example { background: var(--surface); border-radius: var(--radius-sm); padding: 12px 14px; margin: 0 0 14px; font-size: 0.95rem; }
 dialog.help .example b { font-family: var(--display); letter-spacing: 0.04em; }
 dialog.help h3 { font-family: var(--display); font-size: 1rem; margin: 16px 0 8px; }
@@ -200,12 +206,37 @@ dialog.help .foot a { color: var(--muted); font-size: 0.9rem; }
 
 /* ---- home page ---- */
 .games { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
-.games a { display: block; background: var(--surface); border-radius: var(--radius); padding: 16px 18px; color: inherit; text-decoration: none; }
+.games a { display: block; background: var(--surface); border-radius: var(--radius); padding: 13px 16px; color: inherit; text-decoration: none; }
 .games a:hover, .games a:focus-visible { background: var(--accent-soft); outline: none; }
 .games h2 { margin: 0 0 4px; font-size: 1.2rem; }
 .games p { margin: 0; color: var(--muted); font-size: 0.95rem; }
-.games .skills { display: block; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 0.78rem; color: var(--accent); font-weight: 700; }
+.games .skills { display: block; margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--line); font-size: 0.78rem; color: var(--accent); font-weight: 700; }
 
 @keyframes shake { 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
 .shake { animation: shake 0.3s; }
 @media (prefers-reduced-motion: reduce) { .shake, .instr.pulse { animation: none; } .toggle input, .toggle input::before { transition: none; } }
+
+/* Short screens (older or smaller phones): a notch tighter everywhere, so a puzzle fits without scrolling. */
+@media (max-height: 720px) {
+  body { padding-block: calc(8px + env(safe-area-inset-top, 0px)) calc(14px + env(safe-area-inset-bottom, 0px)); line-height: 1.38; }
+  .app { gap: 8px; }
+  .stack { gap: 8px; }
+  h1 { font-size: 1.35rem; }
+  .q { width: 32px; height: 32px; }
+  .daily { font-size: 0.84rem; }
+  .instr { font-size: 0.95rem; padding: 6px 12px 8px; }
+  .instr::before { margin-bottom: 0; }
+  .clue { padding: 8px 12px; }
+  .clue b { font-size: 1rem; }
+  .tiles.row .tile { max-width: 52px; font-size: 1.4rem; }
+  .tile, .word { padding: 10px 14px; }
+  .tiles.wrap .tile, .words.wrap .word { padding: 8px 12px; font-size: 1.05rem; }
+  button, .btn { min-height: 44px; }
+  .opt { min-height: 44px; }
+  .key { min-height: 40px; }
+  .keys { gap: 4px; }
+  .status { min-height: 2em; padding: 6px 12px; font-size: 0.9rem; }
+  .ladder li { padding: 8px 12px; }
+  .recap li { padding: 7px 0; }
+  .card { padding: 14px; }
+}

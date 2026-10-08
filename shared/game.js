@@ -142,8 +142,8 @@
     choice(p) {
       let tries = 0, hinted = false;
       const opts = shuffle(p.options.slice());
-      const reveal = () => '<div class="words">' + p.words.map(w => '<div class="word">' + esc(w) + "</div>").join("") + '</div><p class="clue"><span>What they share</span><b>' + esc(p.options[0]) + "</b></p>";
-      stage.innerHTML = head() + '<div class="words">' + p.words.map(w => '<div class="word">' + esc(w) + "</div>").join("") + '</div><div class="opts" id="opts">' +
+      const reveal = () => '<div class="words wrap">' + p.words.map(w => '<div class="word">' + esc(w) + "</div>").join("") + '</div><p class="clue"><span>What they share</span><b>' + esc(p.options[0]) + "</b></p>";
+      stage.innerHTML = head() + '<div class="words wrap">' + p.words.map(w => '<div class="word">' + esc(w) + "</div>").join("") + '</div><div class="opts" id="opts">' +
         opts.map(o => '<button class="opt" type="button">' + esc(o) + "</button>").join("") + '</div><p class="status" id="msg" aria-live="polite"></p>' + buttons("Hint · 1 point");
       const points = () => Math.max(0, (tries === 0 ? 2 : 1) - (hinted ? 1 : 0));
       $("opts").onclick = e => {
@@ -176,7 +176,7 @@
         h += '<p class="status" id="msg" aria-live="polite">' + (started ? (sel < 0 ? "Tap the letter to change." : "Now tap its replacement.") : "") + "</p>";
         if (started) h += '<div class="keys">' + "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(c => '<button class="key" type="button" data-k="' + c + '"' + (sel < 0 ? " disabled" : "") + ">" + c + "</button>").join("") + "</div>";
         else h += '<button class="primary" id="go" type="button">Start</button>';
-        if (pts) h += rows(p.steps.slice(0, pts).map(s => [s[1], s[0], true]));
+        if (pts) h += '<p class="rungs">' + [p.start].concat(p.steps.slice(0, pts).map(s => "<b>" + s[1] + "</b>")).join(" → ") + "</p>";
         if (started) h += buttons("Hint · 1 point");
         stage.innerHTML = h;
         if (!started) { $("go").onclick = () => { started = true; draw(); startClock(G.timer, () => settle(points(), reveal(), "Time ran out.")); }; return; }

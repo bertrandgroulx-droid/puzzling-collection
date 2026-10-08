@@ -32,6 +32,7 @@
     <div class="tiles row" id="tiles"></div>
     <p class="status" id="msg" aria-live="polite"></p>
     <button class="primary" id="go" type="button">Start</button>
+    <p class="rungs" id="rungs" hidden></p>
     <ul class="ladder" id="ladder"></ul>
     <div class="row" id="helpRow" hidden>
       <button id="hintBtn" type="button">Hint &middot; 1 point</button>
@@ -105,7 +106,7 @@ function readyChain() {
   $("clockRow").hidden = true; $("clueRow").hidden = true;
   instruct("Read the word, then tap Start. " + SECONDS + " seconds for three clues.");
   say("");
-  $("ladder").innerHTML = ""; $("helpRow").hidden = true;
+  $("ladder").innerHTML = ""; $("rungs").hidden = true; $("rungs").innerHTML = ""; $("helpRow").hidden = true;
   drawTiles(false); drawClock(SECONDS * 1000); drawPips();
   if (timed) { $("go").hidden = false; $("go").textContent = "Start"; }
   else { $("go").hidden = true; begin(); }
@@ -144,7 +145,7 @@ function finish(why) {
   $("clueLabel").textContent = "Started from";
   $("clueText").textContent = c.start;
   say((pts === 3 ? "All three found." : why) + " " + p + (p === 1 ? " point." : " points."), p === MAX ? "good" : p > 0 ? "part" : "bad");
-  $("tiles").innerHTML = ""; $("helpRow").hidden = true;
+  $("tiles").innerHTML = ""; $("rungs").hidden = true; $("helpRow").hidden = true;
   $("go").hidden = false; $("go").textContent = ci + 1 < game.length ? "Next" : "See your score";
   $("go").focus();
   drawPips();
@@ -168,7 +169,8 @@ $("tiles").addEventListener("click", e => {
   const c = game[ci];
   if (cand === c.steps[step][1]) {
     pts++; word = cand;
-    $("ladder").insertAdjacentHTML("beforeend", '<li class="got"><span class="w">' + cand + '</span><span class="d">' + c.steps[step][0] + "</span></li>");
+    $("rungs").hidden = false;
+    $("rungs").innerHTML = [c.start].concat(c.steps.slice(0, step + 1).map(s => "<b>" + s[1] + "</b>")).join(" → ");
     say(cand + " is right.", "good");
     step++;
     $("hintBtn").disabled = false; $("hintBtn").innerHTML = "Hint &middot; 1 point";
