@@ -31,6 +31,12 @@ and code. The other six games share one stylesheet and one engine in `shared/`,
 so a fix there fixes all six at once. Each game folder still has its own page
 and its own puzzle file.
 
+## The timer switch
+
+Minus 3, Anagrams and Swap One have a clock. Each shows a Timer switch under
+its title. It is on by default; a player can turn it off for a relaxed game
+with no clock and no time penalties, and the phone remembers the choice.
+
 ## Adding puzzles
 
 Open the game's `puzzles.js`. Each line is one puzzle. Copy a line, change the

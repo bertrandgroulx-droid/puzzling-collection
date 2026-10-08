@@ -4,8 +4,25 @@
 // prepare() below turns them into what the engine needs.
 (function () {
   const $ = id => document.getElementById(id);
-  let S = null, G = null, stage = null, queue = [];
+  let S = null, G = null, stage = null, queue = [], timerOn = true, redrawReady = null;
   let clockEnd = 0, clockRaf = 0, clockTotal = 1, clockCb = null;
+
+  // The timer switch. On by default; the choice is remembered on this device.
+  function storageKey() { return "timer:" + location.pathname; }
+  function loadTimerChoice() { try { timerOn = localStorage.getItem(storageKey()) !== "off"; } catch (e) { timerOn = true; } }
+  function saveTimerChoice() { try { localStorage.setItem(storageKey(), timerOn ? "on" : "off"); } catch (e) {} }
+  function useTimer() { return !!G.timer && timerOn; }
+  function drawToggle() {
+    if (!G.timer || $("timerToggle")) return;
+    stage.insertAdjacentHTML("beforebegin", '<label class="toggle"><span>Timer <small id="timerNote"></small></span><input type="checkbox" id="timerToggle" role="switch"' + (timerOn ? " checked" : "") + "></label>");
+    $("timerToggle").onchange = e => { timerOn = e.target.checked; saveTimerChoice(); if (redrawReady) redrawReady(); };
+  }
+  // The switch is locked while a clock is running; the change applies from the next puzzle.
+  function lockToggle(locked) {
+    const t = $("timerToggle"); if (!t) return;
+    t.disabled = locked;
+    $("timerNote").textContent = locked ? "(change applies to the next puzzle)" : "";
+  }
 
   function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
   function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
@@ -23,13 +40,13 @@
     return { clues: p.clues, answers: p.answers.map(up) };
   }
 
-  function startClock(sec, cb) { clockTotal = sec; clockEnd = performance.now() + sec * 1000; clockCb = cb; cancelAnimationFrame(clockRaf); tickClock(); }
-  function stopClock() { cancelAnimationFrame(clockRaf); clockCb = null; }
+  function startClock(sec, cb) { clockTotal = sec; clockEnd = performance.now() + sec * 1000; clockCb = cb; cancelAnimationFrame(clockRaf); lockToggle(true); tickClock(); }
+  function stopClock() { cancelAnimationFrame(clockRaf); clockCb = null; lockToggle(false); }
   function tickClock() {
     const left = clockEnd - performance.now(), f = $("barFill"), s = $("secs");
     if (f) { f.style.width = Math.max(0, Math.min(100, left / (10 * clockTotal))) + "%"; f.parentNode.className = "bar" + (left <= 7000 ? " low" : ""); }
     if (s) s.textContent = Math.max(0, Math.ceil(left / 1000));
-    if (left <= 0) { const cb = clockCb; clockCb = null; if (cb) cb(); return; }
+    if (left <= 0) { const cb = clockCb; clockCb = null; lockToggle(false); if (cb) cb(); return; }
     clockRaf = requestAnimationFrame(tickClock);
   }
   const CLOCK = '<div class="clock"><div class="bar"><span id="barFill"></span></div><div class="secs" id="secs"></div></div>';
@@ -39,7 +56,7 @@
       const r = S.results[j];
       return '<span class="pip ' + (r === undefined ? (j === S.i ? "now" : "") : r === G.max ? "full" : r > 0 ? "part" : "zero") + '"></span>';
     }).join("");
-    return '<div class="pips" aria-hidden="true">' + pips + '</div><p class="lead">Puzzle ' + (S.i + 1) + " of " + G.per + ". " + esc(G.rules) + "</p>";
+    return '<div class="pips" aria-hidden="true">' + pips + '</div><p class="lead">Puzzle ' + (S.i + 1) + " of " + G.per + ". " + esc(G.timer && !timerOn && G.rulesUntimed ? G.rulesUntimed : G.rules) + "</p>";
   }
   function rows(list) { return '<ul class="ladder">' + list.map(r => '<li class="' + (r[2] ? "got" : "miss") + '"><span class="w">' + esc(r[0]) + '</span><span class="d">' + esc(r[1]) + "</span></li>").join("") + "</ul>"; }
   function label(p) { return p.words ? p.words.join(", ") : p.start ? p.start + " → " + p.steps[2][1] : p.given ? p.given + " → " + p.answers.join(", ") : p.answers.join(" / "); }
@@ -56,7 +73,7 @@
     ENGINES[G.type](S.items[S.i]);
   }
   function settle(points, revealHTML, text) {
-    stopClock(); stage.onclick = null;
+    stopClock(); stage.onclick = null; redrawReady = null;
     S.results.push(points); S.score += points; $("score").textContent = S.score;
     stage.innerHTML = head() + revealHTML + '<p class="msg ' + (points === G.max ? "good" : "") + '">' + esc(text) + " " + points + (points === 1 ? " point." : " points.") + '</p><button class="primary" id="nextBtn" type="button">' + (S.i + 1 < G.per ? "Next puzzle" : "See your score") + "</button>";
     $("nextBtn").onclick = () => { S.i++; next(); };
@@ -81,7 +98,7 @@
         rows(p.answers.map((a, j) => [a, p.clues ? p.clues[j] : p.lead.join(" + "), G.each ? j < pts : true]));
       const draw = () => {
         let h = head();
-        if (G.timer) h += CLOCK;
+        if (useTimer()) h += CLOCK;
         if (p.given) h += '<div class="tiles">' + p.given.split("").map(c => '<div class="tile">' + c + "</div>").join("") + "</div>";
         if (p.lead) h += '<div class="words">' + p.lead.map(t => '<p class="clue" style="margin:0"><b>' + esc(t) + "</b></p>").join("") + "</div>";
         h += '<form id="f" class="stack" autocomplete="off">';
@@ -119,7 +136,7 @@
         $("giveUp").onclick = () => settle(G.each ? pts : 0, reveal(), G.each ? "Stopped." : "Answer shown.");
       };
       draw();
-      if (G.timer) startClock(G.timer, () => settle(pts, reveal(), "Time ran out."));
+      if (useTimer()) startClock(G.timer, () => settle(pts, reveal(), "Time ran out."));
       $("a" + k).focus();
     },
     // Pick the connection from four options. Two tries.
@@ -140,18 +157,22 @@
     },
     // Word ladder: select a tile, then pick its replacement letter.
     swap(p) {
-      let step = 0, word = p.start, sel = -1, pts = 0, started = false;
+      let step = 0, word = p.start, sel = -1, pts = 0, started = false, timed = useTimer();
       const reveal = () => '<p class="clue"><span>Started from</span><b>' + p.start + "</b></p>" + rows(p.steps.map((s, j) => [s[1], s[0], j < pts]));
       const draw = () => {
-        let h = head() + CLOCK;
+        if (!started) timed = useTimer();   // the switch can change until Start is pressed
+        redrawReady = started ? null : draw;
+        let h = head() + (timed ? CLOCK : "");
         h += '<p class="clue"><span>' + (started ? "Clue " + (step + 1) + " of 3" : "Four letters") + "</span><b>" + (started ? esc(p.steps[step][0]) : "Change one letter at a time to match each clue.") + "</b></p>";
         h += '<div class="tiles">' + word.split("").map((c, i) => '<button class="tile' + (i === sel ? " sel" : "") + '" type="button" data-i="' + i + '"' + (started ? "" : " disabled") + ' aria-label="Letter ' + c + '">' + c + "</button>").join("") + "</div>";
         h += '<p class="msg" id="msg" aria-live="polite">' + (started ? (sel < 0 ? "Tap the letter to change." : "Now pick its replacement.") : "") + "</p>";
         if (started) h += '<div class="keys">' + "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(c => '<button type="button" data-k="' + c + '"' + (sel < 0 ? " disabled" : "") + ">" + c + "</button>").join("") + "</div>";
-        else h += '<button class="primary" id="go" type="button">Start the clock</button>';
+        else h += '<button class="primary" id="go" type="button">' + (timed ? "Start the clock" : "Start") + "</button>";
         if (pts) h += rows(p.steps.slice(0, pts).map(s => [s[1], s[0], true]));
+        if (started && !timed) h += '<button class="ghost" id="stopBtn" type="button">Stop here</button>';
         stage.innerHTML = h;
-        if (!started) { $("secs").textContent = G.timer; $("go").onclick = () => { started = true; draw(); startClock(G.timer, () => settle(pts, reveal(), "Time ran out.")); }; }
+        if (!started) { if (timed) $("secs").textContent = G.timer; $("go").onclick = () => { started = true; draw(); if (timed) startClock(G.timer, () => settle(pts, reveal(), "Time ran out.")); }; }
+        if (started && !timed) $("stopBtn").onclick = () => settle(pts, reveal(), "Stopped.");
       };
       stage.onclick = e => {
         if (!started) return;
@@ -164,7 +185,9 @@
           if (step === 3) return settle(pts, reveal(), "Ladder complete.");
           draw(); say(cand + " is right. Tap the next letter to change.", "good");
         } else {
-          clockEnd -= 3000; sel = -1; draw(); say(cand + " does not fit. 3 seconds lost.", "bad");
+          sel = -1; draw();
+          if (timed) { clockEnd -= 3000; say(cand + " does not fit. 3 seconds lost.", "bad"); }
+          else say(cand + " does not fit. Try again.", "bad");
         }
       };
       draw();
@@ -177,6 +200,7 @@
     G.items = (settings.puzzles || []).map(p => prepare(p, G.type));
     stage = $("stage");
     if (!G.items.length) { stage.innerHTML = '<p class="lead">No puzzles found. Check puzzles.js.</p>'; return; }
+    loadTimerChoice(); drawToggle();
     newGame();
   };
 })();

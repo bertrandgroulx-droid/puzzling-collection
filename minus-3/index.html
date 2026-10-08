@@ -74,6 +74,15 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .ladder li.miss { border-style: dashed; }
 .ladder li.miss .w { color: var(--muted); }
 .rules { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 500; font-size: 0.95rem; cursor: pointer; }
+.toggle small { color: var(--muted); font-weight: 400; font-size: 0.8rem; }
+.toggle input { appearance: none; -webkit-appearance: none; flex: none; width: 46px; height: 28px; margin: 0; border-radius: 14px; background: var(--line); position: relative; cursor: pointer; transition: background 0.15s; }
+.toggle input::before { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 2px rgba(0,0,0,0.25); transition: transform 0.15s; }
+.toggle input:checked { background: var(--accent); }
+.toggle input:checked::before { transform: translateX(18px); }
+.toggle input:disabled { opacity: 0.55; cursor: default; }
+.toggle input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
 .big { font-family: var(--display); font-weight: 700; font-size: 3rem; line-height: 1; font-variant-numeric: tabular-nums; }
 .big small { font-size: 1.25rem; color: var(--muted); font-weight: 600; }
 .prompt { margin: 0; color: var(--muted); }
@@ -94,9 +103,10 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
     <div class="score" aria-live="polite">Score <b id="score">0</b> / 12</div>
   </header>
   <div class="pips" id="pips" aria-hidden="true"></div>
+  <label class="toggle"><span>Timer <small id="timerNote"></small></span><input type="checkbox" id="timerToggle" role="switch" checked></label>
 
   <section id="play" class="stack">
-    <div class="clock">
+    <div class="clock" id="clockRow">
       <div class="bar" id="bar"><span id="barFill"></span></div>
       <div class="secs" id="secs">25</div>
     </div>
@@ -104,8 +114,9 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
     <div class="tiles" id="tiles"></div>
     <p class="msg" id="msg" aria-live="polite"></p>
     <button class="primary" id="go" type="button">Start the clock</button>
+    <button class="ghost" id="giveUp" type="button" hidden>Show the rest</button>
     <ul class="ladder" id="ladder"></ul>
-    <p class="rules">Three clues per word, 25 seconds for all three. 1 point per clue. A wrong tap costs 3 seconds.</p>
+    <p class="rules" id="rules">Three clues per word, 25 seconds for all three. 1 point per clue. A wrong tap costs 3 seconds.</p>
   </section>
 
   <section id="done" class="stack" hidden>
@@ -123,6 +134,26 @@ const CHAINS = (window.MINUS_3_PUZZLES || []).map(c => ({ start: c.start.toUpper
 const PER_GAME = 4, SECONDS = 25, PENALTY = 3;
 const $ = id => document.getElementById(id);
 let queue = [], game = [], ci = 0, step = 0, word = "", pts = 0, score = 0, results = [], running = false, deadline = 0, raf = 0;
+
+// The timer switch. On by default; the choice is remembered on this device.
+let timerOn = true;
+try { timerOn = localStorage.getItem("timer:minus-3") !== "off"; } catch (e) {}
+$("timerToggle").checked = timerOn;
+$("timerToggle").addEventListener("change", e => {
+  timerOn = e.target.checked;
+  try { localStorage.setItem("timer:minus-3", timerOn ? "on" : "off"); } catch (e) {}
+  if (!running) applyTimerChoice();
+});
+function applyTimerChoice() {
+  $("clockRow").hidden = !timerOn;
+  $("go").textContent = timerOn ? "Start the clock" : "Start";
+  $("rules").textContent = timerOn ? "Three clues per word, 25 seconds for all three. 1 point per clue. A wrong tap costs 3 seconds." : "Three clues per word, no clock. 1 point per clue.";
+}
+// The switch is locked while a word is in play; the change applies from the next word.
+function lockToggle(locked) {
+  $("timerToggle").disabled = locked;
+  $("timerNote").textContent = locked ? "(change applies to the next word)" : "";
+}
 
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
@@ -161,8 +192,9 @@ function readyChain() {
   $("clueText").textContent = "Six letters. Tap one away to match each clue.";
   $("msg").textContent = ""; $("msg").className = "msg";
   $("ladder").innerHTML = "";
-  $("go").hidden = false; $("go").textContent = "Start the clock";
+  $("go").hidden = false; $("giveUp").hidden = true;
   drawTiles(false); drawClock(SECONDS * 1000); drawPips();
+  applyTimerChoice(); lockToggle(false);
 }
 
 function showStep() {
@@ -187,13 +219,14 @@ function finish() {
   $("ladder").innerHTML = c.steps.map((s, i) =>
     '<li class="' + (i < pts ? "got" : "miss") + '"><span class="w">' + s[1] + '</span><span class="d">' + s[0] + "</span></li>").join("");
   $("clueLabel").textContent = c.start;
-  $("clueText").textContent = pts === 3 ? "All three found." : pts === 0 ? "Time ran out. Here is the full chain." : "Time ran out after " + pts + ". Here is the rest.";
+  const why = timerOn ? "Time ran out" : "Stopped";
+  $("clueText").textContent = pts === 3 ? "All three found." : pts === 0 ? why + ". Here is the full chain." : why + " after " + pts + ". Here is the rest.";
   $("msg").className = "msg " + (pts === 3 ? "good" : "");
   $("msg").textContent = pts + (pts === 1 ? " point." : " points.");
-  $("tiles").innerHTML = "";
+  $("tiles").innerHTML = ""; $("giveUp").hidden = true;
   $("go").hidden = false; $("go").textContent = ci + 1 < PER_GAME ? "Next word" : "See your score";
   $("go").focus();
-  drawPips();
+  drawPips(); lockToggle(false);
 }
 
 $("go").addEventListener("click", () => {
@@ -208,10 +241,12 @@ $("go").addEventListener("click", () => {
     $("again").focus();
     return;
   }
-  $("go").hidden = true; running = true;
-  deadline = performance.now() + SECONDS * 1000;
-  showStep(); tick();
+  $("go").hidden = true; running = true; lockToggle(true);
+  showStep();
+  if (timerOn) { deadline = performance.now() + SECONDS * 1000; tick(); }
+  else $("giveUp").hidden = false;
 });
+$("giveUp").addEventListener("click", () => { if (running) finish(); });
 
 $("tiles").addEventListener("click", e => {
   const b = e.target.closest(".tile");
@@ -227,8 +262,8 @@ $("tiles").addEventListener("click", e => {
     if (step === 3) { finish(); return; }
     showStep();
   } else {
-    deadline -= PENALTY * 1000;
-    $("msg").className = "msg bad"; $("msg").textContent = "Not that letter. " + PENALTY + " seconds lost.";
+    if (timerOn) deadline -= PENALTY * 1000;
+    $("msg").className = "msg bad"; $("msg").textContent = timerOn ? "Not that letter. " + PENALTY + " seconds lost." : "Not that letter. Try another.";
     b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake");
   }
 });
