@@ -40,9 +40,10 @@
 
   // ---- the parts every puzzle screen shares ----
   function pipClass(r, j) { return r === undefined ? (j === S.i ? "now" : "") : r === G.max ? "full" : r > 0 ? "half" : "zero"; }
-  function head() {
+  function head(instruction) {
+    if (instruction === undefined) instruction = G.instruction;
     return '<div class="pips" aria-hidden="true">' + S.items.map((_, j) => '<span class="pip ' + pipClass(S.results[j], j) + '"></span>').join("") + "</div>" +
-      '<p class="instr">' + esc(G.instruction) + "</p>";
+      (instruction ? '<p class="instr">' + esc(instruction) + "</p>" : "");
   }
   function rows(list) { return '<ul class="ladder">' + list.map(r => '<li class="' + (r[2] ? "got" : "miss") + '"><span class="w">' + esc(r[0]) + '</span><span class="d">' + esc(r[1]) + "</span></li>").join("") + "</ul>"; }
   function label(p) { return p.words ? p.words.join(", ") : p.start ? p.start + " → " + p.steps[2][1] : p.given ? p.given + " → " + p.answers.join(", ") : p.answers.join(" / "); }
@@ -70,7 +71,7 @@
     stopClock(); stage.onclick = null;
     S.results.push(points); S.score += points;
     const cls = points === G.max ? "good" : points > 0 ? "part" : "bad";
-    stage.innerHTML = head() + revealHTML + '<p class="status ' + cls + '">' + esc(text) + " " + points + (points === 1 ? " point." : " points.") + "</p>" +
+    stage.innerHTML = head(null) + revealHTML + '<p class="status ' + cls + '">' + esc(text) + " " + points + (points === 1 ? " point." : " points.") + "</p>" +
       '<button class="primary" id="nextBtn" type="button">' + (S.i + 1 < S.items.length ? "Next" : "See your score") + "</button>";
     $("nextBtn").onclick = () => { S.i++; next(); };
     $("nextBtn").focus();
@@ -165,8 +166,8 @@
       const reveal = () => '<p class="clue"><span>Started from</span><b>' + p.start + "</b></p>" + rows(p.steps.map((s, j) => [s[1], s[0], j < pts]));
       const points = () => Math.max(0, pts - hints);
       const draw = () => {
-        let h = head() + (timed() ? CLOCK : "");
-        h += '<p class="clue"><span>' + (started ? "Clue " + (step + 1) + " of 3" : "Four letters") + "</span><b>" + (started ? esc(p.steps[step][0]) : "Read the clue, then start.") + "</b></p>";
+        let h = head(started ? undefined : "Read the word, then tap Start. " + G.timer + " seconds for three clues.") + (started && timed() ? CLOCK : "");
+        if (started) h += '<p class="clue"><span>Clue ' + (step + 1) + " of 3</span><b>" + esc(p.steps[step][0]) + "</b></p>";
         h += '<div class="tiles row">' + word.split("").map((c, i) => '<button class="tile' + (i === sel ? " sel" : "") + (i === hintedTile ? " hinted" : "") + '" type="button" data-i="' + i + '"' + (started ? "" : " disabled") + ' aria-label="Letter ' + c + '">' + c + "</button>").join("") + "</div>";
         h += '<p class="status" id="msg" aria-live="polite">' + (started ? (sel < 0 ? "Tap the letter to change." : "Now tap its replacement.") : "") + "</p>";
         if (started) h += '<div class="keys">' + "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(c => '<button class="key" type="button" data-k="' + c + '"' + (sel < 0 ? " disabled" : "") + ">" + c + "</button>").join("") + "</div>";
@@ -174,7 +175,7 @@
         if (pts) h += rows(p.steps.slice(0, pts).map(s => [s[1], s[0], true]));
         if (started) h += buttons("Hint · 1 point");
         stage.innerHTML = h;
-        if (!started) { $("secs").textContent = G.timer; $("go").onclick = () => { started = true; draw(); startClock(G.timer, () => settle(points(), reveal(), "Time ran out.")); }; return; }
+        if (!started) { $("go").onclick = () => { started = true; draw(); startClock(G.timer, () => settle(points(), reveal(), "Time ran out.")); }; return; }
         $("hintBtn").onclick = () => {
           hints++;
           hintedTile = [...word].findIndex((c, i) => c !== p.steps[step][1][i]);

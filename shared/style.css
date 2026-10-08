@@ -62,7 +62,7 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 1.5rem; margin: 0
 .pip.zero { background: transparent; box-shadow: inset 0 0 0 2px var(--muted); }
 
 /* ---- the instruction line: what to find, then what to do. Ink, not grey, because it is read. ---- */
-.instr { margin: 0; font-weight: 700; font-size: 0.95rem; }
+.instr { margin: 0; padding: 12px 14px; border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--ink); font-weight: 700; font-size: 1rem; line-height: 1.35; }
 .lead { margin: 0; color: var(--muted); }
 .note { margin: 0; color: var(--muted); font-size: 0.88rem; }
 
