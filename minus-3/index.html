@@ -6,6 +6,7 @@
 <title>Minus 3</title>
 <meta name="description" content="Start with six letters. Tap one away at a time to match three clues before the clock runs out.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="../shared/daily.css">
 <style>
 /* Layout: one phone-width column. Clock bar on top, the clue, a single row of six letter tiles to tap, and the ladder of solved words building underneath. */
 :root {
@@ -83,6 +84,8 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .toggle input:disabled { opacity: 0.55; cursor: default; }
 .toggle input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.row button { flex: 1; }
 .big { font-family: var(--display); font-weight: 700; font-size: 3rem; line-height: 1; font-variant-numeric: tabular-nums; }
 .big small { font-size: 1.25rem; color: var(--muted); font-weight: 600; }
 .prompt { margin: 0; color: var(--muted); }
@@ -97,15 +100,17 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 <body>
 
 <main class="app">
-  <a class="home" href="../">&larr; All games</a>
+  <a class="home" id="backLink" href="../">&larr; All games</a>
   <header>
     <h1>Minus 3</h1>
-    <div class="score" aria-live="polite">Score <b id="score">0</b> / 12</div>
+    <div class="score" aria-live="polite" data-game-ui>Score <b id="score">0</b> / <span id="max">12</span></div>
   </header>
-  <div class="pips" id="pips" aria-hidden="true"></div>
-  <label class="toggle"><span>Timer <small id="timerNote"></small></span><input type="checkbox" id="timerToggle" role="switch" checked></label>
+  <p class="modeline" id="modeLine" hidden></p>
+  <section id="menu" class="stack"></section>
+  <div class="pips" id="pips" aria-hidden="true" data-game-ui></div>
+  <label class="toggle" data-game-ui><span>Timer <small id="timerNote"></small></span><input type="checkbox" id="timerToggle" role="switch" checked></label>
 
-  <section id="play" class="stack">
+  <section id="play" class="stack" data-game-ui>
     <div class="clock" id="clockRow">
       <div class="bar" id="bar"><span id="barFill"></span></div>
       <div class="secs" id="secs">25</div>
@@ -119,21 +124,28 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
     <p class="rules" id="rules">Three clues per word, 25 seconds for all three. 1 point per clue. A wrong tap costs 3 seconds.</p>
   </section>
 
-  <section id="done" class="stack" hidden>
-    <div class="big"><span id="finalScore">0</span> <small>/ 12</small></div>
+  <section id="done" class="stack" hidden data-game-ui>
+    <p class="modeline" id="doneLine" hidden></p>
+    <div class="big"><span id="finalScore">0</span> <small>/ <span id="finalMax">12</span></small></div>
     <p class="prompt" id="verdict"></p>
     <ul class="recap" id="recap"></ul>
-    <button class="primary" id="again" type="button">Play four more</button>
+    <div class="row">
+      <button class="primary" id="again" type="button">Play four more</button>
+      <button class="ghost" id="menuBtn" type="button">Back to puzzles</button>
+    </div>
   </section>
 </main>
 
 <script src="puzzles.js"></script>
+<script src="../shared/keys.js"></script>
+<script src="../shared/daily.js"></script>
 <script>
 // Chains live in puzzles.js: a six-letter start, then three [clue, answer] steps.
-const CHAINS = (window.MINUS_3_PUZZLES || []).map(c => ({ start: c.start.toUpperCase(), steps: c.steps.map(s => [s[0], s[1].toUpperCase()]) }));
+const RAW = window.MINUS_3_PUZZLES || [];
+const CHAINS = RAW.map(c => ({ start: c.start.toUpperCase(), steps: c.steps.map(s => [s[0], s[1].toUpperCase()]) }));
 const PER_GAME = 4, SECONDS = 25, PENALTY = 3;
 const $ = id => document.getElementById(id);
-let queue = [], game = [], ci = 0, step = 0, word = "", pts = 0, score = 0, results = [], running = false, deadline = 0, raf = 0;
+let queue = [], game = [], ci = 0, step = 0, word = "", pts = 0, score = 0, results = [], running = false, deadline = 0, raf = 0, meta = null;
 
 // The timer switch. On by default; the choice is remembered on this device.
 let timerOn = true;
@@ -157,10 +169,16 @@ function lockToggle(locked) {
 
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
-function newGame() {
-  if (queue.length < PER_GAME) queue = shuffle(CHAINS.map((_, i) => i));
-  game = queue.splice(0, PER_GAME).map(i => CHAINS[i]);
+// m comes from the daily menu: { mode: "daily", items, number, date } or { mode: "practice" }.
+function newGame(m) {
+  meta = m && m.mode === "daily" ? m : null;
+  if (meta) game = meta.items.map(c => CHAINS[RAW.indexOf(c)]);
+  else {
+    if (queue.length < PER_GAME) queue = shuffle(CHAINS.map((_, i) => i));
+    game = queue.splice(0, PER_GAME).map(i => CHAINS[i]);
+  }
   ci = 0; score = 0; results = [];
+  $("max").textContent = game.length * 3;
   $("done").hidden = true; $("play").hidden = false;
   readyChain();
 }
@@ -188,7 +206,7 @@ function drawClock(ms) {
 function readyChain() {
   const c = game[ci];
   step = 0; pts = 0; word = c.start; running = false;
-  $("clueLabel").textContent = "Word " + (ci + 1) + " of " + PER_GAME;
+  $("clueLabel").textContent = "Word " + (ci + 1) + " of " + game.length;
   $("clueText").textContent = "Six letters. Tap one away to match each clue.";
   $("msg").textContent = ""; $("msg").className = "msg";
   $("ladder").innerHTML = "";
@@ -224,7 +242,7 @@ function finish() {
   $("msg").className = "msg " + (pts === 3 ? "good" : "");
   $("msg").textContent = pts + (pts === 1 ? " point." : " points.");
   $("tiles").innerHTML = ""; $("giveUp").hidden = true;
-  $("go").hidden = false; $("go").textContent = ci + 1 < PER_GAME ? "Next word" : "See your score";
+  $("go").hidden = false; $("go").textContent = ci + 1 < game.length ? "Next word" : "See your score";
   $("go").focus();
   drawPips(); lockToggle(false);
 }
@@ -232,13 +250,21 @@ function finish() {
 $("go").addEventListener("click", () => {
   if (results[ci] !== undefined) {
     ci++;
-    if (ci < PER_GAME) { readyChain(); return; }
+    if (ci < game.length) { readyChain(); return; }
     $("play").hidden = true; $("done").hidden = false;
     $("pips").innerHTML = game.map((_, i) => '<span class="pip p' + results[i] + '"></span>').join("");
-    $("finalScore").textContent = score;
-    $("verdict").textContent = score === 12 ? "A perfect game. Every chain cleared in time." : score >= 9 ? "Strong game. The clock only caught you once or twice." : score >= 5 ? "A fair game. The first clue of each word is the one to get fast." : "A tough set. The next four are different.";
+    const total = game.length * 3;
+    $("finalScore").textContent = score; $("finalMax").textContent = total;
+    $("verdict").textContent = score === total ? "A perfect game. Every chain cleared." : score >= 9 ? "Strong game. Only a word or two got away." : score >= 5 ? "A fair game. The first clue of each word is the one to get fast." : meta ? "A tough set. Tomorrow's is different." : "A tough set. The next four are different.";
     $("recap").innerHTML = game.map((c, i) => "<li><span>" + c.start + " → " + c.steps[2][1] + "</span><span>" + results[i] + " / 3</span></li>").join("");
-    $("again").focus();
+    const first = meta && window.Daily ? Daily.record(meta, score, total) : false;
+    $("doneLine").hidden = !(meta && !first);
+    $("doneLine").textContent = "Your first score for this puzzle is the one that is kept.";
+    $("menuBtn").style.order = meta ? -1 : 0;
+    $("again").textContent = meta ? "Play it again" : "Play four more";
+    $("again").className = meta ? "ghost" : "primary"; $("menuBtn").className = meta ? "primary" : "ghost";
+    $("menuBtn").hidden = !window.Daily;
+    (meta ? $("menuBtn") : $("again")).focus();
     return;
   }
   $("go").hidden = true; running = true; lockToggle(true);
@@ -267,8 +293,10 @@ $("tiles").addEventListener("click", e => {
     b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake");
   }
 });
-$("again").addEventListener("click", newGame);
-newGame();
+$("again").addEventListener("click", () => newGame(meta));
+$("menuBtn").addEventListener("click", () => Daily.showMenu());
+if (window.Daily) Daily.init({ game: "minus-3", puzzles: RAW, per: PER_GAME, onStart: newGame });
+else newGame();
 </script>
 
 </body>

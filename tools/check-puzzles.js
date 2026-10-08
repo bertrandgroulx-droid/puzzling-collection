@@ -102,6 +102,36 @@ dupes("mash-ups", MU.map(p => p.answer));
 // Anagram sets that use the same letters as another set are also duplicates.
 dupes("anagrams (same letters)", AN.map(p => sorted(p.letters || "")));
 
+// Daily schedules: every <game>/daily-<year>.js must name real puzzles, one set per day, all different.
+const { KEYS } = require("../shared/keys.js");
+const allLists = { "missing-link": ML, "minus-3": M3, "anagrams": AN, "plus-one": PO, "hear-here": HH, "swap-one": SO, "shared-property": SP, "mash-ups": MU };
+const PER = { "missing-link": 5, "minus-3": 4, "anagrams": 5, "plus-one": 5, "hear-here": 5, "swap-one": 4, "shared-property": 5, "mash-ups": 5 };
+const yearsFound = {};
+for (const game of Object.keys(allLists)) {
+  const keys = new Set(allLists[game].map(KEYS[game]));
+  for (const f of fs.readdirSync(path.join(root, game)).filter(f => /^daily-\d{4}\.js$/.test(f))) {
+    const year = Number(f.slice(6, 10));
+    const window = { DAILY_SCHEDULE: {} };
+    new Function("window", fs.readFileSync(path.join(root, game, f), "utf8"))(window);
+    const list = window.DAILY_SCHEDULE[year];
+    const want = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0 ? 366 : 365;
+    if (!Array.isArray(list)) { bad(game + "/" + f, "does not define a schedule for " + year, null); continue; }
+    if (list.length !== want) bad(game + "/" + f, "has " + list.length + " days, expected " + want, null);
+    const seen = new Set();
+    list.forEach((set, i) => {
+      if (!Array.isArray(set) || set.length !== PER[game]) return bad(game + "/" + f, "day " + (i + 1) + " should list " + PER[game] + " puzzles", set);
+      if (new Set(set).size !== set.length) bad(game + "/" + f, "day " + (i + 1) + " repeats a puzzle", set);
+      for (const k of set) if (!keys.has(k)) bad(game + "/" + f, "day " + (i + 1) + " names a puzzle that is not in puzzles.js: " + k, null);
+      const id = set.slice().sort().join("|");
+      if (seen.has(id)) bad(game + "/" + f, "day " + (i + 1) + " is the same set as an earlier day", set);
+      seen.add(id);
+    });
+    (yearsFound[year] = yearsFound[year] || []).push(game);
+  }
+}
+for (const y of Object.keys(yearsFound).sort()) console.log("Daily schedule " + y + ": " + yearsFound[y].length + " of 8 games" + (yearsFound[y].length < 8 ? " (missing: " + Object.keys(allLists).filter(g => !yearsFound[y].includes(g)).join(", ") + ")" : ""));
+if (!Object.keys(yearsFound).length) console.log("No daily schedules found. Make one with: node tools/make-daily.js <year>");
+
 // Capacity: how many games each list can supply.
 // "games before a repeat" = full games played before any puzzle comes round again.
 // "different games" = distinct sets of puzzles a game can be (order ignored).

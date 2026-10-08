@@ -18,18 +18,52 @@ swap-one/
 shared-property/
 mash-ups/
   index.html          ... the game page (rules, scoring, look and feel)
-  puzzles.js          ... and its puzzles. Edit this file to add more.
+  puzzles.js          ... its puzzles. Edit this file to add more.
+  daily-2026.js       ... and its daily puzzle schedule for one year (made by a tool, not by hand).
 shared/
   style.css           The look shared by six of the games.
   game.js             The game engine shared by six of the games.
+  daily.js            The daily-puzzle menu, archive and saved scores, used by all eight games.
+  daily.css           The look of that menu.
+  keys.js             How each game names a puzzle, so schedules can refer to it.
 tools/
-  check-puzzles.js    Checks every puzzle file for mistakes (optional).
+  check-puzzles.js    Checks every puzzle file and daily schedule for mistakes.
+  make-daily.js       Makes the daily schedule for a new year.
 ```
 
 Missing Link and Minus 3 are self-contained: each page holds its own styling
 and code. The other six games share one stylesheet and one engine in `shared/`,
 so a fix there fixes all six at once. Each game folder still has its own page
 and its own puzzle file.
+
+## Daily puzzles
+
+Each game opens on a menu with three choices:
+
+- **Today's puzzle.** The same set of puzzles for everyone, numbered by the day
+  of the year (No. 1 is January 1) and dated. The first score a player gets on a
+  day is saved on their phone and shown in the menu.
+- **Practice.** A random set, as many times as you like. Nothing is saved.
+- **Past 100 days.** The previous hundred daily puzzles, newest first, with the
+  player's score next to any they have played. Tomorrow's puzzle cannot be opened
+  early.
+
+Each day's set is written down in advance in the game's `daily-<year>.js` file.
+That file is made by a tool and should not be edited, so a day's puzzle stays
+the same for everyone. Adding puzzles to `puzzles.js` does not change any day
+that is already scheduled.
+
+### Once a year: make next year's schedule
+
+In December, run this in the project folder (it needs Node.js) and push the
+result. It writes a `daily-<year>.js` file into every game folder:
+
+```
+node tools/make-daily.js 2027
+```
+
+The tool refuses to overwrite a year that already exists, so past puzzles are
+safe. If a year's file is missing, the menu says so and practice still works.
 
 ## The timer switch
 
@@ -66,7 +100,8 @@ but none of the show's clues or answers are used.
 
 If you are comfortable with a terminal and have Node.js installed, this
 command checks every puzzle file for slips such as an anagram whose letters
-do not match, or a Minus 3 step that removes two letters:
+do not match, or a Minus 3 step that removes two letters, checks the daily
+schedules, and prints how many games each list can supply:
 
 ```
 node tools/check-puzzles.js

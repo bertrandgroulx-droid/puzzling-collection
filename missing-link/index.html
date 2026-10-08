@@ -6,6 +6,7 @@
 <title>Missing Link</title>
 <meta name="description" content="Three words, one missing link. Find the word that pairs with all three.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="../shared/daily.css">
 <style>
 /* Layout: one phone-width column. Three clue tiles stacked like parts on a workbench, answer bar under them, thumb-reach buttons last. */
 :root {
@@ -61,6 +62,7 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .primary { background: var(--accent); color: var(--accent-ink); }
 .ghost { background: transparent; color: var(--ink); border-color: var(--line); }
 .ghost:disabled { color: var(--muted); cursor: default; }
+.btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
 .row { display: flex; gap: 8px; flex-wrap: wrap; }
 .row button { flex: 1; }
 .msg { min-height: 1.5em; margin: 0; font-weight: 500; }
@@ -83,14 +85,16 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 <body>
 
 <main class="app">
-  <a class="home" href="../">&larr; All games</a>
+  <a class="home" id="backLink" href="../">&larr; All games</a>
   <header>
     <h1>Missing Link</h1>
-    <div class="score" aria-live="polite">Score <b id="score">0</b> / 10</div>
+    <div class="score" aria-live="polite" data-game-ui>Score <b id="score">0</b> / <span id="max">10</span></div>
   </header>
-  <div class="pips" id="pips" aria-hidden="true"></div>
+  <p class="modeline" id="modeLine" hidden></p>
+  <section id="menu" class="app" style="gap:12px"></section>
+  <div class="pips" id="pips" aria-hidden="true" data-game-ui></div>
 
-  <section id="play">
+  <section id="play" data-game-ui>
     <div class="app" style="gap:14px">
       <p class="prompt" id="prompt">One word pairs with all three. It can go before or after each.</p>
       <div class="tiles" id="tiles"></div>
@@ -111,15 +115,21 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
     </div>
   </section>
 
-  <section id="done" class="final" hidden>
-    <div class="big"><span id="finalScore">0</span> <small>/ 10</small></div>
+  <section id="done" class="final" hidden data-game-ui>
+    <p class="modeline" id="doneLine" hidden></p>
+    <div class="big"><span id="finalScore">0</span> <small>/ <span id="finalMax">10</span></small></div>
     <p class="prompt" id="verdict"></p>
     <ul class="recap" id="recap"></ul>
-    <button class="primary" id="again" type="button">Play five more</button>
+    <div class="row">
+      <button class="primary" id="again" type="button">Play five more</button>
+      <button class="ghost" id="menuBtn" type="button">Back to puzzles</button>
+    </div>
   </section>
 </main>
 
 <script src="puzzles.js"></script>
+<script src="../shared/keys.js"></script>
+<script src="../shared/daily.js"></script>
 <script>
 // Puzzles live in puzzles.js. Each clue is written like "SUN_" (link goes after)
 // or "_HOUSE" (link goes before). A space beside the underscore means a two-word phrase.
@@ -130,18 +140,25 @@ function parseClue(s) {
   if (before.length) return { word: before.trim(), after: true, sep: before.endsWith(" ") ? " " : "" };
   return { word: after.trim(), after: false, sep: after.startsWith(" ") ? " " : "" };
 }
-const PUZZLES = (window.MISSING_LINK_PUZZLES || []).map(p => ({ link: p.link.toUpperCase(), hint: p.hint, clues: p.clues.map(parseClue) }));
+const RAW = window.MISSING_LINK_PUZZLES || [];
+const PUZZLES = RAW.map(p => ({ link: p.link.toUpperCase(), hint: p.hint, clues: p.clues.map(parseClue) }));
 const PER_GAME = 5;
 const $ = id => document.getElementById(id);
-let queue = [], game = [], idx = 0, score = 0, hinted = false, solved = false, results = [];
+let queue = [], game = [], idx = 0, score = 0, hinted = false, solved = false, results = [], meta = null;
 
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function esc(s) { return s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
 
-function newGame() {
-  if (queue.length < PER_GAME) queue = shuffle(PUZZLES.map((_, i) => i));
-  game = queue.splice(0, PER_GAME).map(i => PUZZLES[i]);
+// m comes from the daily menu: { mode: "daily", items, number, date } or { mode: "practice" }.
+function newGame(m) {
+  meta = m && m.mode === "daily" ? m : null;
+  if (meta) game = meta.items.map(p => PUZZLES[RAW.indexOf(p)]);
+  else {
+    if (queue.length < PER_GAME) queue = shuffle(PUZZLES.map((_, i) => i));
+    game = queue.splice(0, PER_GAME).map(i => PUZZLES[i]);
+  }
   idx = 0; score = 0; results = [];
+  $("max").textContent = game.length * 2;
   $("done").hidden = true; $("play").hidden = false;
   showPuzzle();
 }
@@ -165,7 +182,7 @@ function showPuzzle() {
   $("guess").value = ""; $("guess").disabled = false; $("check").disabled = false;
   $("hintBtn").disabled = false; $("hintBtn").textContent = "Hint (costs 1 point)";
   $("form").hidden = false; $("helpRow").hidden = false; $("nextRow").hidden = true;
-  $("prompt").textContent = "Puzzle " + (idx + 1) + " of " + PER_GAME + ". One word pairs with all three, before or after each.";
+  $("prompt").textContent = "Puzzle " + (idx + 1) + " of " + game.length + ". One word pairs with all three, before or after each.";
   drawPips();
 }
 
@@ -181,7 +198,7 @@ function reveal(points) {
   $("form").hidden = true; $("helpRow").hidden = true; $("hint").hidden = true;
   $("msg").className = "msg " + (points > 0 ? "good" : "");
   $("msg").textContent = points === 2 ? "Correct. 2 points." : points === 1 ? "Correct with a hint. 1 point." : "The link was " + p.link + ". No points.";
-  $("next").textContent = idx + 1 < PER_GAME ? "Next puzzle" : "See your score";
+  $("next").textContent = idx + 1 < game.length ? "Next puzzle" : "See your score";
   $("nextRow").hidden = false; $("next").focus();
   drawPips();
 }
@@ -203,16 +220,26 @@ $("hintBtn").addEventListener("click", () => {
 $("giveUp").addEventListener("click", () => reveal(0));
 $("next").addEventListener("click", () => {
   idx++;
-  if (idx < PER_GAME) { showPuzzle(); $("guess").focus(); return; }
+  if (idx < game.length) { showPuzzle(); $("guess").focus(); return; }
   $("play").hidden = true; $("done").hidden = false;
   $("pips").innerHTML = game.map((_, i) => '<span class="pip p' + results[i] + '"></span>').join("");
-  $("finalScore").textContent = score;
-  $("verdict").textContent = score === 10 ? "A perfect game, no hints needed." : score >= 7 ? "Strong game. A couple of links made you work." : score >= 4 ? "A fair game. The hints are there to be used." : "A tough set. The next five are different.";
+  const total = game.length * 2;
+  $("finalScore").textContent = score; $("finalMax").textContent = total;
+  $("verdict").textContent = score === total ? "A perfect game, no hints needed." : score >= 7 ? "Strong game. A couple of links made you work." : score >= 4 ? "A fair game. The hints are there to be used." : meta ? "A tough set. Tomorrow's is different." : "A tough set. The next five are different.";
+  const first = meta && window.Daily ? Daily.record(meta, score, total) : false;
+  $("doneLine").hidden = !(meta && !first);
+  $("doneLine").textContent = "Your first score for this puzzle is the one that is kept.";
+  $("menuBtn").style.order = meta ? -1 : 0;
+  $("again").textContent = meta ? "Play it again" : "Play five more";
+  $("again").className = meta ? "ghost" : "primary"; $("menuBtn").className = meta ? "primary" : "ghost";
+  $("menuBtn").hidden = !window.Daily;
   $("recap").innerHTML = game.map((p, i) => "<li><span>" + esc(p.clues.map(c => c.word).join(", ")) + " → " + esc(p.link) + "</span><span>" + results[i] + " pt" + (results[i] === 1 ? "" : "s") + "</span></li>").join("");
-  $("again").focus();
+  (meta ? $("menuBtn") : $("again")).focus();
 });
-$("again").addEventListener("click", newGame);
-newGame();
+$("again").addEventListener("click", () => newGame(meta));
+$("menuBtn").addEventListener("click", () => Daily.showMenu());
+if (window.Daily) Daily.init({ game: "missing-link", puzzles: RAW, per: PER_GAME, onStart: newGame });
+else newGame();
 </script>
 
 </body>

@@ -14,7 +14,7 @@
   function useTimer() { return !!G.timer && timerOn; }
   function drawToggle() {
     if (!G.timer || $("timerToggle")) return;
-    stage.insertAdjacentHTML("beforebegin", '<label class="toggle"><span>Timer <small id="timerNote"></small></span><input type="checkbox" id="timerToggle" role="switch"' + (timerOn ? " checked" : "") + "></label>");
+    stage.insertAdjacentHTML("beforebegin", '<label class="toggle" data-game-ui><span>Timer <small id="timerNote"></small></span><input type="checkbox" id="timerToggle" role="switch"' + (timerOn ? " checked" : "") + "></label>");
     $("timerToggle").onchange = e => { timerOn = e.target.checked; saveTimerChoice(); if (redrawReady) redrawReady(); };
   }
   // The switch is locked while a clock is running; the change applies from the next puzzle.
@@ -56,38 +56,51 @@
       const r = S.results[j];
       return '<span class="pip ' + (r === undefined ? (j === S.i ? "now" : "") : r === G.max ? "full" : r > 0 ? "part" : "zero") + '"></span>';
     }).join("");
-    return '<div class="pips" aria-hidden="true">' + pips + '</div><p class="lead">Puzzle ' + (S.i + 1) + " of " + G.per + ". " + esc(G.timer && !timerOn && G.rulesUntimed ? G.rulesUntimed : G.rules) + "</p>";
+    return '<div class="pips" aria-hidden="true">' + pips + '</div><p class="lead">Puzzle ' + (S.i + 1) + " of " + S.items.length + ". " + esc(G.timer && !timerOn && G.rulesUntimed ? G.rulesUntimed : G.rules) + "</p>";
   }
   function rows(list) { return '<ul class="ladder">' + list.map(r => '<li class="' + (r[2] ? "got" : "miss") + '"><span class="w">' + esc(r[0]) + '</span><span class="d">' + esc(r[1]) + "</span></li>").join("") + "</ul>"; }
   function label(p) { return p.words ? p.words.join(", ") : p.start ? p.start + " → " + p.steps[2][1] : p.given ? p.given + " → " + p.answers.join(", ") : p.answers.join(" / "); }
 
-  function newGame() {
-    if (queue.length < G.per) queue = shuffle(G.items.map((_, i) => i));
-    S = { items: queue.splice(0, G.per).map(i => G.items[i]), i: 0, score: 0, results: [] };
-    $("score").textContent = 0; $("max").textContent = G.per * G.max;
+  // meta comes from the daily menu: { mode: "daily", items, number, date } or { mode: "practice" }.
+  function newGame(meta) {
+    let items;
+    if (meta && meta.mode === "daily") items = meta.items.map(p => prepare(p, G.type));
+    else {
+      if (queue.length < G.per) queue = shuffle(G.items.map((_, i) => i));
+      items = queue.splice(0, G.per).map(i => G.items[i]);
+    }
+    S = { items, i: 0, score: 0, results: [], meta: meta && meta.mode === "daily" ? meta : null };
+    $("score").textContent = 0; $("max").textContent = items.length * G.max;
     next();
   }
   function next() {
     stage.onclick = null;
-    if (S.i >= G.per) return endGame();
+    if (S.i >= S.items.length) return endGame();
     ENGINES[G.type](S.items[S.i]);
   }
   function settle(points, revealHTML, text) {
     stopClock(); stage.onclick = null; redrawReady = null;
     S.results.push(points); S.score += points; $("score").textContent = S.score;
-    stage.innerHTML = head() + revealHTML + '<p class="msg ' + (points === G.max ? "good" : "") + '">' + esc(text) + " " + points + (points === 1 ? " point." : " points.") + '</p><button class="primary" id="nextBtn" type="button">' + (S.i + 1 < G.per ? "Next puzzle" : "See your score") + "</button>";
+    stage.innerHTML = head() + revealHTML + '<p class="msg ' + (points === G.max ? "good" : "") + '">' + esc(text) + " " + points + (points === 1 ? " point." : " points.") + '</p><button class="primary" id="nextBtn" type="button">' + (S.i + 1 < S.items.length ? "Next puzzle" : "See your score") + "</button>";
     $("nextBtn").onclick = () => { S.i++; next(); };
     $("nextBtn").focus();
   }
   function endGame() {
-    const total = G.per * G.max, ratio = S.score / total;
-    const verdict = ratio === 1 ? "A perfect game." : ratio >= 0.7 ? "A strong game." : ratio >= 0.4 ? "A fair game." : "A tough set. The next ones are different.";
-    stage.innerHTML = '<div class="pips" aria-hidden="true">' + S.results.map(r => '<span class="pip ' + (r === G.max ? "full" : r > 0 ? "part" : "zero") + '"></span>').join("") + "</div>" +
+    const total = S.items.length * G.max, ratio = S.score / total, meta = S.meta;
+    const verdict = ratio === 1 ? "A perfect game." : ratio >= 0.7 ? "A strong game." : ratio >= 0.4 ? "A fair game." : meta ? "A tough set. Tomorrow's is different." : "A tough set. The next ones are different.";
+    const first = meta && window.Daily ? Daily.record(meta, S.score, total) : false;
+    const heading = meta && !first ? '<p class="lead">Your first score for this puzzle is the one that is kept.</p>' : "";
+    const buttons = window.Daily
+      ? (meta ? '<button class="primary" id="menuBtn" type="button">Back to puzzles</button><button class="ghost" id="againBtn" type="button">Play it again</button>'
+              : '<button class="primary" id="againBtn" type="button">Play again</button><button class="ghost" id="menuBtn" type="button">Back to puzzles</button>')
+      : '<button class="primary" id="againBtn" type="button">Play again</button><a class="ghost btn" href="../">All games</a>';
+    stage.innerHTML = '<div class="pips" aria-hidden="true">' + S.results.map(r => '<span class="pip ' + (r === G.max ? "full" : r > 0 ? "part" : "zero") + '"></span>').join("") + "</div>" + heading +
       '<div class="big">' + S.score + " <small>/ " + total + '</small></div><p class="lead">' + verdict + '</p><ul class="recap">' +
       S.items.map((p, j) => "<li><span>" + esc(label(p)) + "</span><span>" + S.results[j] + " / " + G.max + "</span></li>").join("") +
-      '</ul><div class="row"><button class="primary" id="againBtn" type="button">Play again</button><a class="ghost btn" href="../">All games</a></div>';
-    $("againBtn").onclick = newGame;
-    $("againBtn").focus();
+      '</ul><div class="row">' + buttons + "</div>";
+    $("againBtn").onclick = () => newGame(meta);
+    if ($("menuBtn")) $("menuBtn").onclick = () => Daily.showMenu();
+    (meta ? $("menuBtn") : $("againBtn")).focus();
   }
 
   const ENGINES = {
@@ -201,6 +214,7 @@
     stage = $("stage");
     if (!G.items.length) { stage.innerHTML = '<p class="lead">No puzzles found. Check puzzles.js.</p>'; return; }
     loadTimerChoice(); drawToggle();
-    newGame();
+    if (window.Daily && G.game) Daily.init({ game: G.game, puzzles: settings.puzzles, per: G.per, onStart: newGame });
+    else newGame();
   };
 })();
