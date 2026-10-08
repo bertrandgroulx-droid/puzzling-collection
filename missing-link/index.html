@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Missing Link</title>
+<meta name="description" content="Three words, one missing link. Find the word that pairs with all three.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: one phone-width column. Three clue tiles stacked like parts on a workbench, answer bar under them, thumb-reach buttons last. */
+:root {
+  --bg: #f3f2f7; --surface: #ffffff; --ink: #1d1a2b; --muted: #625d78; --line: #d9d5e6;
+  --accent: #6b3fd4; --accent-ink: #ffffff; --accent-soft: #ebe4fb;
+  --good: #0f8a6c; --good-soft: #dcf3ec; --warn: #a85a00; --bad: #c2314a;
+  --display: "Chakra Petch", "Trebuchet MS", sans-serif;
+  --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14121d; --surface: #1e1b2b; --ink: #ecebf5; --muted: #a39fba; --line: #34304a;
+    --accent: #a98bff; --accent-ink: #17132a; --accent-soft: #2c2547;
+    --good: #4fd1ac; --good-soft: #17352e; --warn: #f0a84a; --bad: #ff7a90; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14121d; --surface: #1e1b2b; --ink: #ecebf5; --muted: #a39fba; --line: #34304a;
+  --accent: #a98bff; --accent-ink: #17132a; --accent-soft: #2c2547;
+  --good: #4fd1ac; --good-soft: #17352e; --warn: #f0a84a; --bad: #ff7a90; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.45; padding-inline: 16px; padding-block: calc(20px + env(safe-area-inset-top, 0px)) calc(32px + env(safe-area-inset-bottom, 0px)); }
+.app { max-width: 440px; margin-inline: auto; display: flex; flex-direction: column; gap: 18px; }
+.home { font-size: 0.9rem; color: var(--muted); text-decoration: none; }
+.home:hover, .home:focus-visible { color: var(--accent); text-decoration: underline; }
+header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 1.5rem; margin: 0; letter-spacing: 0.01em; text-wrap: balance; }
+.score { font-family: var(--mono); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+.score b { color: var(--ink); font-weight: 600; }
+.pips { display: flex; gap: 6px; }
+.pip { flex: 1; height: 6px; border-radius: 3px; background: var(--line); }
+.pip.now { background: var(--accent); }
+.pip.p2 { background: var(--good); }
+.pip.p1 { background: var(--warn); }
+.pip.p0 { background: var(--bad); }
+.prompt { margin: 0; color: var(--muted); }
+.tiles { display: flex; flex-direction: column; gap: 10px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; font-family: var(--mono); font-weight: 600; font-size: 1.35rem; letter-spacing: 0.06em; text-transform: uppercase; min-width: 0; overflow-wrap: anywhere; }
+.tile .link { color: var(--accent); }
+.tiles.solved .tile { border-color: var(--good); background: var(--good-soft); }
+.tiles.missed .tile { border-style: dashed; }
+form { display: flex; gap: 8px; }
+input[type="text"] { flex: 1; min-width: 0; font-family: var(--mono); font-weight: 600; font-size: 1.15rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 14px 14px; border-radius: 10px; border: 2px solid var(--line); background: var(--surface); color: var(--ink); }
+input[type="text"]::placeholder { color: var(--muted); font-weight: 500; text-transform: none; letter-spacing: 0; }
+input[type="text"]:focus-visible { outline: none; border-color: var(--accent); }
+button { font-family: var(--body); font-weight: 600; font-size: 1rem; border-radius: 10px; padding: 14px 18px; border: 2px solid transparent; cursor: pointer; }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.primary { background: var(--accent); color: var(--accent-ink); }
+.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.ghost:disabled { color: var(--muted); cursor: default; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.row button { flex: 1; }
+.msg { min-height: 1.5em; margin: 0; font-weight: 500; }
+.msg.bad { color: var(--bad); }
+.msg.good { color: var(--good); }
+.hint { margin: 0; padding: 12px 14px; background: var(--accent-soft); border-radius: 10px; }
+.hint span { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); display: block; }
+.rules { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.final { display: flex; flex-direction: column; gap: 14px; }
+.big { font-family: var(--display); font-weight: 700; font-size: 3rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.big small { font-size: 1.25rem; color: var(--muted); font-weight: 600; }
+.recap { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.recap li { display: flex; justify-content: space-between; gap: 12px; font-family: var(--mono); font-size: 0.95rem; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.recap li span:last-child { color: var(--muted); white-space: nowrap; }
+@keyframes shake { 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+.shake { animation: shake 0.3s; }
+@media (prefers-reduced-motion: reduce) { .shake { animation: none; } }
+</style>
+</head>
+<body>
+
+<main class="app">
+  <a class="home" href="../">&larr; All games</a>
+  <header>
+    <h1>Missing Link</h1>
+    <div class="score" aria-live="polite">Score <b id="score">0</b> / 10</div>
+  </header>
+  <div class="pips" id="pips" aria-hidden="true"></div>
+
+  <section id="play">
+    <div class="app" style="gap:14px">
+      <p class="prompt" id="prompt">One word pairs with all three. It can go before or after each.</p>
+      <div class="tiles" id="tiles"></div>
+      <p class="hint" id="hint" hidden><span>Hint</span><span id="hintText" style="all:unset"></span></p>
+      <form id="form" autocomplete="off">
+        <input type="text" id="guess" name="guess" placeholder="Type the link word" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-label="Your answer">
+        <button class="primary" id="check" type="submit">Check</button>
+      </form>
+      <p class="msg" id="msg" aria-live="polite"></p>
+      <div class="row" id="helpRow">
+        <button class="ghost" id="hintBtn" type="button">Hint (costs 1 point)</button>
+        <button class="ghost" id="giveUp" type="button">Show answer</button>
+      </div>
+      <div class="row" id="nextRow" hidden>
+        <button class="primary" id="next" type="button">Next puzzle</button>
+      </div>
+      <p class="rules">2 points unaided, 1 point after a hint, 0 if you ask for the answer. Five puzzles a game.</p>
+    </div>
+  </section>
+
+  <section id="done" class="final" hidden>
+    <div class="big"><span id="finalScore">0</span> <small>/ 10</small></div>
+    <p class="prompt" id="verdict"></p>
+    <ul class="recap" id="recap"></ul>
+    <button class="primary" id="again" type="button">Play five more</button>
+  </section>
+</main>
+
+<script src="puzzles.js"></script>
+<script>
+// Puzzles live in puzzles.js. Each clue is written like "SUN_" (link goes after)
+// or "_HOUSE" (link goes before). A space beside the underscore means a two-word phrase.
+// parseClue turns that into { word, after, sep } for display.
+function parseClue(s) {
+  const i = s.indexOf("_");
+  const before = s.slice(0, i), after = s.slice(i + 1);
+  if (before.length) return { word: before.trim(), after: true, sep: before.endsWith(" ") ? " " : "" };
+  return { word: after.trim(), after: false, sep: after.startsWith(" ") ? " " : "" };
+}
+const PUZZLES = (window.MISSING_LINK_PUZZLES || []).map(p => ({ link: p.link.toUpperCase(), hint: p.hint, clues: p.clues.map(parseClue) }));
+const PER_GAME = 5;
+const $ = id => document.getElementById(id);
+let queue = [], game = [], idx = 0, score = 0, hinted = false, solved = false, results = [];
+
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function esc(s) { return s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+
+function newGame() {
+  if (queue.length < PER_GAME) queue = shuffle(PUZZLES.map((_, i) => i));
+  game = queue.splice(0, PER_GAME).map(i => PUZZLES[i]);
+  idx = 0; score = 0; results = [];
+  $("done").hidden = true; $("play").hidden = false;
+  showPuzzle();
+}
+
+function drawPips() {
+  $("pips").innerHTML = game.map((_, i) => {
+    const r = results[i];
+    const cls = r !== undefined ? "p" + r : (i === idx ? "now" : "");
+    return '<span class="pip ' + cls + '"></span>';
+  }).join("");
+  $("score").textContent = score;
+}
+
+function showPuzzle() {
+  const p = game[idx];
+  hinted = false; solved = false;
+  $("tiles").className = "tiles";
+  $("tiles").innerHTML = p.clues.map(c => '<div class="tile">' + esc(c.word) + "</div>").join("");
+  $("hint").hidden = true; $("hintText").textContent = p.hint;
+  $("msg").textContent = ""; $("msg").className = "msg";
+  $("guess").value = ""; $("guess").disabled = false; $("check").disabled = false;
+  $("hintBtn").disabled = false; $("hintBtn").textContent = "Hint (costs 1 point)";
+  $("form").hidden = false; $("helpRow").hidden = false; $("nextRow").hidden = true;
+  $("prompt").textContent = "Puzzle " + (idx + 1) + " of " + PER_GAME + ". One word pairs with all three, before or after each.";
+  drawPips();
+}
+
+function reveal(points) {
+  const p = game[idx];
+  solved = true; results[idx] = points; score += points;
+  $("tiles").className = "tiles " + (points > 0 ? "solved" : "missed");
+  $("tiles").innerHTML = p.clues.map(c => {
+    const link = '<span class="link">' + esc(p.link) + "</span>";
+    const sep = c.sep === " " ? "&nbsp;" : "";
+    return '<div class="tile">' + (c.after ? esc(c.word) + sep + link : link + sep + esc(c.word)) + "</div>";
+  }).join("");
+  $("form").hidden = true; $("helpRow").hidden = true; $("hint").hidden = true;
+  $("msg").className = "msg " + (points > 0 ? "good" : "");
+  $("msg").textContent = points === 2 ? "Correct. 2 points." : points === 1 ? "Correct with a hint. 1 point." : "The link was " + p.link + ". No points.";
+  $("next").textContent = idx + 1 < PER_GAME ? "Next puzzle" : "See your score";
+  $("nextRow").hidden = false; $("next").focus();
+  drawPips();
+}
+
+$("form").addEventListener("submit", e => {
+  e.preventDefault();
+  if (solved) return;
+  const g = $("guess").value.trim().toUpperCase();
+  if (!g) { $("msg").className = "msg"; $("msg").textContent = "Type a word first."; return; }
+  if (g === game[idx].link) { reveal(hinted ? 1 : 2); return; }
+  $("msg").className = "msg bad"; $("msg").textContent = g + " does not fit all three. Try another.";
+  const el = $("guess"); el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); el.select();
+});
+$("hintBtn").addEventListener("click", () => {
+  hinted = true; $("hint").hidden = false;
+  $("hintBtn").disabled = true; $("hintBtn").textContent = "Hint used";
+  $("guess").focus();
+});
+$("giveUp").addEventListener("click", () => reveal(0));
+$("next").addEventListener("click", () => {
+  idx++;
+  if (idx < PER_GAME) { showPuzzle(); $("guess").focus(); return; }
+  $("play").hidden = true; $("done").hidden = false;
+  $("pips").innerHTML = game.map((_, i) => '<span class="pip p' + results[i] + '"></span>').join("");
+  $("finalScore").textContent = score;
+  $("verdict").textContent = score === 10 ? "A perfect game, no hints needed." : score >= 7 ? "Strong game. A couple of links made you work." : score >= 4 ? "A fair game. The hints are there to be used." : "A tough set. The next five are different.";
+  $("recap").innerHTML = game.map((p, i) => "<li><span>" + esc(p.clues.map(c => c.word).join(", ")) + " → " + esc(p.link) + "</span><span>" + results[i] + " pt" + (results[i] === 1 ? "" : "s") + "</span></li>").join("");
+  $("again").focus();
+});
+$("again").addEventListener("click", newGame);
+newGame();
+</script>
+
+</body>
+</html>
