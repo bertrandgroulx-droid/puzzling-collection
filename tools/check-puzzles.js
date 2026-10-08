@@ -99,6 +99,16 @@ for (const p of MU) {
 }
 dupes("mash-ups", MU.map(p => p.answer));
 
-console.log([["Missing Link", ML], ["Minus 3", M3], ["Anagrams", AN], ["Plus One", PO], ["Hear, Here", HH], ["Swap One", SO], ["Shared Property", SP], ["Mash-Ups", MU]].map(([n, l]) => n + ": " + l.length + " puzzles").join("\n"));
+// Anagram sets that use the same letters as another set are also duplicates.
+dupes("anagrams (same letters)", AN.map(p => sorted(p.letters || "")));
+
+// Capacity: how many games each list can supply.
+// "games before a repeat" = full games played before any puzzle comes round again.
+// "different games" = distinct sets of puzzles a game can be (order ignored).
+const choose = (n, k) => { let r = 1; for (let i = 1; i <= k; i++) r = r * (n - k + i) / i; return Math.round(r); };
+const fmt = n => n.toLocaleString("en-CA");
+const games = [["Missing Link", ML, 5], ["Minus 3", M3, 4], ["Anagrams", AN, 5], ["Plus One", PO, 5], ["Hear, Here", HH, 5], ["Swap One", SO, 4], ["Shared Property", SP, 5], ["Mash-Ups", MU, 5]];
+console.log("Game              Puzzles  Per game  Games before a repeat  Different games");
+for (const [n, l, k] of games) console.log(n.padEnd(18) + String(l.length).padStart(7) + String(k).padStart(10) + String(Math.floor(l.length / k)).padStart(23) + fmt(choose(l.length, k)).padStart(17));
 console.log(problems ? problems + " problem(s) found." : "All puzzle files look good.");
 process.exit(problems ? 1 : 0);
