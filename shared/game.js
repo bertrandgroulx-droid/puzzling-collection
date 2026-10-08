@@ -40,10 +40,14 @@
 
   // ---- the parts every puzzle screen shares ----
   function pipClass(r, j) { return r === undefined ? (j === S.i ? "now" : "") : r === G.max ? "full" : r > 0 ? "half" : "zero"; }
+  // The instruction block pulses once when it appears or its text changes, not on every redraw.
+  let lastInstruction = null;
   function head(instruction) {
     if (instruction === undefined) instruction = G.instruction;
+    const changed = instruction !== lastInstruction;
+    lastInstruction = instruction;
     return '<div class="pips" aria-hidden="true">' + S.items.map((_, j) => '<span class="pip ' + pipClass(S.results[j], j) + '"></span>').join("") + "</div>" +
-      (instruction ? '<p class="instr">' + esc(instruction) + "</p>" : "");
+      (instruction ? '<p class="instr' + (changed ? " pulse" : "") + '">' + esc(instruction) + "</p>" : "");
   }
   function rows(list) { return '<ul class="ladder">' + list.map(r => '<li class="' + (r[2] ? "got" : "miss") + '"><span class="w">' + esc(r[0]) + '</span><span class="d">' + esc(r[1]) + "</span></li>").join("") + "</ul>"; }
   function label(p) { return p.words ? p.words.join(", ") : p.start ? p.start + " → " + p.steps[2][1] : p.given ? p.given + " → " + p.answers.join(", ") : p.answers.join(" / "); }

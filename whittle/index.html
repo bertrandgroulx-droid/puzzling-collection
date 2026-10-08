@@ -56,6 +56,14 @@ let queue = [], game = [], ci = 0, step = 0, word = "", pts = 0, hints = 0, scor
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function say(text, cls) { $("msg").textContent = text; $("msg").className = "status " + (cls || ""); }
 const points = () => Math.max(0, pts - hints);
+// Show an instruction; the block pulses once whenever the text changes or it reappears.
+function instruct(text) {
+  const el = $("instr");
+  if (!text) { el.hidden = true; el.textContent = ""; return; }
+  const changed = el.hidden || el.textContent !== text;
+  el.hidden = false; el.textContent = text;
+  if (changed) { el.classList.remove("pulse"); void el.offsetWidth; el.classList.add("pulse"); }
+}
 
 // m comes from the shell: { mode: "daily", items, number, date } or { mode: "practice" }.
 function newGame(m) {
@@ -95,8 +103,7 @@ function readyChain() {
   step = 0; pts = 0; hints = 0; word = c.start; running = false;
   timed = Shell.timerOn();
   $("clockRow").hidden = true; $("clueRow").hidden = true;
-  $("instr").hidden = false;
-  $("instr").textContent = "Read the word, then tap Start. " + SECONDS + " seconds for three clues.";
+  instruct("Read the word, then tap Start. " + SECONDS + " seconds for three clues.");
   say("");
   $("ladder").innerHTML = ""; $("helpRow").hidden = true;
   drawTiles(false); drawClock(SECONDS * 1000); drawPips();
@@ -106,7 +113,7 @@ function readyChain() {
 
 function begin() {
   running = true; $("go").hidden = true; $("helpRow").hidden = false;
-  $("instr").textContent = "Tap the letter to take away so the word matches the clue.";
+  instruct("Tap the letter to take away so the word matches the clue.");
   $("clueRow").hidden = false; $("clockRow").hidden = !timed;
   $("hintBtn").disabled = false; $("hintBtn").innerHTML = "Hint &middot; 1 point";
   showStep();
@@ -133,7 +140,7 @@ function finish(why) {
   results[ci] = p; score += p;
   $("ladder").innerHTML = c.steps.map((s, i) =>
     '<li class="' + (i < pts ? "got" : "miss") + '"><span class="w">' + s[1] + '</span><span class="d">' + s[0] + "</span></li>").join("");
-  $("instr").hidden = true; $("clockRow").hidden = true;
+  instruct(""); $("clockRow").hidden = true;
   $("clueLabel").textContent = "Started from";
   $("clueText").textContent = c.start;
   say((pts === 3 ? "All three found." : why) + " " + p + (p === 1 ? " point." : " points."), p === MAX ? "good" : p > 0 ? "part" : "bad");
