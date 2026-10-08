@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Switcheroo</title>
+<meta name="description" content="Change one letter at a time to climb a three-step word ladder.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121214" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div class="name"><h1>Switcheroo</h1></div>
+    <button class="q" id="helpBtn" type="button" aria-label="How to play">?</button>
+  </header>
+  <div class="daily"><span id="dailyText"></span><a id="pastLink" href="?past">Past puzzles</a></div>
+  <section id="shell" class="stack" hidden></section>
+  <section id="stage" class="stack" data-game-ui></section>
+  <dialog class="help" id="help"></dialog>
+</main>
+
+<script src="puzzles.js"></script>
+<script src="../shared/keys.js"></script>
+<script src="../shared/shell.js"></script>
+<script src="../shared/game.js"></script>
+<script>
+// The settings for this game. Puzzles live in puzzles.js; the look in ../shared/style.css.
+startGame({
+  game: "switcheroo",
+  title: "Switcheroo",
+  type: "swap",       // tap a letter, pick its replacement
+  timer: 25,          // seconds per ladder
+  per: 4,             // ladders per game
+  max: 3,             // points per ladder
+  timed: { title: "Four ladders, 25 seconds each", rules: "Three steps per ladder. 1 point per step; a wrong swap costs 3 seconds." },
+  instruction: "Change one letter so the word matches the clue. Tap a letter, then its replacement.",
+  how: {
+    goal: "Climb a word ladder: change one letter at a time so the word matches each clue.",
+    steps: [
+      "Start with a four-letter word. Each clue describes a new word that differs from the last one by exactly one letter, in any position.",
+      "Tap the letter to change, then tap its replacement on the keyboard.",
+      "1 point for each of the three steps. 25 seconds per ladder, and a wrong swap costs 3 seconds, unless the timer is off.",
+      "<b>Hint</b> marks the letter to change and costs 1 point. <b>Give up</b> shows the rest of the ladder and keeps what you have scored."
+    ],
+    example: "<b>COLD</b>, then “a length of string” is <b>CORD</b>, “it comes in a deck” is <b>CARD</b>, and “not soft” is <b>HARD</b>."
+  },
+  puzzles: window.SWITCHEROO_PUZZLES
+});
+</script>
+</body>
+</html>

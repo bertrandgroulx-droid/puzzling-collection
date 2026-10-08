@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Whittle</title>
+<meta name="description" content="Take one letter away at a time to match three clues before the clock runs out.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121214" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div class="name"><h1>Whittle</h1></div>
+    <button class="q" id="helpBtn" type="button" aria-label="How to play">?</button>
+  </header>
+  <div class="daily"><span id="dailyText"></span><a id="pastLink" href="?past">Past puzzles</a></div>
+  <section id="shell" class="stack" hidden></section>
+
+  <section id="play" class="stack" data-game-ui>
+    <div class="pips" id="pips" aria-hidden="true"></div>
+    <p class="instr">Tap the letter to take away so the word matches the clue.</p>
+    <div class="clock" id="clockRow">
+      <div class="bar" id="bar"><span id="barFill"></span></div>
+      <div class="secs" id="secs">25</div>
+    </div>
+    <p class="clue"><span id="clueLabel">Six letters</span><b id="clueText">Read the word, then start.</b></p>
+    <div class="tiles row" id="tiles"></div>
+    <p class="status" id="msg" aria-live="polite"></p>
+    <button class="primary" id="go" type="button">Start</button>
+    <ul class="ladder" id="ladder"></ul>
+    <div class="row" id="helpRow" hidden>
+      <button id="hintBtn" type="button">Hint &middot; 1 point</button>
+      <button id="giveUp" type="button">Give up</button>
+    </div>
+  </section>
+
+  <dialog class="help" id="help"></dialog>
+</main>
+
+<script src="puzzles.js"></script>
+<script src="../shared/keys.js"></script>
+<script src="../shared/shell.js"></script>
+<script>
+// Chains live in puzzles.js: a six-letter start, then three [clue, answer] steps.
+const RAW = window.WHITTLE_PUZZLES || [];
+const CHAINS = RAW.map(c => ({ start: c.start.toUpperCase(), steps: c.steps.map(s => [s[0], s[1].toUpperCase()]) }));
+const PER_GAME = 4, MAX = 3, SECONDS = 25, PENALTY = 3;
+const $ = id => document.getElementById(id);
+let queue = [], game = [], ci = 0, step = 0, word = "", pts = 0, hints = 0, score = 0, results = [], running = false, timed = true, deadline = 0, raf = 0, meta = null;
+
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function say(text, cls) { $("msg").textContent = text; $("msg").className = "status " + (cls || ""); }
+const points = () => Math.max(0, pts - hints);
+
+// m comes from the shell: { mode: "daily", items, number, date } or { mode: "practice" }.
+function newGame(m) {
+  meta = m && m.mode === "daily" ? m : null;
+  if (meta) game = meta.items.map(c => CHAINS[RAW.indexOf(c)]);
+  else {
+    if (queue.length < PER_GAME) queue = shuffle(CHAINS.map((_, i) => i));
+    game = queue.splice(0, PER_GAME).map(i => CHAINS[i]);
+  }
+  ci = 0; score = 0; results = [];
+  readyChain();
+}
+
+function drawPips() {
+  $("pips").innerHTML = game.map((_, i) => {
+    const r = results[i];
+    const cls = r === undefined ? (i === ci ? "now" : "") : r === MAX ? "full" : r > 0 ? "half" : "zero";
+    return '<span class="pip ' + cls + '"></span>';
+  }).join("");
+}
+
+function drawTiles(enabled, hintedIndex) {
+  $("tiles").innerHTML = word.split("").map((ch, i) =>
+    '<button class="tile' + (i === hintedIndex ? " hinted" : "") + '" type="button" data-i="' + i + '" aria-label="Take away ' + ch + '"' + (enabled ? "" : " disabled") + ">" + ch + "</button>").join("");
+}
+
+function drawClock(ms) {
+  const s = Math.max(0, ms / 1000);
+  $("barFill").style.width = Math.min(100, (s / SECONDS) * 100) + "%";
+  $("bar").className = "bar" + (s <= 7 ? " low" : "");
+  $("secs").textContent = Math.ceil(s);
+}
+
+// The timer setting is read at the start of each word, so a change applies from the next one.
+function readyChain() {
+  const c = game[ci];
+  step = 0; pts = 0; hints = 0; word = c.start; running = false;
+  timed = Shell.timerOn();
+  $("clockRow").hidden = !timed;
+  $("clueLabel").textContent = "Word " + (ci + 1) + " of " + game.length;
+  $("clueText").textContent = timed ? "Read the word, then start the clock." : "Six letters. Tap one away to match each clue.";
+  say("");
+  $("ladder").innerHTML = ""; $("helpRow").hidden = true;
+  drawTiles(false); drawClock(SECONDS * 1000); drawPips();
+  if (timed) { $("go").hidden = false; $("go").textContent = "Start"; }
+  else { $("go").hidden = true; begin(); }
+}
+
+function begin() {
+  running = true; $("go").hidden = true; $("helpRow").hidden = false;
+  $("hintBtn").disabled = false; $("hintBtn").innerHTML = "Hint &middot; 1 point";
+  showStep();
+  if (timed) { deadline = performance.now() + SECONDS * 1000; tick(); }
+}
+
+function showStep() {
+  $("clueLabel").textContent = "Clue " + (step + 1) + " of 3";
+  $("clueText").textContent = game[ci].steps[step][0];
+  drawTiles(true, -1);
+}
+
+function tick() {
+  if (!running) return;
+  const left = deadline - performance.now();
+  drawClock(left);
+  if (left <= 0) { finish("Time ran out."); return; }
+  raf = requestAnimationFrame(tick);
+}
+
+function finish(why) {
+  running = false; cancelAnimationFrame(raf);
+  const c = game[ci], p = points();
+  results[ci] = p; score += p;
+  $("ladder").innerHTML = c.steps.map((s, i) =>
+    '<li class="' + (i < pts ? "got" : "miss") + '"><span class="w">' + s[1] + '</span><span class="d">' + s[0] + "</span></li>").join("");
+  $("clueLabel").textContent = c.start;
+  $("clueText").textContent = pts === 3 ? "All three found." : why + " Here is the rest.";
+  say((pts === 3 ? "All three found." : why) + " " + p + (p === 1 ? " point." : " points."), p === MAX ? "good" : p > 0 ? "part" : "bad");
+  $("tiles").innerHTML = ""; $("helpRow").hidden = true;
+  $("go").hidden = false; $("go").textContent = ci + 1 < game.length ? "Next" : "See your score";
+  $("go").focus();
+  drawPips();
+}
+
+$("go").addEventListener("click", () => {
+  if (results[ci] !== undefined) {
+    ci++;
+    if (ci < game.length) { readyChain(); return; }
+    Shell.finish({ score, max: game.length * MAX, results, recap: game.map((c, i) => [c.start + " → " + c.steps[2][1], results[i]]), meta });
+    return;
+  }
+  begin();
+});
+
+$("tiles").addEventListener("click", e => {
+  const b = e.target.closest(".tile");
+  if (!b || !running) return;
+  const i = Number(b.dataset.i);
+  const cand = word.slice(0, i) + word.slice(i + 1);
+  const c = game[ci];
+  if (cand === c.steps[step][1]) {
+    pts++; word = cand;
+    $("ladder").insertAdjacentHTML("beforeend", '<li class="got"><span class="w">' + cand + '</span><span class="d">' + c.steps[step][0] + "</span></li>");
+    say(cand + " is right.", "good");
+    step++;
+    $("hintBtn").disabled = false; $("hintBtn").innerHTML = "Hint &middot; 1 point";
+    if (step === 3) { finish("Done."); return; }
+    showStep();
+  } else {
+    if (timed) { deadline -= PENALTY * 1000; say("Not that letter. " + PENALTY + " seconds lost.", "bad"); }
+    else say("Not that letter. Try another.", "bad");
+    b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake");
+  }
+});
+$("hintBtn").addEventListener("click", () => {
+  if (!running) return;
+  hints++;
+  const ans = game[ci].steps[step][1];
+  const i = [...word].findIndex((_, k) => word.slice(0, k) + word.slice(k + 1) === ans);
+  drawTiles(true, i);
+  $("hintBtn").disabled = true; $("hintBtn").textContent = "Hint used";
+  say("Take away the marked letter.", "part");
+});
+$("giveUp").addEventListener("click", () => { if (running) finish("Given up."); });
+
+Shell.init({
+  game: "whittle", title: "Whittle", puzzles: RAW, per: PER_GAME, max: MAX,
+  timed: { title: "Four words, 25 seconds each", rules: "Three clues per word. 1 point per clue; a wrong tap costs 3 seconds." },
+  how: {
+    goal: "Take one letter away at a time so the word matches each clue, from six letters down to three.",
+    steps: [
+      "A six-letter word is shown. Each clue describes the word you get by removing one letter and keeping the rest in order.",
+      "Tap the letter to take away. Three clues, three taps.",
+      "1 point for each clue. 25 seconds for all three, and a wrong tap costs 3 seconds, unless the timer is off.",
+      "<b>Hint</b> marks the letter to take away and costs 1 point. <b>Give up</b> shows the rest and keeps what you have scored."
+    ],
+    example: "<b>PLANET</b>, then “something that grows in soil” is <b>PLANT</b>, “a scheme” is <b>PLAN</b>, and “you fry an egg in it” is <b>PAN</b>."
+  },
+  onStart: newGame
+});
+</script>
+</body>
+</html>

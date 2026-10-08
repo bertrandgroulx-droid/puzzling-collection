@@ -1,4 +1,4 @@
-// Minus 3 puzzles.
+// Whittle puzzles.
 //
 // Each puzzle has:
 //   start - a six-letter word, in capitals
@@ -7,7 +7,7 @@
 //
 // Every game picks four of these at random. All puzzles must be original.
 
-window.MINUS_3_PUZZLES = [
+window.WHITTLE_PUZZLES = [
   { start: "PLANET", steps: [["Something that grows in soil", "PLANT"], ["A scheme", "PLAN"], ["You fry an egg in it", "PAN"]] },
   { start: "STRAIN", steps: [["It runs on rails", "TRAIN"], ["It falls from clouds", "RAIN"], ["Moved fast on foot", "RAN"]] },
   { start: "BRANDY", steps: [["A company's name and logo", "BRAND"], ["The husk of a grain", "BRAN"], ["To forbid", "BAN"]] },

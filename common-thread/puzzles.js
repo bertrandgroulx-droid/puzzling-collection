@@ -1,4 +1,4 @@
-// Missing Link puzzles.
+// Common Thread puzzles.
 //
 // To add a puzzle, copy one of the lines below and change the words.
 // Each puzzle has:
@@ -13,7 +13,7 @@
 // Every game picks five of these at random, so the more puzzles here the longer
 // it takes before a player sees a repeat. All puzzles must be original.
 
-window.MISSING_LINK_PUZZLES = [
+window.COMMON_THREAD_PUZZLES = [
   { link: "LIGHT", hint: "You flip a switch to get it.",        clues: ["SUN_", "FLASH_", "_HOUSE"] },
   { link: "BALL",  hint: "It bounces.",                         clues: ["SNOW_", "FOOT_", "_ROOM"] },
   { link: "FISH",  hint: "It swims.",                           clues: ["STAR_", "GOLD_", "_BOWL"] },

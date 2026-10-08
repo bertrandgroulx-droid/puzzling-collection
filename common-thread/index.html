@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Common Thread</title>
+<meta name="description" content="Three words, and one missing word that pairs with every one of them.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121214" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div class="name"><h1>Common Thread</h1></div>
+    <button class="q" id="helpBtn" type="button" aria-label="How to play">?</button>
+  </header>
+  <div class="daily"><span id="dailyText"></span><a id="pastLink" href="?past">Past puzzles</a></div>
+  <section id="shell" class="stack" hidden></section>
+
+  <section id="play" class="stack" data-game-ui>
+    <div class="pips" id="pips" aria-hidden="true"></div>
+    <p class="instr">Find the one word that goes with all three. Type it, then tap Check.</p>
+    <div class="tiles" id="tiles"></div>
+    <form id="form" class="entry" autocomplete="off">
+      <input type="text" id="guess" name="guess" placeholder="The missing word" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-label="Your answer">
+      <button class="primary" id="check" type="submit">Check</button>
+    </form>
+    <p class="hint" id="hint" hidden></p>
+    <p class="status" id="msg" aria-live="polite"></p>
+    <div class="row" id="helpRow">
+      <button id="hintBtn" type="button">Hint &middot; 1 point</button>
+      <button id="giveUp" type="button">Give up</button>
+    </div>
+    <div class="row" id="nextRow" hidden>
+      <button class="primary" id="next" type="button">Next</button>
+    </div>
+  </section>
+
+  <dialog class="help" id="help"></dialog>
+</main>
+
+<script src="puzzles.js"></script>
+<script src="../shared/keys.js"></script>
+<script src="../shared/shell.js"></script>
+<script>
+// Puzzles live in puzzles.js. Each clue is written like "SUN_" (link goes after)
+// or "_HOUSE" (link goes before). A space beside the underscore means a two-word phrase.
+function parseClue(s) {
+  const i = s.indexOf("_");
+  const before = s.slice(0, i), after = s.slice(i + 1);
+  if (before.length) return { word: before.trim(), after: true, sep: before.endsWith(" ") ? " " : "" };
+  return { word: after.trim(), after: false, sep: after.startsWith(" ") ? " " : "" };
+}
+const RAW = window.COMMON_THREAD_PUZZLES || [];
+const PUZZLES = RAW.map(p => ({ link: p.link.toUpperCase(), clues: p.clues.map(parseClue) }));
+const PER_GAME = 5, MAX = 2;
+const $ = id => document.getElementById(id);
+let queue = [], game = [], idx = 0, score = 0, hinted = false, solved = false, results = [], meta = null;
+
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function esc(s) { return s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+function say(text, cls) { $("msg").textContent = text; $("msg").className = "status " + (cls || ""); }
+
+// m comes from the shell: { mode: "daily", items, number, date } or { mode: "practice" }.
+function newGame(m) {
+  meta = m && m.mode === "daily" ? m : null;
+  if (meta) game = meta.items.map(p => PUZZLES[RAW.indexOf(p)]);
+  else {
+    if (queue.length < PER_GAME) queue = shuffle(PUZZLES.map((_, i) => i));
+    game = queue.splice(0, PER_GAME).map(i => PUZZLES[i]);
+  }
+  idx = 0; score = 0; results = [];
+  showPuzzle();
+}
+
+function drawPips() {
+  $("pips").innerHTML = game.map((_, i) => {
+    const r = results[i];
+    const cls = r === undefined ? (i === idx ? "now" : "") : r === MAX ? "full" : r > 0 ? "half" : "zero";
+    return '<span class="pip ' + cls + '"></span>';
+  }).join("");
+}
+
+function showPuzzle() {
+  const p = game[idx];
+  hinted = false; solved = false;
+  $("tiles").className = "tiles";
+  $("tiles").innerHTML = p.clues.map(c => '<div class="tile">' + esc(c.word) + "</div>").join("");
+  $("hint").hidden = true; $("hint").textContent = p.link[0] + " _".repeat(p.link.length - 1);
+  say("");
+  $("guess").value = ""; $("guess").disabled = false; $("check").disabled = false;
+  $("hintBtn").disabled = false; $("hintBtn").innerHTML = "Hint &middot; 1 point";
+  $("form").hidden = false; $("helpRow").hidden = false; $("nextRow").hidden = true;
+  drawPips();
+  $("guess").focus();
+}
+
+function reveal(points) {
+  const p = game[idx];
+  solved = true; results[idx] = points; score += points;
+  $("tiles").className = "tiles " + (points > 0 ? "solved" : "missed");
+  $("tiles").innerHTML = p.clues.map(c => {
+    const link = '<span class="link">' + esc(p.link) + "</span>";
+    const sep = c.sep === " " ? "&nbsp;" : "";
+    return '<div class="tile">' + (c.after ? esc(c.word) + sep + link : link + sep + esc(c.word)) + "</div>";
+  }).join("");
+  $("form").hidden = true; $("helpRow").hidden = true; $("hint").hidden = true;
+  say(points === 2 ? "Correct. 2 points." : points === 1 ? "Correct, with a hint. 1 point." : "The answer was " + p.link + ". 0 points.", points === 2 ? "good" : points === 1 ? "part" : "bad");
+  $("next").textContent = idx + 1 < game.length ? "Next" : "See your score";
+  $("nextRow").hidden = false; $("next").focus();
+  drawPips();
+}
+
+$("form").addEventListener("submit", e => {
+  e.preventDefault();
+  if (solved) return;
+  const g = $("guess").value.trim().toUpperCase().replace(/[^A-Z]/g, "");
+  if (!g) { say("Type a word first.", "bad"); return; }
+  if (g === game[idx].link) { reveal(hinted ? 1 : 2); return; }
+  say(g + " does not go with all three. Try again.", "bad");
+  const el = $("guess"); el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); el.select();
+});
+$("hintBtn").addEventListener("click", () => {
+  hinted = true; $("hint").hidden = false;
+  $("hintBtn").disabled = true; $("hintBtn").textContent = "Hint used";
+  $("guess").focus();
+});
+$("giveUp").addEventListener("click", () => reveal(0));
+$("next").addEventListener("click", () => {
+  idx++;
+  if (idx < game.length) { showPuzzle(); return; }
+  Shell.finish({ score, max: game.length * MAX, results, recap: game.map((p, i) => [p.clues.map(c => c.word).join(", ") + " → " + p.link, results[i]]), meta });
+});
+
+Shell.init({
+  game: "common-thread", title: "Common Thread", puzzles: RAW, per: PER_GAME, max: MAX,
+  how: {
+    goal: "Find the one word that goes with all three words on the tiles to make a compound word or a phrase.",
+    steps: [
+      "The missing word can go before one tile and after another.",
+      "Type it, then tap Check. Enter on the keyboard checks too.",
+      "2 points, or 1 point after a hint.",
+      "<b>Hint</b> shows the first letter. <b>Give up</b> shows the answer and scores nothing."
+    ],
+    example: "<b>SUN</b>, <b>FLASH</b> and <b>HOUSE</b> all go with <b>LIGHT</b>: sunlight, flashlight, lighthouse."
+  },
+  onStart: newGame
+});
+</script>
+</body>
+</html>

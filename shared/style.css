@@ -1,99 +1,208 @@
-/* Shared look for the games that use shared/game.js.
-   One phone-width column: clue on top, tiles or fields in the middle, thumb-reach buttons last. */
+/* The one stylesheet for every Puzzling game. Change it here and all eight change.
+   Rules it carries (see the house standards):
+   - white ground, neutral charcoal ink, one blue accent for the next action
+   - green and amber only where something happened; wrong is neutral; no red
+   - raised = tappable, flat = read-only; exactly one filled accent button per screen
+   - no dashed borders anywhere
+   - light and dark; a colour-blind setting swaps the state colours */
+
 :root {
-  --bg: #f3f2f7; --surface: #ffffff; --ink: #1d1a2b; --muted: #625d78; --line: #d9d5e6;
-  --accent: #6b3fd4; --accent-ink: #ffffff; --accent-soft: #ebe4fb;
-  --good: #0f8a6c; --good-soft: #dcf3ec; --warn: #a85a00; --bad: #c2314a;
-  --display: "Chakra Petch", "Trebuchet MS", sans-serif;
-  --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --bg: #ffffff; --surface: #f7f7f9; --ink: #1c1c1e; --muted: #6b6b70; --line: #e4e4e8;
+  --accent: #2a6fcf; --accent-ink: #ffffff; --accent-edge: #1c519c; --accent-soft: #e8f0fc;
+  --now: var(--accent);
+  --good: #1f8a4c; --good-soft: #e6f6ec;
+  --part: #b4730a; --part-soft: #fbf1df;
+  --btn: #f1f1f4; --btn-line: #d6d6dc;
+  --display: "Bricolage Grotesque", "Trebuchet MS", ui-sans-serif, sans-serif;
+  --body: "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --radius: 16px; --radius-sm: 10px;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #14121d; --surface: #1e1b2b; --ink: #ecebf5; --muted: #a39fba; --line: #34304a;
-    --accent: #a98bff; --accent-ink: #17132a; --accent-soft: #2c2547;
-    --good: #4fd1ac; --good-soft: #17352e; --warn: #f0a84a; --bad: #ff7a90; color-scheme: dark;
+    --bg: #121214; --surface: #1c1c1f; --ink: #f2f2f4; --muted: #9d9da4; --line: #2e2e33;
+    --accent: #7fb0f0; --accent-ink: #121214; --accent-edge: #5a8ed0; --accent-soft: #1f2d40;
+    --good: #5fcf8a; --good-soft: #1b2f24; --part: #e8b04b; --part-soft: #332a18;
+    --btn: #27272b; --btn-line: #3d3d43; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #14121d; --surface: #1e1b2b; --ink: #ecebf5; --muted: #a39fba; --line: #34304a;
-  --accent: #a98bff; --accent-ink: #17132a; --accent-soft: #2c2547;
-  --good: #4fd1ac; --good-soft: #17352e; --warn: #f0a84a; --bad: #ff7a90; color-scheme: dark;
+  --bg: #121214; --surface: #1c1c1f; --ink: #f2f2f4; --muted: #9d9da4; --line: #2e2e33;
+  --accent: #7fb0f0; --accent-ink: #121214; --accent-edge: #5a8ed0; --accent-soft: #1f2d40;
+  --good: #5fcf8a; --good-soft: #1b2f24; --part: #e8b04b; --part-soft: #332a18;
+  --btn: #27272b; --btn-line: #3d3d43; color-scheme: dark;
 }
+/* Colour-blind setting: right becomes blue, partial becomes orange, and the "you are here" pip
+   becomes ink so that blue keeps one meaning. */
+:root[data-cb] { --good: #2a6fcf; --good-soft: #e8f0fc; --part: #d9780b; --part-soft: #fdecd9; --now: var(--ink); }
+@media (prefers-color-scheme: dark) { :root[data-cb]:not([data-theme="light"]) { --good: #7fb0f0; --good-soft: #1f2d40; --part: #f0a04a; --part-soft: #3a2a14; } }
+:root[data-cb][data-theme="dark"] { --good: #7fb0f0; --good-soft: #1f2d40; --part: #f0a04a; --part-soft: #3a2a14; }
+
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html { scroll-padding-top: env(safe-area-inset-top, 0px); }
-body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.45; padding-inline: 16px; padding-block: calc(20px + env(safe-area-inset-top, 0px)) calc(32px + env(safe-area-inset-bottom, 0px)); }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.45; padding-inline: 16px; padding-block: calc(16px + env(safe-area-inset-top, 0px)) calc(32px + env(safe-area-inset-bottom, 0px)); -webkit-tap-highlight-color: transparent; }
+button, .tile, .key { touch-action: manipulation; -webkit-user-select: none; user-select: none; }
 .app, .stack { display: flex; flex-direction: column; }
-.app { max-width: 440px; margin-inline: auto; gap: 18px; }
+.app { max-width: 440px; margin-inline: auto; gap: 14px; }
 .stack { gap: 12px; }
-.home { font-size: 0.9rem; color: var(--muted); text-decoration: none; }
-.home:hover, .home:focus-visible { color: var(--accent); text-decoration: underline; }
-header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-h1 { font-family: var(--display); font-weight: 700; font-size: 1.5rem; margin: 0; letter-spacing: 0.01em; text-wrap: balance; }
-.score { font-family: var(--mono); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
-.score b { color: var(--ink); font-weight: 600; }
-.lead { margin: 0; color: var(--muted); }
-.toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 500; font-size: 0.95rem; cursor: pointer; }
-.toggle small { color: var(--muted); font-weight: 400; font-size: 0.8rem; }
-.toggle input { appearance: none; -webkit-appearance: none; flex: none; width: 46px; height: 28px; margin: 0; border-radius: 14px; background: var(--line); position: relative; cursor: pointer; transition: background 0.15s; }
-.toggle input::before { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 2px rgba(0,0,0,0.25); transition: transform 0.15s; }
-.toggle input:checked { background: var(--accent); }
-.toggle input:checked::before { transform: translateX(18px); }
-.toggle input:disabled { opacity: 0.55; cursor: default; }
-.toggle input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-button, .btn { font-family: var(--body); font-weight: 600; font-size: 1rem; border-radius: 10px; padding: 14px 18px; border: 2px solid transparent; cursor: pointer; text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
-button:focus-visible, .btn:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-.primary { background: var(--accent); color: var(--accent-ink); }
-.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
-.ghost:disabled { color: var(--muted); cursor: default; }
+
+/* ---- header: the game's name, the How to play button, and the line that says which puzzle this is ---- */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.name { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-width: 0; }
+h1 { font-family: var(--display); font-weight: 800; font-size: 1.5rem; margin: 0; letter-spacing: -0.02em; }
+.q { flex: none; width: 36px; height: 36px; padding: 0; border-radius: 50%; border: 1.5px solid var(--line); background: var(--surface); color: var(--muted); font-family: var(--body); font-weight: 800; font-size: 1rem; cursor: pointer; display: grid; place-items: center; box-shadow: none; }
+.q:hover { color: var(--ink); border-color: var(--muted); }
+.daily { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 0.88rem; color: var(--muted); min-height: 1.4em; }
+.daily b { color: var(--ink); font-weight: 800; }
+.daily a { color: var(--accent); font-weight: 700; text-decoration: none; white-space: nowrap; padding: 6px 0; }
+.daily a:hover, .daily a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---- progress pips: full = all points, half = some, hollow = none, accent = this one. Shape as well as colour. ---- */
 .pips { display: flex; gap: 6px; }
-.pip { flex: 1; height: 6px; border-radius: 3px; background: var(--line); }
-.pip.now { background: var(--accent); }
+.pip { flex: 1; height: 8px; border-radius: 4px; background: var(--line); }
+.pip.now { background: var(--now); }
 .pip.full { background: var(--good); }
-.pip.part { background: var(--warn); }
-.pip.zero { background: var(--bad); }
+.pip.half { background: linear-gradient(90deg, var(--part) 50%, var(--line) 50%); }
+.pip.zero { background: transparent; box-shadow: inset 0 0 0 2px var(--muted); }
+
+/* ---- the instruction line: what to find, then what to do. Ink, not grey, because it is read. ---- */
+.instr { margin: 0; font-weight: 700; font-size: 0.95rem; }
+.lead { margin: 0; color: var(--muted); }
+.note { margin: 0; color: var(--muted); font-size: 0.88rem; }
+
+/* ---- the clue box, for games that show a clue above the letters ---- */
+.clue { margin: 0; padding: 12px 14px; background: var(--surface); border-radius: var(--radius-sm); }
+.clue span { display: block; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.clue b { font-weight: 700; font-size: 1.05rem; }
+
+/* ---- tiles and words. Flat when read-only; raised (button.tile) when tappable. ---- */
+.tiles { display: flex; flex-direction: column; gap: 8px; }
+.tiles.row { flex-direction: row; gap: 6px; justify-content: center; }
+.tile { background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 13px 16px; font-family: var(--display); font-weight: 800; font-size: 1.3rem; letter-spacing: 0.04em; text-transform: uppercase; min-width: 0; overflow-wrap: anywhere; color: var(--ink); }
+.tile .link { color: var(--accent); }
+.tiles.solved .tile, .tile.solved { border-color: var(--good); background: var(--good-soft); }
+.tiles.missed .tile, .tile.missed { background: var(--surface); color: var(--muted); }
+.tiles.missed .tile .link { color: var(--ink); }
+.tiles.row .tile { flex: 1; max-width: 62px; aspect-ratio: 1; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 1.55rem; letter-spacing: 0; }
+button.tile { cursor: pointer; background: var(--btn); border-color: var(--btn-line); box-shadow: 0 1.5px 0 var(--btn-line); font-family: var(--display); }
+button.tile:disabled { cursor: default; color: var(--muted); box-shadow: none; }
+button.tile:not(:disabled):active { transform: translateY(1.5px); box-shadow: none; }
+button.tile.sel { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 1.5px 0 var(--accent-edge); }
+button.tile.hinted { border-color: var(--part); background: var(--part-soft); }
+.words { display: flex; flex-direction: column; gap: 8px; }
+.word { background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 13px 16px; font-family: var(--display); font-weight: 800; font-size: 1.25rem; letter-spacing: 0.04em; text-transform: uppercase; overflow-wrap: anywhere; }
+
+/* ---- typing. The answer box carries the accent border: this is where you act. ---- */
+form { display: flex; flex-direction: column; gap: 10px; margin: 0; }
+.entry { display: flex; gap: 8px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > span { font-weight: 600; font-size: 0.95rem; }
+input[type="text"] { width: 100%; min-width: 0; font-family: var(--display); font-weight: 800; font-size: 1.15rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 12px 14px; border-radius: var(--radius); border: 2px solid var(--line); background: var(--surface); color: var(--ink); }
+.entry input[type="text"] { flex: 1; }
+input[type="text"]::placeholder { color: var(--muted); font-family: var(--body); font-weight: 500; text-transform: none; letter-spacing: 0; font-size: 1rem; }
+input[type="text"]:focus-visible { outline: none; border-color: var(--accent); }
+input[type="text"].wrong { border-color: var(--muted); }
+input[type="text"]:disabled { border-color: var(--good); background: var(--good-soft); }
+.hint { margin: 0; font-family: var(--mono); font-weight: 700; letter-spacing: 0.14em; color: var(--part); font-size: 1.05rem; }
+
+/* ---- buttons: filled and raised, so a control never reads as a label. One accent-filled button per screen. ---- */
+button, .btn { font-family: var(--body); font-weight: 800; font-size: 0.95rem; border-radius: var(--radius); min-height: 48px; padding: 10px 16px; border: 1px solid var(--btn-line); background: var(--btn); color: var(--ink); box-shadow: 0 1.5px 0 var(--btn-line); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center; text-decoration: none; }
+button:not(:disabled):active, .btn:active { transform: translateY(1.5px); box-shadow: none; }
+button:disabled { cursor: default; opacity: 0.45; box-shadow: none; }
+button:focus-visible, .btn:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); box-shadow: 0 2px 0 var(--accent-edge); }
+.quiet { background: transparent; border-color: transparent; box-shadow: none; color: var(--muted); min-height: 40px; text-decoration: underline; text-underline-offset: 3px; font-weight: 700; }
+.quiet:hover { color: var(--ink); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.row > button, .row > .btn { flex: 1; }
+.opts { display: flex; flex-direction: column; gap: 8px; }
+.opt { justify-content: flex-start; text-align: left; font-weight: 600; min-height: 52px; }
+.opt.wrong { background: var(--surface); border-color: var(--line); color: var(--muted); box-shadow: none; }
+.opt.wrong::before { content: "\2715"; font-size: 0.75rem; }
+.keys { display: grid; grid-template-columns: repeat(9, 1fr); gap: 5px; }
+.key { min-height: 44px; padding: 0; font-family: var(--display); font-weight: 800; font-size: 1rem; border-radius: var(--radius-sm); min-width: 0; }
+
+/* ---- the status line: what happened, in the state colour, with an icon so colour is never alone ---- */
+.status { margin: 0; display: flex; align-items: center; gap: 8px; min-height: 2.6em; padding: 8px 12px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.92rem; border: 1px solid transparent; }
+.status:empty { padding: 0; min-height: 1.4em; }
+.status::before { content: ""; display: none; width: 18px; height: 18px; border-radius: 50%; flex: none; place-items: center; font-size: 0.65rem; line-height: 1; color: var(--bg); }
+.status.good { background: var(--good-soft); color: var(--good); }
+.status.good::before { content: "\2713"; display: grid; background: var(--good); }
+.status.bad { background: var(--surface); border-color: var(--line); color: var(--ink); }
+.status.bad::before { content: "\2715"; display: grid; background: var(--muted); }
+.status.part { background: var(--part-soft); color: var(--part); }
+.status.note { background: var(--surface); color: var(--muted); }
+.status.part::before { content: "\2713"; display: grid; background: var(--part); }
+
+/* ---- the clock ---- */
 .clock { display: flex; align-items: center; gap: 10px; }
 .bar { flex: 1; height: 10px; border-radius: 5px; background: var(--line); overflow: hidden; }
 .bar span { display: block; height: 100%; width: 100%; background: var(--accent); border-radius: 5px; }
-.bar.low span { background: var(--bad); }
-.secs { font-family: var(--mono); font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3ch; text-align: right; }
-.clue { margin: 0; padding: 14px 16px; background: var(--accent-soft); border-radius: 10px; }
-.clue span { display: block; font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
-.clue b { font-weight: 600; font-size: 1.1rem; }
-.tiles { display: flex; gap: 6px; justify-content: center; }
-.tile { flex: 1; max-width: 62px; aspect-ratio: 1; min-width: 0; padding: 0; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-weight: 600; font-size: 1.6rem; text-transform: uppercase; background: var(--surface); color: var(--ink); border: 2px solid var(--line); border-radius: 10px; }
-button.tile.sel { border-color: var(--accent); background: var(--accent-soft); }
-.words { display: flex; flex-direction: column; gap: 8px; }
-.word { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; font-family: var(--mono); font-weight: 600; font-size: 1.25rem; letter-spacing: 0.06em; text-transform: uppercase; overflow-wrap: anywhere; }
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field span { font-weight: 500; }
-input[type="text"] { width: 100%; font-family: var(--mono); font-weight: 600; font-size: 1.15rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 13px 14px; border-radius: 10px; border: 2px solid var(--line); background: var(--surface); color: var(--ink); }
-input[type="text"].wrong { border-color: var(--bad); }
-input[type="text"]:disabled { border-color: var(--good); background: var(--good-soft); }
-.row { display: flex; gap: 8px; flex-wrap: wrap; }
-.row button, .row .btn { flex: 1; }
-.opt { text-align: left; justify-content: flex-start; font-weight: 500; }
-.opt.wrong { border-style: dashed; text-decoration: line-through; }
-.keys { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; }
-.keys button { padding: 11px 0; font-family: var(--mono); font-size: 1rem; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
-.msg { min-height: 1.5em; margin: 0; font-weight: 500; }
-.msg.bad { color: var(--bad); }
-.msg.good { color: var(--good); }
-.hint { margin: 0; font-family: var(--mono); letter-spacing: 0.12em; color: var(--accent); }
+.bar.low span { background: var(--part); }
+.secs { font-family: var(--mono); font-weight: 700; font-variant-numeric: tabular-nums; min-width: 3ch; text-align: right; }
+
+/* ---- the ladder of solved words ---- */
 .ladder { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.ladder li { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); }
-.ladder .w { font-family: var(--mono); font-weight: 600; font-size: 1.05rem; letter-spacing: 0.08em; overflow-wrap: anywhere; min-width: 0; }
-.ladder .d { color: var(--muted); font-size: 0.9rem; text-align: right; min-width: 0; }
+.ladder li { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); }
+.ladder .w { font-family: var(--display); font-weight: 800; font-size: 1.05rem; letter-spacing: 0.06em; overflow-wrap: anywhere; min-width: 0; }
+.ladder .d { color: var(--muted); font-size: 0.88rem; text-align: right; min-width: 0; }
 .ladder li.got { border-color: var(--good); background: var(--good-soft); }
-.ladder li.miss { border-style: dashed; }
-.big { font-family: var(--display); font-weight: 700; font-size: 3rem; line-height: 1; font-variant-numeric: tabular-nums; }
-.big small { font-size: 1.25rem; color: var(--muted); font-weight: 600; }
+.ladder li.miss .w { color: var(--muted); }
+
+/* ---- results ---- */
+.big { font-family: var(--display); font-weight: 800; font-size: 3.2rem; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.big small { font-size: 1.1rem; color: var(--muted); font-weight: 700; letter-spacing: 0; }
 .recap { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
-.recap li { display: flex; justify-content: space-between; gap: 12px; font-family: var(--mono); font-size: 0.9rem; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.recap li { display: flex; justify-content: space-between; gap: 12px; font-family: var(--mono); font-size: 0.82rem; padding: 9px 0; border-bottom: 1px solid var(--line); }
 .recap li span:first-child { min-width: 0; overflow-wrap: anywhere; }
 .recap li span:last-child { color: var(--muted); white-space: nowrap; }
+
+/* ---- the start card for timed games, and the past-puzzles list ---- */
+.card { background: var(--surface); border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.card small { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.card b { font-family: var(--display); font-weight: 800; font-size: 1.15rem; }
+.card p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+.toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer; }
+.toggle small { color: var(--muted); font-weight: 500; font-size: 0.82rem; display: block; font-family: var(--body); text-transform: none; letter-spacing: 0; }
+.toggle input { appearance: none; -webkit-appearance: none; flex: none; width: 46px; height: 28px; margin: 0; border-radius: 14px; background: var(--btn-line); position: relative; cursor: pointer; transition: background 0.15s; }
+.toggle input::before { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.25); transition: transform 0.15s; }
+.toggle input:checked { background: var(--accent); }
+.toggle input:checked::before { transform: translateX(18px); }
+.toggle input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+h2 { font-family: var(--display); font-weight: 800; font-size: 1.15rem; margin: 6px 0 0; letter-spacing: -0.01em; }
+.days { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.days a { display: grid; grid-template-columns: 5.2em 1fr auto; gap: 10px; align-items: baseline; padding: 12px 4px; border-bottom: 1px solid var(--line); color: inherit; text-decoration: none; }
+.days a:hover, .days a:focus-visible { background: var(--surface); outline: none; }
+.days .n { font-family: var(--mono); font-weight: 700; font-size: 0.88rem; }
+.days .d { color: var(--muted); font-size: 0.92rem; }
+.days .s { font-family: var(--mono); font-size: 0.82rem; color: var(--muted); white-space: nowrap; }
+.days .s.done { color: var(--good); font-weight: 700; }
+.days a.today .n { color: var(--accent); }
+
+/* ---- How to play ---- */
+dialog.help { max-width: 420px; width: calc(100% - 32px); max-height: 86dvh; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); color: var(--ink); padding: 20px; margin: auto; }
+dialog.help::backdrop { background: rgba(0, 0, 0, 0.5); }
+dialog.help h2 { margin: 0 0 10px; font-size: 1.3rem; }
+dialog.help .goal { font-weight: 700; margin: 0 0 10px; }
+dialog.help ul { margin: 0 0 12px; padding-left: 1.1rem; }
+dialog.help li { margin-bottom: 6px; }
+dialog.help .example { background: var(--surface); border-radius: var(--radius-sm); padding: 12px 14px; margin: 0 0 14px; font-size: 0.95rem; }
+dialog.help .example b { font-family: var(--display); letter-spacing: 0.04em; }
+dialog.help h3 { font-family: var(--display); font-size: 1rem; margin: 16px 0 8px; }
+dialog.help .settings { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+dialog.help .foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 8px; }
+dialog.help .foot a { color: var(--muted); font-size: 0.9rem; }
+
+/* ---- home page ---- */
+.games { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.games a { display: block; background: var(--surface); border-radius: var(--radius); padding: 16px 18px; color: inherit; text-decoration: none; }
+.games a:hover, .games a:focus-visible { background: var(--accent-soft); outline: none; }
+.games h2 { margin: 0 0 4px; font-size: 1.2rem; }
+.games p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+.games .skills { display: block; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 0.78rem; color: var(--accent); font-weight: 700; }
+
 @keyframes shake { 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
 .shake { animation: shake 0.3s; }
-@media (prefers-reduced-motion: reduce) { .shake { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .shake { animation: none; } .toggle input, .toggle input::before { transition: none; } }

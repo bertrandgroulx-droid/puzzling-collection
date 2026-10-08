@@ -1,4 +1,4 @@
-// Mash-Ups puzzles.
+// Splice puzzles.
 //
 // Each puzzle has:
 //   clues  - two clues, one for each word
@@ -8,7 +8,7 @@
 //
 // Every game picks five of these at random. All puzzles must be original.
 
-window.MASH_UPS_PUZZLES = [
+window.SPLICE_PUZZLES = [
   { clues: ["You hit it with sticks", "It keeps the rain off"], parts: ["DRUM", "UMBRELLA"], answer: "DRUMBRELLA" },
   { clues: ["A big cousin of the violin, played seated", "Seafood with claws"], parts: ["CELLO", "LOBSTER"], answer: "CELLOBSTER" },
   { clues: ["It has 88 keys", "A long work of fiction"], parts: ["PIANO", "NOVEL"], answer: "PIANOVEL" },

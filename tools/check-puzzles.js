@@ -16,96 +16,96 @@ const oneRemoved = (a, b) => b.length === a.length - 1 && [...a].some((_, i) => 
 const oneSwapped = (a, b) => a.length === b.length && [...a].filter((c, i) => c !== b[i]).length === 1;
 function dupes(game, keys) { const seen = new Set(); for (const k of keys) { if (seen.has(k)) bad(game, "appears twice: " + k, null); seen.add(k); } }
 
-const ML = load("missing-link", "MISSING_LINK_PUZZLES");
+const ML = load("common-thread", "COMMON_THREAD_PUZZLES");
 for (const p of ML) {
-  if (!letters(p.link)) bad("missing-link", "link must be capitals", p);
-  if (!p.hint) bad("missing-link", "missing hint", p);
-  if (!Array.isArray(p.clues) || p.clues.length !== 3) bad("missing-link", "needs exactly 3 clues", p);
-  else for (const c of p.clues) if (!/^([A-Z]+ ?_|_ ?[A-Z]+)$/.test(c)) bad("missing-link", "clue must be like SUN_ or _HOUSE or FULL _", c);
+  if (!letters(p.link)) bad("common-thread", "link must be capitals", p);
+  if (!p.hint) bad("common-thread", "missing hint", p);
+  if (!Array.isArray(p.clues) || p.clues.length !== 3) bad("common-thread", "needs exactly 3 clues", p);
+  else for (const c of p.clues) if (!/^([A-Z]+ ?_|_ ?[A-Z]+)$/.test(c)) bad("common-thread", "clue must be like SUN_ or _HOUSE or FULL _", c);
 }
-dupes("missing-link", ML.map(p => p.link));
+dupes("common-thread", ML.map(p => p.link));
 
-const M3 = load("minus-3", "MINUS_3_PUZZLES");
+const M3 = load("whittle", "WHITTLE_PUZZLES");
 for (const p of M3) {
-  if (!letters(p.start) || p.start.length !== 6) bad("minus-3", "start must be six capital letters", p);
-  if (!Array.isArray(p.steps) || p.steps.length !== 3) { bad("minus-3", "needs exactly 3 steps", p); continue; }
+  if (!letters(p.start) || p.start.length !== 6) bad("whittle", "start must be six capital letters", p);
+  if (!Array.isArray(p.steps) || p.steps.length !== 3) { bad("whittle", "needs exactly 3 steps", p); continue; }
   let w = p.start;
   for (const [clue, ans] of p.steps) {
-    if (!clue) bad("minus-3", "missing clue", p);
-    if (!letters(ans) || !oneRemoved(w, ans)) bad("minus-3", ans + " is not " + w + " with one letter removed", p);
+    if (!clue) bad("whittle", "missing clue", p);
+    if (!letters(ans) || !oneRemoved(w, ans)) bad("whittle", ans + " is not " + w + " with one letter removed", p);
     w = ans;
   }
 }
-dupes("minus-3", M3.map(p => p.start));
+dupes("whittle", M3.map(p => p.start));
 
-const AN = load("anagrams", "ANAGRAMS_PUZZLES");
+const AN = load("tumble", "TUMBLE_PUZZLES");
 for (const p of AN) {
-  if (!letters(p.letters)) bad("anagrams", "letters must be capitals", p);
-  if (!Array.isArray(p.clues) || p.clues.length !== 2 || !Array.isArray(p.answers) || p.answers.length !== 2) { bad("anagrams", "needs 2 clues and 2 answers", p); continue; }
+  if (!letters(p.letters)) bad("tumble", "letters must be capitals", p);
+  if (!Array.isArray(p.clues) || p.clues.length !== 2 || !Array.isArray(p.answers) || p.answers.length !== 2) { bad("tumble", "needs 2 clues and 2 answers", p); continue; }
   for (const a of p.answers) {
-    if (!letters(a) || sorted(a) !== sorted(p.letters)) bad("anagrams", a + " does not use exactly the letters of " + p.letters, p);
-    if (a === p.letters) bad("anagrams", "answer is the same as the scrambled word", p);
+    if (!letters(a) || sorted(a) !== sorted(p.letters)) bad("tumble", a + " does not use exactly the letters of " + p.letters, p);
+    if (a === p.letters) bad("tumble", "answer is the same as the scrambled word", p);
   }
-  if (p.answers[0] === p.answers[1]) bad("anagrams", "both answers are the same", p);
+  if (p.answers[0] === p.answers[1]) bad("tumble", "both answers are the same", p);
 }
-dupes("anagrams", AN.map(p => p.letters));
+dupes("tumble", AN.map(p => p.letters));
 
-const PO = load("plus-one", "PLUS_ONE_PUZZLES");
+const PO = load("stowaway", "STOWAWAY_PUZZLES");
 for (const p of PO) {
-  if (!Array.isArray(p.clues) || p.clues.length !== 2 || !Array.isArray(p.answers) || p.answers.length !== 2) { bad("plus-one", "needs 2 clues and 2 answers", p); continue; }
+  if (!Array.isArray(p.clues) || p.clues.length !== 2 || !Array.isArray(p.answers) || p.answers.length !== 2) { bad("stowaway", "needs 2 clues and 2 answers", p); continue; }
   const [a, b] = p.answers;
-  if (!letters(a) || !letters(b) || !oneRemoved(b, a)) bad("plus-one", b + " is not " + a + " with one letter added", p);
+  if (!letters(a) || !letters(b) || !oneRemoved(b, a)) bad("stowaway", b + " is not " + a + " with one letter added", p);
 }
-dupes("plus-one", PO.map(p => p.answers[0]));
+dupes("stowaway", PO.map(p => p.answers[0]));
 
-const HH = load("hear-here", "HEAR_HERE_PUZZLES");
+const HH = load("soundalike", "SOUNDALIKE_PUZZLES");
 for (const p of HH) {
-  if (!Array.isArray(p.clues) || p.clues.length !== 2 || !Array.isArray(p.answers) || p.answers.length !== 2) { bad("hear-here", "needs 2 clues and 2 answers", p); continue; }
+  if (!Array.isArray(p.clues) || p.clues.length !== 2 || !Array.isArray(p.answers) || p.answers.length !== 2) { bad("soundalike", "needs 2 clues and 2 answers", p); continue; }
   const [a, b] = p.answers;
-  if (!letters(a) || !letters(b)) bad("hear-here", "answers must be capitals", p);
-  if (a === b) bad("hear-here", "the two spellings are the same", p);
+  if (!letters(a) || !letters(b)) bad("soundalike", "answers must be capitals", p);
+  if (a === b) bad("soundalike", "the two spellings are the same", p);
 }
-dupes("hear-here", HH.map(p => p.answers[0]));
+dupes("soundalike", HH.map(p => p.answers[0]));
 
-const SO = load("swap-one", "SWAP_ONE_PUZZLES");
+const SO = load("switcheroo", "SWITCHEROO_PUZZLES");
 for (const p of SO) {
-  if (!letters(p.start) || p.start.length !== 4) bad("swap-one", "start must be four capital letters", p);
-  if (!Array.isArray(p.steps) || p.steps.length !== 3) { bad("swap-one", "needs exactly 3 steps", p); continue; }
+  if (!letters(p.start) || p.start.length !== 4) bad("switcheroo", "start must be four capital letters", p);
+  if (!Array.isArray(p.steps) || p.steps.length !== 3) { bad("switcheroo", "needs exactly 3 steps", p); continue; }
   let w = p.start;
   for (const [clue, ans] of p.steps) {
-    if (!clue) bad("swap-one", "missing clue", p);
-    if (!letters(ans) || !oneSwapped(w, ans)) bad("swap-one", ans + " is not " + w + " with one letter changed", p);
+    if (!clue) bad("switcheroo", "missing clue", p);
+    if (!letters(ans) || !oneSwapped(w, ans)) bad("switcheroo", ans + " is not " + w + " with one letter changed", p);
     w = ans;
   }
 }
-dupes("swap-one", SO.map(p => p.start));
+dupes("switcheroo", SO.map(p => p.start));
 
-const SP = load("shared-property", "SHARED_PROPERTY_PUZZLES");
+const SP = load("three-of-a-kind", "THREE_OF_A_KIND_PUZZLES");
 for (const p of SP) {
-  if (!Array.isArray(p.words) || p.words.length !== 3) bad("shared-property", "needs exactly 3 words", p);
-  if (!p.answer) bad("shared-property", "missing answer", p);
-  if (!Array.isArray(p.wrong) || p.wrong.length !== 3) bad("shared-property", "needs exactly 3 wrong options", p);
-  else if (p.wrong.includes(p.answer)) bad("shared-property", "the answer is also listed as wrong", p);
+  if (!Array.isArray(p.words) || p.words.length !== 3) bad("three-of-a-kind", "needs exactly 3 words", p);
+  if (!p.answer) bad("three-of-a-kind", "missing answer", p);
+  if (!Array.isArray(p.wrong) || p.wrong.length !== 3) bad("three-of-a-kind", "needs exactly 3 wrong options", p);
+  else if (p.wrong.includes(p.answer)) bad("three-of-a-kind", "the answer is also listed as wrong", p);
 }
-dupes("shared-property", SP.map(p => (p.words || []).join(",")));
+dupes("three-of-a-kind", SP.map(p => (p.words || []).join(",")));
 
-const MU = load("mash-ups", "MASH_UPS_PUZZLES");
+const MU = load("splice", "SPLICE_PUZZLES");
 for (const p of MU) {
-  if (!Array.isArray(p.clues) || p.clues.length !== 2 || !Array.isArray(p.parts) || p.parts.length !== 2) { bad("mash-ups", "needs 2 clues and 2 parts", p); continue; }
+  if (!Array.isArray(p.clues) || p.clues.length !== 2 || !Array.isArray(p.parts) || p.parts.length !== 2) { bad("splice", "needs 2 clues and 2 parts", p); continue; }
   const [a, b] = p.parts;
   let ok = false;
   for (let k = 1; k < Math.min(a.length, b.length); k++) if (a.endsWith(b.slice(0, k)) && a + b.slice(k) === p.answer) ok = true;
-  if (!letters(p.answer) || !ok) bad("mash-ups", p.answer + " is not " + a + " and " + b + " blended where they overlap", p);
+  if (!letters(p.answer) || !ok) bad("splice", p.answer + " is not " + a + " and " + b + " blended where they overlap", p);
 }
-dupes("mash-ups", MU.map(p => p.answer));
+dupes("splice", MU.map(p => p.answer));
 
 // Anagram sets that use the same letters as another set are also duplicates.
 dupes("anagrams (same letters)", AN.map(p => sorted(p.letters || "")));
 
 // Daily schedules: every <game>/daily-<year>.js must name real puzzles, one set per day, all different.
 const { KEYS } = require("../shared/keys.js");
-const allLists = { "missing-link": ML, "minus-3": M3, "anagrams": AN, "plus-one": PO, "hear-here": HH, "swap-one": SO, "shared-property": SP, "mash-ups": MU };
-const PER = { "missing-link": 5, "minus-3": 4, "anagrams": 5, "plus-one": 5, "hear-here": 5, "swap-one": 4, "shared-property": 5, "mash-ups": 5 };
+const allLists = { "common-thread": ML, "whittle": M3, "tumble": AN, "stowaway": PO, "soundalike": HH, "switcheroo": SO, "three-of-a-kind": SP, "splice": MU };
+const PER = { "common-thread": 5, "whittle": 4, "tumble": 5, "stowaway": 5, "soundalike": 5, "switcheroo": 4, "three-of-a-kind": 5, "splice": 5 };
 const yearsFound = {};
 for (const game of Object.keys(allLists)) {
   const keys = new Set(allLists[game].map(KEYS[game]));
@@ -137,7 +137,7 @@ if (!Object.keys(yearsFound).length) console.log("No daily schedules found. Make
 // "different games" = distinct sets of puzzles a game can be (order ignored).
 const choose = (n, k) => { let r = 1; for (let i = 1; i <= k; i++) r = r * (n - k + i) / i; return Math.round(r); };
 const fmt = n => n.toLocaleString("en-CA");
-const games = [["Missing Link", ML, 5], ["Minus 3", M3, 4], ["Anagrams", AN, 5], ["Plus One", PO, 5], ["Hear, Here", HH, 5], ["Swap One", SO, 4], ["Shared Property", SP, 5], ["Mash-Ups", MU, 5]];
+const games = [["Common Thread", ML, 5], ["Whittle", M3, 4], ["Tumble", AN, 5], ["Stowaway", PO, 5], ["Soundalike", HH, 5], ["Switcheroo", SO, 4], ["Three of a Kind", SP, 5], ["Splice", MU, 5]];
 console.log("Game              Puzzles  Per game  Games before a repeat  Different games");
 for (const [n, l, k] of games) console.log(n.padEnd(18) + String(l.length).padStart(7) + String(k).padStart(10) + String(Math.floor(l.length / k)).padStart(23) + fmt(choose(l.length, k)).padStart(17));
 console.log(problems ? problems + " problem(s) found." : "All puzzle files look good.");

@@ -1,4 +1,4 @@
-// Swap One puzzles.
+// Switcheroo puzzles.
 //
 // Each puzzle has:
 //   start - a four-letter word, in capitals
@@ -7,7 +7,7 @@
 //
 // Every game picks four of these at random. All puzzles must be original.
 
-window.SWAP_ONE_PUZZLES = [
+window.SWITCHEROO_PUZZLES = [
   { start: "COLD", steps: [["A length of string", "CORD"], ["It comes in a deck", "CARD"], ["Not soft", "HARD"]] },
   { start: "WARM", steps: [["A hospital room", "WARD"], ["You are reading one", "WORD"], ["A nobleman", "LORD"]] },
   { start: "FISH", steps: [["You serve food on it", "DISH"], ["A short fast run", "DASH"], ["Paper money", "CASH"]] },

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Three of a Kind</title>
+<meta name="description" content="Three words have something in common. Spot what it is.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121214" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div class="name"><h1>Three of a Kind</h1></div>
+    <button class="q" id="helpBtn" type="button" aria-label="How to play">?</button>
+  </header>
+  <div class="daily"><span id="dailyText"></span><a id="pastLink" href="?past">Past puzzles</a></div>
+  <section id="shell" class="stack" hidden></section>
+  <section id="stage" class="stack" data-game-ui></section>
+  <dialog class="help" id="help"></dialog>
+</main>
+
+<script src="puzzles.js"></script>
+<script src="../shared/keys.js"></script>
+<script src="../shared/shell.js"></script>
+<script src="../shared/game.js"></script>
+<script>
+// The settings for this game. Puzzles live in puzzles.js; the look in ../shared/style.css.
+startGame({
+  game: "three-of-a-kind",
+  title: "Three of a Kind",
+  type: "choice",     // pick from four options, two tries
+  per: 5,             // puzzles per game
+  max: 2,             // points per puzzle
+  instruction: "What do these three have in common? Tap the answer.",
+  how: {
+    goal: "Three words have something in common. Pick what it is.",
+    steps: [
+      "Read the three words, then tap the answer that fits all three.",
+      "2 points on the first try, 1 on the second.",
+      "The link can be a set they belong to, letters hidden inside them, or something they all have.",
+      "<b>Hint</b> removes one wrong answer and costs 1 point. <b>Give up</b> shows the connection and scores nothing."
+    ],
+    example: "<b>SCAR</b>, <b>CARPET</b> and <b>OSCAR</b> each contain <b>CAR</b>."
+  },
+  puzzles: window.THREE_OF_A_KIND_PUZZLES
+});
+</script>
+</body>
+</html>

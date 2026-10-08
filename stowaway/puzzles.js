@@ -1,4 +1,4 @@
-// Plus One puzzles.
+// Stowaway puzzles.
 //
 // Each puzzle has:
 //   clues   - two clues
@@ -7,7 +7,7 @@
 //
 // Every game picks five of these at random. All puzzles must be original.
 
-window.PLUS_ONE_PUZZLES = [
+window.STOWAWAY_PUZZLES = [
   { clues: ["A hot drink", "A group of players"], answers: ["TEA", "TEAM"] },
   { clues: ["A pet that purrs", "You push it around the store"], answers: ["CAT", "CART"] },
   { clues: ["It twinkles at night", "To begin"], answers: ["STAR", "START"] },

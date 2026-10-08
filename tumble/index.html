@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tumble</title>
+<meta name="description" content="Rearrange the letters to fit the clue, then find a bonus word in the same letters.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121214" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div class="name"><h1>Tumble</h1></div>
+    <button class="q" id="helpBtn" type="button" aria-label="How to play">?</button>
+  </header>
+  <div class="daily"><span id="dailyText"></span><a id="pastLink" href="?past">Past puzzles</a></div>
+  <section id="shell" class="stack" hidden></section>
+  <section id="stage" class="stack" data-game-ui></section>
+  <dialog class="help" id="help"></dialog>
+</main>
+
+<script src="puzzles.js"></script>
+<script src="../shared/keys.js"></script>
+<script src="../shared/shell.js"></script>
+<script src="../shared/game.js"></script>
+<script>
+// The settings for this game. Puzzles live in puzzles.js; the look in ../shared/style.css.
+startGame({
+  game: "tumble",
+  title: "Tumble",
+  type: "typed",      // typed answers
+  each: true,         // each word scores on its own
+  timer: 30,          // seconds for both words
+  per: 5,             // puzzles per game
+  max: 2,             // points per puzzle
+  timed: { title: "Five puzzles, 30 seconds each", rules: "Both words in 30 seconds. 1 point per word." },
+  instruction: "Make the clue’s word from these letters. Type it, then tap Check.",
+  how: {
+    goal: "Rearrange the five letters into the word the clue describes, then find a second word in the same letters.",
+    steps: [
+      "The letters of a real word are shown. Type a word that uses all five letters and matches the clue, then tap Check.",
+      "Once the first word is right, a bonus clue asks for a second word made from the same letters.",
+      "1 point for each word. 30 seconds for both, unless the timer is off.",
+      "<b>Hint</b> shows the first letter of the word you are on and costs 1 point. <b>Give up</b> ends the puzzle and keeps what you have scored."
+    ],
+    example: "<b>HEART</b> with the clue “the ground beneath you” is <b>EARTH</b>. The bonus clue “someone full of dislike” is <b>HATER</b>."
+  },
+  puzzles: window.TUMBLE_PUZZLES
+});
+</script>
+</body>
+</html>

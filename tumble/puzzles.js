@@ -1,4 +1,4 @@
-// Anagrams puzzles.
+// Tumble puzzles.
 //
 // Each puzzle has:
 //   letters - the scrambled word shown on the tiles, in capitals
@@ -7,7 +7,7 @@
 //
 // Every game picks five of these at random. All puzzles must be original.
 
-window.ANAGRAMS_PUZZLES = [
+window.TUMBLE_PUZZLES = [
   { letters: "HEART", clues: ["The ground beneath you", "Bonus: someone full of dislike"], answers: ["EARTH", "HATER"] },
   { letters: "NOTES", clues: ["A rock", "Bonus: the start of something"], answers: ["STONE", "ONSET"] },
   { letters: "PARSE", clues: ["A weapon you throw", "Bonus: an extra one, kept in reserve"], answers: ["SPEAR", "SPARE"] },

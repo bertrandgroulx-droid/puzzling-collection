@@ -1,4 +1,4 @@
-// Hear, Here puzzles.
+// Soundalike puzzles.
 //
 // Each puzzle has:
 //   clues   - two clues
@@ -6,7 +6,7 @@
 //
 // Every game picks five of these at random. All puzzles must be original.
 
-window.HEAR_HERE_PUZZLES = [
+window.SOUNDALIKE_PUZZLES = [
   { clues: ["Two of something", "A juicy fruit"], answers: ["PAIR", "PEAR"] },
   { clues: ["Ground wheat for baking", "A bloom"], answers: ["FLOUR", "FLOWER"] },
   { clues: ["He wears armour", "When the stars are out"], answers: ["KNIGHT", "NIGHT"] },

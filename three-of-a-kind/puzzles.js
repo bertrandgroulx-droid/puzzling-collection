@@ -1,4 +1,4 @@
-// Shared Property puzzles.
+// Three of a Kind puzzles.
 //
 // Each puzzle has:
 //   words  - three words, in capitals
@@ -8,7 +8,7 @@
 // The game shuffles the four options. Every game picks five puzzles at random.
 // All puzzles must be original.
 
-window.SHARED_PROPERTY_PUZZLES = [
+window.THREE_OF_A_KIND_PUZZLES = [
   { words: ["SCAR", "CARPET", "OSCAR"], answer: "Each contains CAR", wrong: ["Each is a film term", "Each can follow RED", "Each has two syllables"] },
   { words: ["POUND", "HASH", "NUMBER"], answer: "Each is a name for the # sign", wrong: ["Each is a unit of weight", "Each is a kind of key", "Each is a breakfast food"] },
   { words: ["BASS", "BOW", "LEAD"], answer: "Each has two pronunciations", wrong: ["Each is part of a ship", "Each is a metal", "Each is a kind of fish"] },
