@@ -37,31 +37,24 @@ h1 { font-family: var(--display); font-weight: 700; font-size: 1.9rem; margin: 0
 .card:hover, .card:focus-visible { border-color: var(--accent); outline: none; }
 .card h2 { font-family: var(--display); font-weight: 700; font-size: 1.25rem; margin: 0 0 4px; }
 .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
-.card .play { display: inline-block; margin-top: 12px; font-family: var(--mono); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
-.soon { border-style: dashed; color: var(--muted); }
-.soon h2 { color: var(--muted); }
+.card small { display: block; margin-top: 10px; font-family: var(--mono); font-weight: 500; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
 footer { margin-top: 8px; color: var(--muted); font-size: 0.85rem; }
 </style>
 </head>
 <body>
 <main class="app">
   <h1>Puzzling Collection</h1>
-  <p class="lead">Quick word games for your phone. No sign-up, nothing to install. Pick a game and play.</p>
+  <p class="lead">Eight quick word games for your phone. No sign-up, nothing to install. Pick a game and play.</p>
 
   <ul class="games">
-    <li>
-      <a class="card" href="missing-link/">
-        <h2>Missing Link</h2>
-        <p>Three words, one missing link. Find the word that pairs with all three, before or after each.</p>
-        <span class="play">Play &rarr;</span>
-      </a>
-    </li>
-    <li>
-      <div class="card soon">
-        <h2>More games coming</h2>
-        <p>Anagrams, Hear Here, Plus One and others are on the way.</p>
-      </div>
-    </li>
+    <li><a class="card" href="missing-link/"><h2>Missing Link</h2><p>Three words, one missing link. Find the word that pairs with all three, before or after each.</p><small>5 puzzles · untimed</small></a></li>
+    <li><a class="card" href="minus-3/"><h2>Minus 3</h2><p>Start with six letters. Tap one away at a time to match three clues before the clock runs out.</p><small>4 words · 25 seconds each</small></a></li>
+    <li><a class="card" href="anagrams/"><h2>Anagrams</h2><p>Unscramble a word to fit the clue, then find a bonus word in the same letters.</p><small>5 puzzles · 30 seconds each</small></a></li>
+    <li><a class="card" href="plus-one/"><h2>Plus One</h2><p>Two clues, two words. The second is the first with one letter added.</p><small>5 puzzles · untimed</small></a></li>
+    <li><a class="card" href="hear-here/"><h2>Hear, Here</h2><p>Two clues, two words that sound the same but are spelled differently.</p><small>5 puzzles · untimed</small></a></li>
+    <li><a class="card" href="swap-one/"><h2>Swap One</h2><p>Change one letter at a time to climb a three-step word ladder.</p><small>4 ladders · 25 seconds each</small></a></li>
+    <li><a class="card" href="shared-property/"><h2>Shared Property</h2><p>Three words have something in common. Pick what it is.</p><small>5 puzzles · untimed</small></a></li>
+    <li><a class="card" href="mash-ups/"><h2>Mash-Ups</h2><p>Two clues, two words, blended into one where they overlap.</p><small>5 puzzles · untimed</small></a></li>
   </ul>
 
   <footer>All puzzles are original.</footer>

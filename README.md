@@ -9,35 +9,64 @@ Play it here: https://bertrandgroulx-droid.github.io/puzzling-collection/
 
 ```
 index.html            The home page. It links to every game.
-missing-link/         One folder per game.
-  index.html          The game itself (rules, scoring, look and feel).
-  puzzles.js          The puzzles. Edit this file to add more.
+missing-link/         One folder per game ...
+minus-3/
+anagrams/
+plus-one/
+hear-here/
+swap-one/
+shared-property/
+mash-ups/
+  index.html          ... the game page (rules, scoring, look and feel)
+  puzzles.js          ... and its puzzles. Edit this file to add more.
+shared/
+  style.css           The look shared by six of the games.
+  game.js             The game engine shared by six of the games.
+tools/
+  check-puzzles.js    Checks every puzzle file for mistakes (optional).
 ```
 
-Each game lives entirely in its own folder, so a new game is a new folder
-plus one more link on the home page.
+Missing Link and Minus 3 are self-contained: each page holds its own styling
+and code. The other six games share one stylesheet and one engine in `shared/`,
+so a fix there fixes all six at once. Each game folder still has its own page
+and its own puzzle file.
 
-## Adding puzzles to Missing Link
+## Adding puzzles
 
-Open `missing-link/puzzles.js`. Each line is one puzzle:
+Open the game's `puzzles.js`. Each line is one puzzle. Copy a line, change the
+words, keep the comma at the end, and save. The top of each file explains its
+format. In short:
 
-```js
-{ link: "LIGHT", hint: "You flip a switch to get it.", clues: ["SUN_", "FLASH_", "_HOUSE"] },
+| Game | One puzzle looks like |
+| --- | --- |
+| Missing Link | `{ link: "LIGHT", hint: "You flip a switch to get it.", clues: ["SUN_", "FLASH_", "_HOUSE"] }` |
+| Minus 3 | `{ start: "PLANET", steps: [["Something that grows", "PLANT"], ["A scheme", "PLAN"], ["You fry an egg in it", "PAN"]] }` |
+| Anagrams | `{ letters: "HEART", clues: ["The ground beneath you", "Bonus: someone full of dislike"], answers: ["EARTH", "HATER"] }` |
+| Plus One | `{ clues: ["A hot drink", "A group of players"], answers: ["TEA", "TEAM"] }` |
+| Hear, Here | `{ clues: ["Two of something", "A juicy fruit"], answers: ["PAIR", "PEAR"] }` |
+| Swap One | `{ start: "COLD", steps: [["A length of string", "CORD"], ["It comes in a deck", "CARD"], ["Not soft", "HARD"]] }` |
+| Shared Property | `{ words: ["SCAR", "CARPET", "OSCAR"], answer: "Each contains CAR", wrong: ["Each is a film term", "Each can follow RED", "Each has two syllables"] }` |
+| Mash-Ups | `{ clues: ["You hit it with sticks", "It keeps the rain off"], parts: ["DRUM", "UMBRELLA"], answer: "DRUMBRELLA" }` |
+
+Answers are written in capitals. In Missing Link, the underscore marks where
+the link word goes: `"SUN_"` is SUN + LIGHT and `"_HOUSE"` is LIGHT + HOUSE.
+Every game draws its puzzles at random from the whole list, so the more
+puzzles a file holds, the longer before a player sees a repeat.
+
+All puzzles must be original. The game formats are inspired by a radio show,
+but none of the show's clues or answers are used.
+
+### Checking the puzzles (optional)
+
+If you are comfortable with a terminal and have Node.js installed, this
+command checks every puzzle file for slips such as an anagram whose letters
+do not match, or a Minus 3 step that removes two letters:
+
 ```
-
-- `link` is the answer.
-- `hint` is shown when the player asks for one (and costs them a point).
-- `clues` are the three words shown. Put an underscore where the link goes:
-  `"SUN_"` means SUN + LIGHT, `"_HOUSE"` means LIGHT + HOUSE. A space next to
-  the underscore makes a two-word phrase, such as `"FULL _"` for FULL MOON.
-
-Copy a line, change the words, keep the comma at the end, and save.
-Every game draws five puzzles at random from the whole list.
-
-All puzzles must be original. The game formats are inspired by a radio
-show, but none of the show's clues or answers are used.
+node tools/check-puzzles.js
+```
 
 ## Publishing
 
-The site is published with GitHub Pages straight from this repository.
-Any change pushed to the published branch goes live within a minute or two.
+The site is published with GitHub Pages from the `main` branch of this
+repository. Any change pushed to `main` goes live within a minute or two.

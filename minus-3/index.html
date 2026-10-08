@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Minus 3</title>
+<meta name="description" content="Start with six letters. Tap one away at a time to match three clues before the clock runs out.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: one phone-width column. Clock bar on top, the clue, a single row of six letter tiles to tap, and the ladder of solved words building underneath. */
+:root {
+  --bg: #f3f2f7; --surface: #ffffff; --ink: #1d1a2b; --muted: #625d78; --line: #d9d5e6;
+  --accent: #6b3fd4; --accent-ink: #ffffff; --accent-soft: #ebe4fb;
+  --good: #0f8a6c; --good-soft: #dcf3ec; --warn: #a85a00; --bad: #c2314a;
+  --display: "Chakra Petch", "Trebuchet MS", sans-serif;
+  --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14121d; --surface: #1e1b2b; --ink: #ecebf5; --muted: #a39fba; --line: #34304a;
+    --accent: #a98bff; --accent-ink: #17132a; --accent-soft: #2c2547;
+    --good: #4fd1ac; --good-soft: #17352e; --warn: #f0a84a; --bad: #ff7a90; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14121d; --surface: #1e1b2b; --ink: #ecebf5; --muted: #a39fba; --line: #34304a;
+  --accent: #a98bff; --accent-ink: #17132a; --accent-soft: #2c2547;
+  --good: #4fd1ac; --good-soft: #17352e; --warn: #f0a84a; --bad: #ff7a90; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.45; padding-inline: 16px; padding-block: calc(20px + env(safe-area-inset-top, 0px)) calc(32px + env(safe-area-inset-bottom, 0px)); }
+.app, .stack { display: flex; flex-direction: column; }
+.app { max-width: 440px; margin-inline: auto; gap: 18px; }
+.stack { gap: 14px; }
+.home { font-size: 0.9rem; color: var(--muted); text-decoration: none; }
+.home:hover, .home:focus-visible { color: var(--accent); text-decoration: underline; }
+header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 1.5rem; margin: 0; letter-spacing: 0.01em; }
+.score { font-family: var(--mono); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+.score b { color: var(--ink); font-weight: 600; }
+.pips { display: flex; gap: 6px; }
+.pip { flex: 1; height: 6px; border-radius: 3px; background: var(--line); }
+.pip.now { background: var(--accent); }
+.pip.p3 { background: var(--good); }
+.pip.p2, .pip.p1 { background: var(--warn); }
+.pip.p0 { background: var(--bad); }
+.clock { display: flex; align-items: center; gap: 10px; }
+.bar { flex: 1; height: 10px; border-radius: 5px; background: var(--line); overflow: hidden; }
+.bar span { display: block; height: 100%; width: 100%; background: var(--accent); border-radius: 5px; }
+.bar.low span { background: var(--bad); }
+.secs { font-family: var(--mono); font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3ch; text-align: right; }
+.clue { margin: 0; padding: 14px 16px; background: var(--accent-soft); border-radius: 10px; min-height: 4.6em; }
+.clue span { display: block; font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.clue b { font-weight: 600; font-size: 1.15rem; }
+.tiles { display: flex; gap: 6px; justify-content: center; }
+.tile { flex: 1; max-width: 62px; aspect-ratio: 1; min-width: 0; padding: 0; font-family: var(--mono); font-weight: 600; font-size: 1.6rem; text-transform: uppercase; background: var(--surface); color: var(--ink); border: 2px solid var(--line); border-radius: 10px; cursor: pointer; }
+.tile:disabled { cursor: default; color: var(--muted); }
+.tile:not(:disabled):active { border-color: var(--accent); background: var(--accent-soft); }
+button { font-family: var(--body); font-weight: 600; font-size: 1rem; border-radius: 10px; padding: 14px 18px; border: 2px solid transparent; cursor: pointer; }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.primary { background: var(--accent); color: var(--accent-ink); }
+.msg { min-height: 1.5em; margin: 0; font-weight: 500; }
+.msg.bad { color: var(--bad); }
+.msg.good { color: var(--good); }
+.ladder { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.ladder li { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); }
+.ladder .w { font-family: var(--mono); font-weight: 600; font-size: 1.1rem; letter-spacing: 0.1em; }
+.ladder .d { color: var(--muted); font-size: 0.9rem; text-align: right; min-width: 0; }
+.ladder li.got { border-color: var(--good); background: var(--good-soft); }
+.ladder li.miss { border-style: dashed; }
+.ladder li.miss .w { color: var(--muted); }
+.rules { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.big { font-family: var(--display); font-weight: 700; font-size: 3rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.big small { font-size: 1.25rem; color: var(--muted); font-weight: 600; }
+.prompt { margin: 0; color: var(--muted); }
+.recap { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.recap li { display: flex; justify-content: space-between; gap: 12px; font-family: var(--mono); font-size: 0.95rem; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.recap li span:last-child { color: var(--muted); white-space: nowrap; }
+@keyframes shake { 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
+.shake { animation: shake 0.3s; border-color: var(--bad); }
+@media (prefers-reduced-motion: reduce) { .shake { animation: none; } }
+</style>
+</head>
+<body>
+
+<main class="app">
+  <a class="home" href="../">&larr; All games</a>
+  <header>
+    <h1>Minus 3</h1>
+    <div class="score" aria-live="polite">Score <b id="score">0</b> / 12</div>
+  </header>
+  <div class="pips" id="pips" aria-hidden="true"></div>
+
+  <section id="play" class="stack">
+    <div class="clock">
+      <div class="bar" id="bar"><span id="barFill"></span></div>
+      <div class="secs" id="secs">25</div>
+    </div>
+    <p class="clue"><span id="clueLabel">Word 1 of 4</span><b id="clueText">Six letters. Tap one away to match each clue.</b></p>
+    <div class="tiles" id="tiles"></div>
+    <p class="msg" id="msg" aria-live="polite"></p>
+    <button class="primary" id="go" type="button">Start the clock</button>
+    <ul class="ladder" id="ladder"></ul>
+    <p class="rules">Three clues per word, 25 seconds for all three. 1 point per clue. A wrong tap costs 3 seconds.</p>
+  </section>
+
+  <section id="done" class="stack" hidden>
+    <div class="big"><span id="finalScore">0</span> <small>/ 12</small></div>
+    <p class="prompt" id="verdict"></p>
+    <ul class="recap" id="recap"></ul>
+    <button class="primary" id="again" type="button">Play four more</button>
+  </section>
+</main>
+
+<script src="puzzles.js"></script>
+<script>
+// Chains live in puzzles.js: a six-letter start, then three [clue, answer] steps.
+const CHAINS = (window.MINUS_3_PUZZLES || []).map(c => ({ start: c.start.toUpperCase(), steps: c.steps.map(s => [s[0], s[1].toUpperCase()]) }));
+const PER_GAME = 4, SECONDS = 25, PENALTY = 3;
+const $ = id => document.getElementById(id);
+let queue = [], game = [], ci = 0, step = 0, word = "", pts = 0, score = 0, results = [], running = false, deadline = 0, raf = 0;
+
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+function newGame() {
+  if (queue.length < PER_GAME) queue = shuffle(CHAINS.map((_, i) => i));
+  game = queue.splice(0, PER_GAME).map(i => CHAINS[i]);
+  ci = 0; score = 0; results = [];
+  $("done").hidden = true; $("play").hidden = false;
+  readyChain();
+}
+
+function drawPips() {
+  $("pips").innerHTML = game.map((_, i) => {
+    const r = results[i];
+    return '<span class="pip ' + (r !== undefined ? "p" + r : (i === ci ? "now" : "")) + '"></span>';
+  }).join("");
+  $("score").textContent = score;
+}
+
+function drawTiles(enabled) {
+  $("tiles").innerHTML = word.split("").map((ch, i) =>
+    '<button class="tile" type="button" data-i="' + i + '" aria-label="Remove letter ' + ch + '"' + (enabled ? "" : " disabled") + ">" + ch + "</button>").join("");
+}
+
+function drawClock(ms) {
+  const s = Math.max(0, ms / 1000);
+  $("barFill").style.width = Math.min(100, (s / SECONDS) * 100) + "%";
+  $("bar").className = "bar" + (s <= 7 ? " low" : "");
+  $("secs").textContent = Math.ceil(s);
+}
+
+function readyChain() {
+  const c = game[ci];
+  step = 0; pts = 0; word = c.start; running = false;
+  $("clueLabel").textContent = "Word " + (ci + 1) + " of " + PER_GAME;
+  $("clueText").textContent = "Six letters. Tap one away to match each clue.";
+  $("msg").textContent = ""; $("msg").className = "msg";
+  $("ladder").innerHTML = "";
+  $("go").hidden = false; $("go").textContent = "Start the clock";
+  drawTiles(false); drawClock(SECONDS * 1000); drawPips();
+}
+
+function showStep() {
+  $("clueLabel").textContent = "Clue " + (step + 1) + " of 3";
+  $("clueText").textContent = game[ci].steps[step][0];
+  drawTiles(true);
+}
+
+function tick() {
+  if (!running) return;
+  const left = deadline - performance.now();
+  drawClock(left);
+  if (left <= 0) { finish(); return; }
+  raf = requestAnimationFrame(tick);
+}
+
+function finish() {
+  running = false; cancelAnimationFrame(raf);
+  const c = game[ci];
+  results[ci] = pts; score += pts;
+  word = c.steps[2][1];
+  $("ladder").innerHTML = c.steps.map((s, i) =>
+    '<li class="' + (i < pts ? "got" : "miss") + '"><span class="w">' + s[1] + '</span><span class="d">' + s[0] + "</span></li>").join("");
+  $("clueLabel").textContent = c.start;
+  $("clueText").textContent = pts === 3 ? "All three found." : pts === 0 ? "Time ran out. Here is the full chain." : "Time ran out after " + pts + ". Here is the rest.";
+  $("msg").className = "msg " + (pts === 3 ? "good" : "");
+  $("msg").textContent = pts + (pts === 1 ? " point." : " points.");
+  $("tiles").innerHTML = "";
+  $("go").hidden = false; $("go").textContent = ci + 1 < PER_GAME ? "Next word" : "See your score";
+  $("go").focus();
+  drawPips();
+}
+
+$("go").addEventListener("click", () => {
+  if (results[ci] !== undefined) {
+    ci++;
+    if (ci < PER_GAME) { readyChain(); return; }
+    $("play").hidden = true; $("done").hidden = false;
+    $("pips").innerHTML = game.map((_, i) => '<span class="pip p' + results[i] + '"></span>').join("");
+    $("finalScore").textContent = score;
+    $("verdict").textContent = score === 12 ? "A perfect game. Every chain cleared in time." : score >= 9 ? "Strong game. The clock only caught you once or twice." : score >= 5 ? "A fair game. The first clue of each word is the one to get fast." : "A tough set. The next four are different.";
+    $("recap").innerHTML = game.map((c, i) => "<li><span>" + c.start + " → " + c.steps[2][1] + "</span><span>" + results[i] + " / 3</span></li>").join("");
+    $("again").focus();
+    return;
+  }
+  $("go").hidden = true; running = true;
+  deadline = performance.now() + SECONDS * 1000;
+  showStep(); tick();
+});
+
+$("tiles").addEventListener("click", e => {
+  const b = e.target.closest(".tile");
+  if (!b || !running) return;
+  const i = Number(b.dataset.i);
+  const cand = word.slice(0, i) + word.slice(i + 1);
+  const c = game[ci];
+  if (cand === c.steps[step][1]) {
+    pts++; word = cand;
+    $("ladder").insertAdjacentHTML("beforeend", '<li class="got"><span class="w">' + cand + '</span><span class="d">' + c.steps[step][0] + "</span></li>");
+    $("msg").className = "msg good"; $("msg").textContent = cand + " is right.";
+    step++;
+    if (step === 3) { finish(); return; }
+    showStep();
+  } else {
+    deadline -= PENALTY * 1000;
+    $("msg").className = "msg bad"; $("msg").textContent = "Not that letter. " + PENALTY + " seconds lost.";
+    b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake");
+  }
+});
+$("again").addEventListener("click", newGame);
+newGame();
+</script>
+
+</body>
+</html>
