@@ -54,8 +54,6 @@
 
   // ---- settings ----
   function timerOn() { return read("timer", true) !== false; }
-  function cbOn() { return read("cb", false) === true; }
-  function applyCb() { if (cbOn()) document.documentElement.setAttribute("data-cb", ""); else document.documentElement.removeAttribute("data-cb"); }
 
   // ---- labels ----
   function label(meta) {
@@ -145,7 +143,7 @@
   }
 
   // ---- results ----
-  function squares(results, max) { return results.map(r => r === max ? (cbOn() ? "🟦" : "🟩") : r > 0 ? (cbOn() ? "🟧" : "🟨") : "⬜").join(""); }
+  function squares(results, max) { return results.map(r => r === max ? "🟩" : r > 0 ? "🟨" : "⬜").join(""); }
   function shareText(res) {
     const meta = res.meta, head = cfg.title + " " + (meta && meta.mode === "daily" ? "No. " + meta.number + " · " + fmtTiny(meta.date) : "practice");
     const link = /^https?:$/.test(location.protocol) ? "\n" + location.origin + location.pathname : "";
@@ -189,19 +187,13 @@
       '<p class="goal">' + esc(h.goal) + "</p>" +
       "<ul>" + h.steps.map(s => "<li>" + s + "</li>").join("") + "</ul>" +
       (h.example ? '<div class="example">' + h.example + "</div>" : "") +
-      "<h3>Settings</h3>" +
-      '<div class="settings">' +
-      (cfg.timed ? '<label class="toggle"><span>Timer<small>Off means no clock and no penalties. Applies from the next puzzle.</small></span><input type="checkbox" id="helpTimer" role="switch"></label>' : "") +
-      '<label class="toggle"><span>Colour-blind colours<small>Blue for right and orange for partly right, instead of green and amber.</small></span><input type="checkbox" id="helpCb" role="switch"></label>' +
-      "</div>" +
+      (cfg.timed ? '<h3>Settings</h3><div class="settings"><label class="toggle"><span>Timer<small>Off means no clock and no penalties. Applies from the next puzzle.</small></span><input type="checkbox" id="helpTimer" role="switch"></label></div>' : "") +
       '<div class="foot"><a href="../">All games</a><button class="primary" id="helpClose" type="button">Got it</button></div>';
     if ($("helpTimer")) $("helpTimer").onchange = e => { write("timer", e.target.checked); const t = $("timerToggle"); if (t) t.checked = e.target.checked; };
-    $("helpCb").onchange = e => { write("cb", e.target.checked); applyCb(); };
     $("helpClose").onclick = () => { $("help").close(); write("help-seen", true); };
   }
   function showHelp() {
     if ($("helpTimer")) $("helpTimer").checked = timerOn();
-    $("helpCb").checked = cbOn();
     $("help").showModal();
   }
   function maybeHelp() { if (!read("help-seen", false)) { showHelp(); } }
@@ -210,7 +202,6 @@
     init(settings) {
       cfg = settings;
       store = cfg.game.replace(/-/g, "") + ":";
-      applyCb();
       buildHelp();
       $("helpBtn").onclick = showHelp;
       $("pastLink").onclick = e => { if ($("pastLink").getAttribute("href") === "?past") { e.preventDefault(); showPast(); } };
@@ -226,6 +217,6 @@
       if (meta && meta.mode === "daily" && !recordOf(meta.iso)) { write("daily:" + meta.iso, { score: res.score, max: res.max, results: res.results, recap: res.recap, at: Date.now() }); first = true; }
       showResults(Object.assign({ first }, res));
     },
-    timerOn, cbOn, label, showPast, showHelp, current: () => current
+    timerOn, label, showPast, showHelp, current: () => current
   };
 })();

@@ -4,7 +4,7 @@
    - green and amber only where something happened; wrong is neutral; no red
    - raised = tappable, flat = read-only; exactly one filled accent button per screen
    - no dashed borders anywhere
-   - light and dark; a colour-blind setting swaps the state colours */
+   - light and dark */
 
 :root {
   --bg: #ffffff; --surface: #f7f7f9; --ink: #1c1c1e; --muted: #6b6b70; --line: #e4e4e8;
@@ -33,12 +33,6 @@
   --good: #5fcf8a; --good-soft: #1b2f24; --part: #e8b04b; --part-soft: #332a18;
   --btn: #27272b; --btn-line: #3d3d43; color-scheme: dark;
 }
-/* Colour-blind setting: right becomes blue, partial becomes orange, and the "you are here" pip
-   becomes ink so that blue keeps one meaning. */
-:root[data-cb] { --good: #2a6fcf; --good-soft: #e8f0fc; --part: #d9780b; --part-soft: #fdecd9; --now: var(--ink); }
-@media (prefers-color-scheme: dark) { :root[data-cb]:not([data-theme="light"]) { --good: #7fb0f0; --good-soft: #1f2d40; --part: #f0a04a; --part-soft: #3a2a14; } }
-:root[data-cb][data-theme="dark"] { --good: #7fb0f0; --good-soft: #1f2d40; --part: #f0a04a; --part-soft: #3a2a14; }
-
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { scroll-padding-top: env(safe-area-inset-top, 0px); -webkit-text-size-adjust: 100%; }

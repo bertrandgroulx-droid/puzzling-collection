@@ -72,9 +72,8 @@ starts unexpectedly.
   days, newest first, with the score beside any that have been played.
   Tomorrow's puzzle cannot be opened early.
 - **Practice.** Random puzzles, as many times as you like. Nothing is saved.
-- **How to play.** The **?** button. It opens by itself on a first visit and
-  holds the settings: the timer switch (timed games only) and colour-blind
-  colours (blue and orange instead of green and amber).
+- **How to play.** The **?** button. It opens by itself on a first visit. On
+  timed games it also holds the timer switch.
 - **Share.** The results screen has a Share button that copies a short text:
   the game, its number and date, the score, and one square per puzzle.
 
