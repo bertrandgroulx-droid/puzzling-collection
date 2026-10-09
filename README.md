@@ -69,10 +69,13 @@ starts unexpectedly.
 - **Today's puzzle.** The same set for everyone, numbered by the day of the
   year (No. 1 is January 1) and dated. The first score on a day is the one that
   is kept; playing it again is allowed but does not change the score.
-- **Past puzzles.** The link at the top of every game lists the previous 100
-  days, newest first, with the score beside any that have been played.
-  Tomorrow's puzzle cannot be opened early.
-- **Practice.** Random puzzles, as many times as you like. Nothing is saved.
+- **Past puzzles.** Lists the previous 100 days, newest first, with the score
+  beside any that have been played. Tomorrow's puzzle cannot be opened early.
+- **Random puzzles.** As many sets as you like. Nothing is saved.
+- **Getting around.** The line under the title always shows two links to the
+  other places you can go (for example "Past puzzles" and "Random puzzles"
+  while on today's puzzle). After a puzzle, the main button on the results
+  screen is Play random puzzles.
 - **How to play.** The **?** button. It opens by itself on a first visit. On
   timed games it also holds the timer switch.
 - **Share.** The results screen has a Share button that copies a short text:
@@ -98,7 +101,7 @@ node tools/make-daily.js 2027
 ```
 
 The tool refuses to overwrite a year that already exists, so past puzzles are
-safe. If a year's file is missing, the game offers practice instead.
+safe. If a year's file is missing, the game offers random puzzles instead.
 
 ## Adding puzzles
 

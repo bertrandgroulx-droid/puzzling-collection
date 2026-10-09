@@ -57,13 +57,24 @@
 
   // ---- labels ----
   function label(meta) {
-    if (!meta || meta.mode !== "daily") return "Practice";
+    if (!meta || meta.mode !== "daily") return "Random puzzles";
     return "No. " + meta.number + " · " + fmtShort(meta.date);
   }
-  function setDailyLine(text, linkText, linkHref) {
+  // The line under the title: what is showing, and links to the other two places to go.
+  const PLACES = {
+    today: ["Today’s puzzle", "./", () => openToday()],
+    past: ["Past puzzles", "?past", () => showPast()],
+    random: ["Random puzzles", "?practice", () => startGame({ mode: "practice" })]
+  };
+  function setDailyLine(text, places) {
     $("dailyText").innerHTML = text;
-    const a = $("pastLink"); a.textContent = linkText; a.href = linkHref;
+    $("links").innerHTML = places.map(k => '<a href="' + PLACES[k][1] + '" data-go="' + k + '">' + PLACES[k][0] + "</a>").join("");
+    bindPlaces($("links"));
   }
+  function bindPlaces(root) {
+    root.querySelectorAll("[data-go]").forEach(a => { a.onclick = e => { e.preventDefault(); PLACES[a.dataset.go][2](); }; });
+  }
+  const lineFor = meta => meta && meta.mode === "daily" ? "<b>Daily No. " + meta.number + "</b> · " + esc(fmtShort(meta.date)) : "<b>Random puzzles</b>";
 
   // ---- screens ----
   function showGame(show) {
@@ -75,8 +86,7 @@
   function startGame(meta) {
     current = meta;
     history.replaceState(null, "", meta.mode === "daily" ? "?daily=" + meta.iso : "?practice");
-    if (meta.mode === "daily") setDailyLine("<b>Daily No. " + meta.number + "</b> · " + esc(fmtShort(meta.date)), "Past puzzles", "?past");
-    else setDailyLine("<b>Practice</b> · random puzzles", "Today’s puzzle", "./");
+    setDailyLine(lineFor(meta), meta.mode === "daily" ? ["past", "random"] : ["today", "past"]);
     if (cfg.timed) return startCard(meta);
     showGame(true);
     cfg.onStart(meta);
@@ -87,7 +97,7 @@
   // Timed games show one card before the clock can start, so the rules are read first.
   function startCard(meta) {
     const t = cfg.timed;
-    shellHTML('<div class="card"><small>' + (meta.mode === "daily" ? "Today’s puzzle · No. " + meta.number : "Practice") + "</small>" +
+    shellHTML('<div class="card"><small>' + (meta.mode === "daily" ? "Today’s puzzle · No. " + meta.number : "Random puzzles") + "</small>" +
       "<b>" + esc(t.title) + "</b><p>" + esc(t.rules) + "</p>" +
       '<label class="toggle"><span>Timer<small>Off means no clock and no penalties</small></span><input type="checkbox" id="timerToggle" role="switch"' + (timerOn() ? " checked" : "") + "></label>" +
       '<button class="primary" id="startBtn" type="button">Start</button></div>');
@@ -102,7 +112,7 @@
     history.replaceState(null, "", "?past");
     const t = today(), years = [t.getFullYear()];
     if (dayOfYear(t) <= PAST_DAYS) years.push(t.getFullYear() - 1);
-    setDailyLine("<b>Past puzzles</b> · the previous " + PAST_DAYS + " days", "Today’s puzzle", "./");
+    setDailyLine("<b>Past puzzles</b> · the previous " + PAST_DAYS + " days", ["today", "random"]);
     Promise.all(years.map(loadYear)).then(() => {
       const rows = [];
       for (let i = 0; i <= PAST_DAYS; i++) {
@@ -111,9 +121,11 @@
         const r = recordOf(set.iso);
         rows.push('<li><a href="?daily=' + set.iso + '" data-daily="' + set.iso + '"' + (i === 0 ? ' class="today"' : "") + '><span class="n">No. ' + set.number + '</span><span class="d">' + (i === 0 ? "Today, " : "") + esc(fmtTiny(d)) + (d.getFullYear() !== t.getFullYear() ? ", " + d.getFullYear() : "") + '</span><span class="s' + (r ? " done" : "") + '">' + (r ? r.score + " / " + r.max : "Not played") + "</span></a></li>");
       }
-      shellHTML('<p class="lead">Each day has its own set, numbered by the day of the year. Your score is kept beside any you have played.</p>' +
+      shellHTML('<p class="lead">Each day has its own set, numbered by the day of the year. Your score is kept beside any you have played. Tap a day to play it.</p>' +
+        '<div class="row"><a class="btn" href="?practice" data-go="random">Play random puzzles instead</a></div>' +
         (rows.length ? '<ul class="days">' + rows.join("") + "</ul>" : '<p class="note">No daily puzzles are set up for this year yet.</p>') +
-        '<div class="row"><a class="quiet btn" href="?practice">Practice with random puzzles</a><a class="quiet btn" href="../">All games</a></div>');
+        '<div class="row"><a class="quiet btn" href="../">All games</a></div>');
+      bindPlaces($("shell"));
       $("shell").querySelectorAll("[data-daily]").forEach(a => { a.onclick = e => { e.preventDefault(); openDate(a.dataset.daily); }; });
     });
   }
@@ -132,6 +144,7 @@
     });
   }
   function openToday() {
+    history.replaceState(null, "", "./");
     const t = today();
     loadYear(t.getFullYear()).then(() => {
       const set = setFor(t);
@@ -145,7 +158,7 @@
   // ---- results ----
   function squares(results, max) { return results.map(r => r === max ? "🟩" : r > 0 ? "🟨" : "⬜").join(""); }
   function shareText(res) {
-    const meta = res.meta, head = cfg.title + " " + (meta && meta.mode === "daily" ? "No. " + meta.number + " · " + fmtTiny(meta.date) : "practice");
+    const meta = res.meta, head = cfg.title + " " + (meta && meta.mode === "daily" ? "No. " + meta.number + " · " + fmtTiny(meta.date) : "random puzzles");
     const link = /^https?:$/.test(location.protocol) ? "\n" + location.origin + location.pathname : "";
     return head + "\n" + res.score + "/" + res.max + " " + squares(res.results, cfg.max) + link;
   }
@@ -161,23 +174,25 @@
   function showResults(res) {
     const meta = res.meta, daily = meta && meta.mode === "daily";
     current = null;
-    if (daily) { history.replaceState(null, "", "?daily=" + meta.iso); setDailyLine("<b>Daily No. " + meta.number + "</b> · " + esc(fmtShort(meta.date)), "Past puzzles", "?past"); }
-    else { history.replaceState(null, "", "?practice"); setDailyLine("<b>Practice</b> · random puzzles", "Today’s puzzle", "./"); }
+    history.replaceState(null, "", daily ? "?daily=" + meta.iso : "?practice");
+    setDailyLine(lineFor(meta), daily ? ["past", "random"] : ["today", "past"]);
     const ratio = res.score / res.max;
     const verdict = ratio === 1 ? "A perfect game." : ratio >= 0.7 ? "A strong game." : ratio >= 0.4 ? "A fair game." : (daily ? "A tough one. Tomorrow’s is different." : "A tough one. The next set is different.");
-    const saved = daily ? (res.first ? "Saved as your score for " + (meta.iso === iso(today()) ? "today" : "this day") + "." : "Your first score for this puzzle is the one that is kept.") : "Practice scores are not saved.";
+    const saved = daily ? (res.first ? "Saved as your score for " + (meta.iso === iso(today()) ? "today" : "this day") + "." : "Your first score for this puzzle is the one that is kept.") : "Random puzzle scores are not saved.";
     const pips = res.results.map(r => '<span class="pip ' + (r === cfg.max ? "full" : r > 0 ? "half" : "zero") + '"></span>').join("");
     shellHTML('<div class="pips" aria-hidden="true">' + pips + "</div>" +
       '<div class="big">' + res.score + " <small>/ " + res.max + "</small></div>" +
       '<p class="lead">' + verdict + "</p>" +
       '<p class="status ' + (daily && res.first ? "good" : "note") + '">' + saved + "</p>" +
       '<ul class="recap">' + res.recap.map(r => "<li><span>" + esc(r[0]) + "</span><span>" + r[1] + (r[1] === 1 ? " pt" : " pts") + "</span></li>").join("") + "</ul>" +
-      '<div class="row"><button class="primary" id="shareBtn" type="button">Share</button><a class="btn" href="?past">Past puzzles</a></div>' +
-      '<div class="row"><button class="quiet" id="againBtn" type="button">' + (daily ? "Play it again" : "Play again") + '</button><a class="quiet btn" href="' + (daily ? "?practice" : "./") + '">' + (daily ? "Practice" : "Today’s puzzle") + "</a></div>");
+      '<button class="primary" id="randomBtn" type="button">' + (daily ? "Play random puzzles" : "More random puzzles") + "</button>" +
+      '<div class="row"><button id="shareBtn" type="button">Share</button><a class="btn" href="?past" data-go="past">Past puzzles</a></div>' +
+      '<div class="row">' + (daily ? '<button class="quiet" id="againBtn" type="button">Play it again</button>' : '<a class="quiet btn" href="./" data-go="today">Today’s puzzle</a>') + "</div>");
+    $("randomBtn").onclick = () => startGame({ mode: "practice" });
     $("shareBtn").onclick = () => share(res, $("shareBtn"));
-    $("againBtn").onclick = () => startGame(daily ? meta : { mode: "practice" });
-    $("shell").querySelector('a[href="?past"]').onclick = e => { e.preventDefault(); showPast(); };
-    $("shareBtn").focus();
+    if ($("againBtn")) $("againBtn").onclick = () => startGame(meta);
+    bindPlaces($("shell"));
+    $("randomBtn").focus();
   }
 
   // ---- How to play ----
@@ -214,7 +229,6 @@
       store = cfg.game.replace(/-/g, "") + ":";
       buildHelp();
       $("helpBtn").onclick = showHelp;
-      $("pastLink").onclick = e => { if ($("pastLink").getAttribute("href") === "?past") { e.preventDefault(); showPast(); } };
       const q = new URLSearchParams(location.search);
       if (q.has("past")) return showPast();
       if (q.has("practice")) return startGame({ mode: "practice" });
