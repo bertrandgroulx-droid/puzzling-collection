@@ -91,14 +91,6 @@ window.TUMBLE_PUZZLES = [
   { letters: "SPINE", clues: ["Evergreen trees", "Bonus: a wading bird, or a nasty remark"], answers: ["PINES", "SNIPE"] },
   { letters: "FIRES", clues: ["Chips, in America", "Bonus: the little foot on a letter in some typefaces"], answers: ["FRIES", "SERIF"] },
   { letters: "MARES", clues: ["To spread grease on something", "Bonus: packs of paper"], answers: ["SMEAR", "REAMS"] },
-  { letters: "TAPES", clues: ["Glue for wallpaper, or a mixture to spread", "Bonus: a sudden flood of events"], answers: ["PASTE", "SPATE"] },
-  { letters: "RIDES", clues: ["Hangs washing until it is no longer wet", "Bonus: fathered, as a horse"], answers: ["DRIES", "SIRED"] },
   { letters: "POLES", clues: ["A hillside", "Bonus: runs with long strides"], answers: ["SLOPE", "LOPES"] },
-  { letters: "LAKES", clues: ["Drips from a pipe", "Bonus: to quench a thirst"], answers: ["LEAKS", "SLAKE"] },
-  { letters: "PILES", clues: ["Smooth, persuasive talk", "Bonus: works away at a trade"], answers: ["SPIEL", "PLIES"] },
   { letters: "CAPER", clues: ["A runner who sets the speed", "Bonus: a short summary"], answers: ["PACER", "RECAP"] },
-  { letters: "HORSE", clues: ["Where the waves come in", "Bonus: a Canadian word for a lout"], answers: ["SHORE", "HOSER"] },
-  { letters: "POSES", clues: ["A group gathered to chase a wanted man", "Bonus: Mexican coins"], answers: ["POSSE", "PESOS"] },
-  { letters: "WEEDS", clues: ["Stitched", "Bonus: a root vegetable like a turnip"], answers: ["SEWED", "SWEDE"] },
-  { letters: "POINT", clues: ["A spotted horse, or a kind of bean", "Bonus: a grape used for red wine"], answers: ["PINTO", "PINOT"] }
 ];
