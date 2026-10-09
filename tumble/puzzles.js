@@ -79,5 +79,26 @@ window.TUMBLE_PUZZLES = [
   { letters: "PANES", clues: ["A tree with trembling leaves", "Bonus: the backs of necks"], answers: ["ASPEN", "NAPES"] },
   { letters: "DOWRY", clues: ["Noisy and wild", "Bonus: using too many words"], answers: ["ROWDY", "WORDY"] },
   { letters: "COINS", clues: ["Small pictures on a screen", "Bonus: to do with sound"], answers: ["ICONS", "SONIC"] },
-  { letters: "LAIRS", clues: ["People who tell untruths", "Bonus: train tracks"], answers: ["LIARS", "RAILS"] }
+  { letters: "LAIRS", clues: ["People who tell untruths", "Bonus: train tracks"], answers: ["LIARS", "RAILS"] },
+  // ---- Added 9 October 2026 ----
+  { letters: "PLANE", clues: ["A flat board, or a group of experts", "Bonus: to do with punishment"], answers: ["PANEL", "PENAL"] },
+  { letters: "CARED", clues: ["A tree with fragrant wood", "Bonus: ran in a competition"], answers: ["CEDAR", "RACED"] },
+  { letters: "DEARS", clues: ["Looks at words on a page", "Bonus: challenges someone to do it"], answers: ["READS", "DARES"] },
+  { letters: "SAFER", clues: ["Worries, frights", "Bonus: ticket prices"], answers: ["FEARS", "FARES"] },
+  { letters: "ROOTS", clues: ["The body without the arms, legs and head", "Bonus: where hens sleep"], answers: ["TORSO", "ROOST"] },
+  { letters: "BEARS", clues: ["A curved sword", "Bonus: uncovers"], answers: ["SABRE", "BARES"] },
+  { letters: "FEAST", clues: ["Impressive deeds", "Bonus: what will happen, destinies"], answers: ["FEATS", "FATES"] },
+  { letters: "SPINE", clues: ["Evergreen trees", "Bonus: a wading bird, or a nasty remark"], answers: ["PINES", "SNIPE"] },
+  { letters: "FIRES", clues: ["Chips, in America", "Bonus: the little foot on a letter in some typefaces"], answers: ["FRIES", "SERIF"] },
+  { letters: "MARES", clues: ["To spread grease on something", "Bonus: packs of paper"], answers: ["SMEAR", "REAMS"] },
+  { letters: "TAPES", clues: ["Glue for wallpaper, or a mixture to spread", "Bonus: a sudden flood of events"], answers: ["PASTE", "SPATE"] },
+  { letters: "RIDES", clues: ["Hangs washing until it is no longer wet", "Bonus: fathered, as a horse"], answers: ["DRIES", "SIRED"] },
+  { letters: "POLES", clues: ["A hillside", "Bonus: runs with long strides"], answers: ["SLOPE", "LOPES"] },
+  { letters: "LAKES", clues: ["Drips from a pipe", "Bonus: to quench a thirst"], answers: ["LEAKS", "SLAKE"] },
+  { letters: "PILES", clues: ["Smooth, persuasive talk", "Bonus: works away at a trade"], answers: ["SPIEL", "PLIES"] },
+  { letters: "CAPER", clues: ["A runner who sets the speed", "Bonus: a short summary"], answers: ["PACER", "RECAP"] },
+  { letters: "HORSE", clues: ["Where the waves come in", "Bonus: a Canadian word for a lout"], answers: ["SHORE", "HOSER"] },
+  { letters: "POSES", clues: ["A group gathered to chase a wanted man", "Bonus: Mexican coins"], answers: ["POSSE", "PESOS"] },
+  { letters: "WEEDS", clues: ["Stitched", "Bonus: a root vegetable like a turnip"], answers: ["SEWED", "SWEDE"] },
+  { letters: "POINT", clues: ["A spotted horse, or a kind of bean", "Bonus: a grape used for red wine"], answers: ["PINTO", "PINOT"] }
 ];

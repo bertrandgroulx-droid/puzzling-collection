@@ -103,6 +103,19 @@ node tools/make-daily.js 2027
 The tool refuses to overwrite a year that already exists, so past puzzles are
 safe. If a year's file is missing, the game offers random puzzles instead.
 
+### After adding puzzles part way through a year
+
+New puzzles reach random play at once, but a day's set is fixed when the
+schedule is made. To let the new puzzles into the daily sets from tomorrow
+on, without touching any day already played:
+
+```
+node tools/make-daily.js 2026 --refresh
+```
+
+Days up to and including today keep exactly the sets they had, so saved
+scores still match. Every later day is dealt again from the full list.
+
 ## Adding puzzles
 
 Open the game's `puzzles.js`. Each line is one puzzle. Copy a line, change the

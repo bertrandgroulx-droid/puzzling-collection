@@ -1,6 +1,11 @@
 // Builds the daily puzzle schedule for one year, for every game.
 //
 //   node tools/make-daily.js 2027
+//   node tools/make-daily.js 2026 --refresh
+//
+// --refresh is for when puzzles have been added part way through a year: days up to and
+// including today keep exactly the sets they had (so past scores still match), and every
+// day after today is dealt again from the full, larger list.
 //
 // Writes <game>/daily-2027.js for each game: one line per day of the year, listing that
 // day's puzzles by key. Each day is a different set, and a puzzle comes round again only
@@ -11,6 +16,7 @@ const { KEYS, GLOBALS, PER_GAME } = require("../shared/keys.js");
 const root = path.join(__dirname, "..");
 const year = Number(process.argv[2]);
 const force = process.argv.includes("--force");
+const refresh = process.argv.includes("--refresh");
 if (!year || year < 2000 || year > 2200) { console.log("Usage: node tools/make-daily.js <year>"); process.exit(1); }
 const days = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0 ? 366 : 365;
 
@@ -25,8 +31,8 @@ function loadPuzzles(game) {
   return window[GLOBALS[game]] || [];
 }
 
-function schedule(game, keys) {
-  const per = PER_GAME[game], rand = rng(hash(year + ":" + game));
+function schedule(game, keys, seed) {
+  const per = PER_GAME[game], rand = rng(hash(year + ":" + game + (seed || "")));
   const sets = [], seen = new Set();
   let pool = [];
   while (sets.length < days) {
@@ -47,20 +53,34 @@ function schedule(game, keys) {
 
 for (const game of Object.keys(KEYS)) {
   const file = path.join(root, game, "daily-" + year + ".js");
-  if (fs.existsSync(file) && !force) { console.log(game + ": daily-" + year + ".js already exists, left as is"); continue; }
+  if (fs.existsSync(file) && !force && !refresh) { console.log(game + ": daily-" + year + ".js already exists, left as is"); continue; }
   const puzzles = loadPuzzles(game), keys = puzzles.map(KEYS[game]);
   if (keys.length < PER_GAME[game] * 2) { console.log(game + ": too few puzzles to schedule"); continue; }
-  const sets = schedule(game, keys);
+  let sets, kept = 0;
+  if (refresh && fs.existsSync(file)) {
+    // Keep every day up to today; deal the rest afresh, avoiding what the last few kept days used.
+    const w = {}; new Function("window", fs.readFileSync(file, "utf8"))(w);
+    const old = (w.DAILY_SCHEDULE || {})[year] || [];
+    const now = new Date(), todayIndex = year < now.getFullYear() ? days : year > now.getFullYear() ? 0 : Math.round((new Date(now.getFullYear(), now.getMonth(), now.getDate()) - new Date(year, 0, 1)) / 864e5) + 1;
+    kept = Math.min(todayIndex, old.length);
+    const recent = new Set(old.slice(Math.max(0, kept - 3), kept).flat());
+    let fresh = null;
+    for (let attempt = 0; attempt < 200; attempt++) {
+      const candidate = schedule(game, keys, ":refresh" + attempt).slice(kept);
+      if (!candidate.length || !candidate[0].some(k => recent.has(k))) { fresh = candidate; break; }
+    }
+    sets = old.slice(0, kept).concat(fresh || schedule(game, keys, ":refresh").slice(kept));
+  } else sets = schedule(game, keys);
   const lines = sets.map((s, i) => {
     const d = new Date(year, 0, i + 1);
     const label = d.toLocaleDateString("en-CA", { month: "short", day: "numeric" });
     return "  " + JSON.stringify(s) + (i < sets.length - 1 ? "," : "") + "  // " + (i + 1) + " · " + label;
   });
-  const out = "// Daily puzzle schedule for " + year + ". Made by: node tools/make-daily.js " + year + "\n" +
+  const out = "// Daily puzzle schedule for " + year + ". Made by: node tools/make-daily.js " + year + (kept ? " --refresh (days 1 to " + kept + " kept from the earlier schedule)" : "") + "\n" +
     "// One line per day. Day 1 is January 1. Each puzzle is named by its key (see shared/keys.js).\n" +
     "// Do not edit by hand: past days should stay as they were.\n" +
     "window.DAILY_SCHEDULE = window.DAILY_SCHEDULE || {};\n" +
     "window.DAILY_SCHEDULE[" + year + "] = [\n" + lines.join("\n") + "\n];\n";
   fs.writeFileSync(file, out);
-  console.log(game + ": wrote daily-" + year + ".js with " + sets.length + " days from " + keys.length + " puzzles");
+  console.log(game + ": wrote daily-" + year + ".js with " + sets.length + " days from " + keys.length + " puzzles" + (kept ? " (kept days 1 to " + kept + ")" : ""));
 }
