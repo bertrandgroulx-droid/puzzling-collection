@@ -24,7 +24,8 @@ tiles, Public Sans for everything else).
 | Splice | Two clues, two words, blended into one where they overlap. | 5 puzzles, 2 points each |
 
 In every game, **Hint** costs 1 point (it shows the first letter, or marks the
-tile to change) and **Give up** shows the answer and keeps whatever has
+tile to change) and **Give up**, tapped twice so a stray touch cannot end a
+puzzle, shows the answer and keeps whatever has
 already been scored.
 
 ## How the files are organised

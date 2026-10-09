@@ -191,7 +191,7 @@ $("hintBtn").addEventListener("click", () => {
   $("hintBtn").disabled = true; $("hintBtn").textContent = "Hint used";
   say("Take away the marked letter.", "part");
 });
-$("giveUp").addEventListener("click", () => { if (running) finish("Given up."); });
+Shell.confirmGiveUp($("giveUp"), () => { if (running) finish("Given up."); });
 
 Shell.init({
   game: "whittle", title: "Whittle", puzzles: RAW, per: PER_GAME, max: MAX,
@@ -202,7 +202,7 @@ Shell.init({
       "A six-letter word is shown. Each clue describes the word you get by removing one letter and keeping the rest in order.",
       "Tap the letter to take away. Three clues, three taps.",
       "1 point for each clue. 25 seconds for all three, and a wrong tap costs 3 seconds, unless the timer is off.",
-      "<b>Hint</b> marks the letter to take away and costs 1 point. <b>Give up</b> shows the rest and keeps what you have scored."
+      "<b>Hint</b> marks the letter to take away and costs 1 point. <b>Give up</b> (tapped twice) shows the rest and keeps what you have scored."
     ],
     example: "<b>PLANET</b>, then “something that grows in soil” is <b>PLANT</b>, “a scheme” is <b>PLAN</b>, and “you fry an egg in it” is <b>PAN</b>."
   },

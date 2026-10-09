@@ -91,9 +91,9 @@
       let hinted = false, k = 0, found = 0, hints = 0;
       const n = p.answers.length;
       const pointsNow = () => G.each ? Math.max(0, found - hints) : (hinted ? 1 : 2);
-      const reveal = () => (p.parts ? '<p class="clue"><span>The two words</span><b>' + esc(p.parts.join(" + ")) + "</b></p>" : "") +
+      const reveal = (ok) => (p.parts ? '<p class="clue"><span>The two words</span><b>' + esc(p.parts.join(" + ")) + "</b></p>" : "") +
         (p.given ? '<div class="tiles row">' + p.given.split("").map(c => '<div class="tile">' + c + "</div>").join("") + "</div>" : "") +
-        rows(p.answers.map((a, j) => [a, p.clues ? p.clues[j] : p.lead.join(" + "), G.each ? j < found : true]));
+        rows(p.answers.map((a, j) => [a, p.clues ? p.clues[j] : p.lead.join(" + "), G.each ? j < found : ok]));
       const draw = () => {
         let h = head();
         if (timed()) h += CLOCK;
@@ -113,14 +113,14 @@
           if (G.each) {
             if (val("a" + k) === p.answers[k]) {
               found++; k++;
-              if (k === n) return settle(pointsNow(), reveal(), "Both found.");
+              if (k === n) return settle(pointsNow(), reveal(true), "Both found.");
               draw(); say("Right. Now the bonus word.", "good"); $("a" + k).focus();
             } else { say("Not that one. Try again.", "bad"); bump($("a" + k)); }
             return;
           }
           const wrong = p.answers.map((a, j) => val("a" + j) === a ? -1 : j).filter(j => j >= 0);
           p.answers.forEach((_, j) => $("a" + j).classList.toggle("wrong", wrong.includes(j)));
-          if (!wrong.length) return settle(pointsNow(), reveal(), hinted ? "Correct, with a hint." : "Correct.");
+          if (!wrong.length) return settle(pointsNow(), reveal(true), hinted ? "Correct, with a hint." : "Correct.");
           say(n > 1 && wrong.length === 1 ? "One of the two is right. Fix the other." : "Not that one. Try again.", "bad");
           bump($("a" + wrong[0]));
         };
@@ -131,10 +131,10 @@
           $("hintBtn").disabled = true; $("hintBtn").textContent = "Hint used";
           $("a" + k).focus();
         };
-        $("giveUp").onclick = () => settle(G.each ? pointsNow() : 0, reveal(), G.each ? "Given up." : (n > 1 ? "The answers were " + p.answers.join(" and ") + "." : "The answer was " + p.answers[0] + "."));
+        Shell.confirmGiveUp($("giveUp"), () => settle(G.each ? pointsNow() : 0, reveal(false), G.each ? "Given up." : (n > 1 ? "The answers were " + p.answers.join(" and ") + "." : "The answer was " + p.answers[0] + ".")));
       };
       draw();
-      if (timed()) startClock(G.timer, () => settle(pointsNow(), reveal(), "Time ran out."));
+      if (timed()) startClock(G.timer, () => settle(pointsNow(), reveal(false), "Time ran out."));
       $("a" + k).focus();
     },
 
@@ -161,7 +161,7 @@
         $("hintBtn").disabled = true; $("hintBtn").textContent = "Hint used";
         say("One wrong answer removed.", "part");
       };
-      $("giveUp").onclick = () => settle(0, reveal(), "The connection was: " + p.options[0].toLowerCase() + ".");
+      Shell.confirmGiveUp($("giveUp"), () => settle(0, reveal(), "The connection was: " + p.options[0].toLowerCase() + "."));
     },
 
     // Word ladder: tap a tile, then pick its replacement letter. Hint marks the tile to change.
@@ -185,7 +185,7 @@
           hintedTile = [...word].findIndex((c, i) => c !== p.steps[step][1][i]);
           sel = hintedTile; draw(); say("Change the marked letter.", "part");
         };
-        $("giveUp").onclick = () => settle(points(), reveal(), "Given up.");
+        Shell.confirmGiveUp($("giveUp"), () => settle(points(), reveal(), "Given up."));
       };
       stage.onclick = e => {
         if (!started) return;

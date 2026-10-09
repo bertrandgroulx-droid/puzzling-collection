@@ -126,6 +126,7 @@ button:focus-visible, .btn:focus-visible, a:focus-visible { outline: 3px solid v
 .row > button, .row > .btn { flex: 1; }
 .opts { display: flex; flex-direction: column; gap: 8px; }
 .opt { justify-content: flex-start; text-align: left; font-weight: 600; min-height: 48px; }
+button.confirm { border-color: var(--part); background: var(--part-soft); color: var(--part); }
 .opt.wrong { background: var(--surface); border-color: var(--line); color: var(--muted); box-shadow: none; }
 .opt.wrong::before { content: "\2715"; font-size: 0.75rem; }
 /* The letter keys sit in the same places as on a phone keyboard. */

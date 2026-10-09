@@ -129,7 +129,7 @@ $("hintBtn").addEventListener("click", () => {
   $("hintBtn").disabled = true; $("hintBtn").textContent = "Hint used";
   $("guess").focus();
 });
-$("giveUp").addEventListener("click", () => reveal(0));
+Shell.confirmGiveUp($("giveUp"), () => reveal(0));
 $("next").addEventListener("click", () => {
   idx++;
   if (idx < game.length) { showPuzzle(); return; }
@@ -144,7 +144,7 @@ Shell.init({
       "The missing word can go before one tile and after another.",
       "Type it, then tap Check. Enter on the keyboard checks too.",
       "2 points, or 1 point after a hint.",
-      "<b>Hint</b> shows the first letter. <b>Give up</b> shows the answer and scores nothing."
+      "<b>Hint</b> shows the first letter. <b>Give up</b> (tapped twice) shows the answer and scores nothing."
     ],
     example: "<b>SUN</b>, <b>FLASH</b> and <b>HOUSE</b> all go with <b>LIGHT</b>: sunlight, flashlight, lighthouse."
   },

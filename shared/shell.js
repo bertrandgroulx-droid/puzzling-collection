@@ -198,6 +198,16 @@
   }
   function maybeHelp() { if (!read("help-seen", false)) { showHelp(); } }
 
+  // Give up asks for a second tap, so a stray touch cannot end a puzzle.
+  function confirmGiveUp(btn, fn) {
+    let armed = 0;
+    btn.onclick = () => {
+      if (armed) { clearTimeout(armed); armed = 0; btn.textContent = "Give up"; btn.classList.remove("confirm"); fn(); return; }
+      btn.textContent = "Tap again to give up"; btn.classList.add("confirm");
+      armed = setTimeout(() => { armed = 0; btn.textContent = "Give up"; btn.classList.remove("confirm"); }, 3000);
+    };
+  }
+
   window.Shell = {
     init(settings) {
       cfg = settings;
@@ -217,6 +227,6 @@
       if (meta && meta.mode === "daily" && !recordOf(meta.iso)) { write("daily:" + meta.iso, { score: res.score, max: res.max, results: res.results, recap: res.recap, at: Date.now() }); first = true; }
       showResults(Object.assign({ first }, res));
     },
-    timerOn, label, showPast, showHelp, current: () => current
+    timerOn, label, showPast, showHelp, confirmGiveUp, current: () => current
   };
 })();
