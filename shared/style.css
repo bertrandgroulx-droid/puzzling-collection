@@ -128,7 +128,10 @@ button:focus-visible, .btn:focus-visible, a:focus-visible { outline: 3px solid v
 .opt { justify-content: flex-start; text-align: left; font-weight: 600; min-height: 48px; }
 .opt.wrong { background: var(--surface); border-color: var(--line); color: var(--muted); box-shadow: none; }
 .opt.wrong::before { content: "\2715"; font-size: 0.75rem; }
-.keys { display: grid; grid-template-columns: repeat(9, 1fr); gap: 5px; }
+/* The letter keys sit in the same places as on a phone keyboard. */
+.keys { display: flex; flex-direction: column; gap: 5px; }
+.keyrow { display: flex; gap: 4px; justify-content: center; }
+.keyrow .key { flex: 1 1 0; max-width: 40px; }
 .key { min-height: 44px; padding: 0; font-family: var(--display); font-weight: 800; font-size: 1rem; border-radius: var(--radius-sm); min-width: 0; }
 
 /* ---- the status line: what happened, in the state colour, with an icon so colour is never alone ---- */
@@ -235,6 +238,7 @@ dialog.help .foot a { color: var(--muted); font-size: 0.9rem; }
   .opt { min-height: 44px; }
   .key { min-height: 40px; }
   .keys { gap: 4px; }
+  .keyrow { gap: 3px; }
   .status { min-height: 2em; padding: 6px 12px; font-size: 0.9rem; }
   .ladder li { padding: 8px 12px; }
   .recap li { padding: 7px 0; }
