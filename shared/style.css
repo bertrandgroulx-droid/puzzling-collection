@@ -83,7 +83,7 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 1.5rem; margin: 0
 /* ---- tiles and words. Flat when read-only; raised (button.tile) when tappable. ---- */
 .tiles { display: flex; flex-direction: column; gap: 8px; }
 .tiles.stack { gap: 6px; }
-.tiles.stack .tile { padding: 10px 14px; font-size: 1.2rem; }
+.tiles.stack .tile { padding: 10px 14px; font-size: 1.2rem; text-align: center; }
 .tiles.wrap { flex-direction: row; flex-wrap: wrap; gap: 6px; }
 .tiles.wrap .tile { flex: 1 1 auto; padding: 10px 14px; font-size: 1.15rem; text-align: center; }
 .tiles.row { flex-direction: row; gap: 6px; justify-content: center; }
