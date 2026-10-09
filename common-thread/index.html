@@ -24,7 +24,7 @@
   <section id="play" class="stack" data-game-ui>
     <div class="pips" id="pips" aria-hidden="true"></div>
     <p class="instr">Find the one word that goes with all three. Type it, then tap Check.</p>
-    <div class="tiles wrap" id="tiles"></div>
+    <div class="tiles stack" id="tiles"></div>
     <form id="form" class="entry" autocomplete="off">
       <input type="text" id="guess" name="guess" placeholder="The missing word" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-label="Your answer">
       <button class="primary" id="check" type="submit">Check</button>
@@ -88,7 +88,7 @@ function drawPips() {
 function showPuzzle() {
   const p = game[idx];
   hinted = false; solved = false;
-  $("tiles").className = "tiles wrap";
+  $("tiles").className = "tiles stack";
   $("tiles").innerHTML = p.clues.map(c => '<div class="tile">' + esc(c.word) + "</div>").join("");
   $("hint").hidden = true; $("hint").textContent = p.link[0] + " _".repeat(p.link.length - 1);
   say("");
@@ -102,7 +102,7 @@ function showPuzzle() {
 function reveal(points) {
   const p = game[idx];
   solved = true; results[idx] = points; score += points;
-  $("tiles").className = "tiles wrap " + (points > 0 ? "solved" : "missed");
+  $("tiles").className = "tiles stack " + (points > 0 ? "solved" : "missed");
   $("tiles").innerHTML = p.clues.map(c => {
     const link = '<span class="link">' + esc(p.link) + "</span>";
     const sep = c.sep === " " ? "&nbsp;" : "";

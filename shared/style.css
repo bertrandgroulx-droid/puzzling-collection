@@ -82,6 +82,8 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 1.5rem; margin: 0
 
 /* ---- tiles and words. Flat when read-only; raised (button.tile) when tappable. ---- */
 .tiles { display: flex; flex-direction: column; gap: 8px; }
+.tiles.stack { gap: 6px; }
+.tiles.stack .tile { padding: 10px 14px; font-size: 1.2rem; }
 .tiles.wrap { flex-direction: row; flex-wrap: wrap; gap: 6px; }
 .tiles.wrap .tile { flex: 1 1 auto; padding: 10px 14px; font-size: 1.15rem; text-align: center; }
 .tiles.row { flex-direction: row; gap: 6px; justify-content: center; }
@@ -236,6 +238,8 @@ dialog.help .foot a { color: var(--muted); font-size: 0.9rem; }
   .tiles.row .tile { max-width: 52px; font-size: 1.4rem; }
   .tile, .word { padding: 10px 14px; }
   .tiles.wrap .tile, .words.wrap .word { padding: 8px 12px; font-size: 1.05rem; }
+  .tiles.stack { gap: 5px; }
+  .tiles.stack .tile { padding: 8px 12px; font-size: 1.1rem; }
   button, .btn { min-height: 44px; }
   .opt { min-height: 44px; }
   .key { min-height: 40px; }
