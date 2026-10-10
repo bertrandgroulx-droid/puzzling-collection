@@ -21,17 +21,35 @@
 
   <!-- Each card's description and skills line match the game's listing on shozbot.com. -->
   <ul class="games">
-    <li><a href="common-thread/"><h2>Common Thread</h2><p>Three words, and one missing word that pairs with every one of them.</p><span class="skills">Word association · Lateral thinking</span></a></li>
-    <li><a href="whittle/"><h2>Whittle</h2><p>Take one letter away at a time to match three clues before the clock runs out.</p><span class="skills">Quick recall · Working under a clock</span></a></li>
-    <li><a href="tumble/"><h2>Tumble</h2><p>Rearrange the letters to fit the clue, then find a bonus word in the same letters.</p><span class="skills">Pattern spotting · Quick recall</span></a></li>
-    <li><a href="stowaway/"><h2>Stowaway</h2><p>Two clues, two words: the second is the first with one letter smuggled in.</p><span class="skills">Word building · Deduction</span></a></li>
-    <li><a href="soundalike/"><h2>Soundalike</h2><p>Two clues, two words that sound the same but are spelled differently.</p><span class="skills">Sounding words out · Spelling</span></a></li>
-    <li><a href="switcheroo/"><h2>Switcheroo</h2><p>Change one letter at a time to climb a three-step word ladder.</p><span class="skills">Step-by-step thinking · Working under a clock</span></a></li>
-    <li><a href="three-of-a-kind/"><h2>Three of a Kind</h2><p>Three words have something in common. Spot what it is.</p><span class="skills">Lateral thinking · General knowledge</span></a></li>
-    <li><a href="splice/"><h2>Splice</h2><p>Two clues, two words, blended into one where they overlap.</p><span class="skills">Word blending · An ear for sound</span></a></li>
+    <li><a href="common-thread/"><h2>Common Thread</h2><p>Three words, and one missing word that pairs with every one of them.</p><span class="state" data-state></span></a></li>
+    <li><a href="whittle/"><h2>Whittle</h2><p>Take one letter away at a time to match three clues before the clock runs out.</p><span class="state" data-state></span></a></li>
+    <li><a href="tumble/"><h2>Tumble</h2><p>Rearrange the letters to fit the clue, then find a bonus word in the same letters.</p><span class="state" data-state></span></a></li>
+    <li><a href="stowaway/"><h2>Stowaway</h2><p>Two clues, two words: the second is the first with one letter smuggled in.</p><span class="state" data-state></span></a></li>
+    <li><a href="soundalike/"><h2>Soundalike</h2><p>Two clues, two words that sound the same but are spelled differently.</p><span class="state" data-state></span></a></li>
+    <li><a href="switcheroo/"><h2>Switcheroo</h2><p>Change one letter at a time to climb a three-step word ladder.</p><span class="state" data-state></span></a></li>
+    <li><a href="three-of-a-kind/"><h2>Three of a Kind</h2><p>Three words have something in common. Spot what it is.</p><span class="state" data-state></span></a></li>
+    <li><a href="splice/"><h2>Splice</h2><p>Two clues, two words, blended into one where they overlap.</p><span class="state" data-state></span></a></li>
   </ul>
 
   <p class="note">Scores are kept on this device only. Every game has a How to play panel behind the <b>?</b> button.</p>
 </main>
+<script>
+// Each card shows whether today's puzzle has been played, with the score and the run of days.
+(function () {
+  const pad = n => String(n).padStart(2, "0"), d = new Date();
+  const iso = x => x.getFullYear() + "-" + pad(x.getMonth() + 1) + "-" + pad(x.getDate());
+  const back = (x, n) => new Date(x.getFullYear(), x.getMonth(), x.getDate() - n);
+  const read = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+  document.querySelectorAll(".games a[href]").forEach(a => {
+    const store = a.getAttribute("href").replace(/[-\/]/g, "") + ":";
+    const rec = read(store + "daily:" + iso(d)), el = a.querySelector("[data-state]");
+    if (!el) return;
+    let run = 0, x = rec ? d : back(d, 1);
+    while (read(store + "daily:" + iso(x))) { run++; x = back(x, 1); }
+    if (rec) { el.className = "state done"; el.textContent = "Played today · " + rec.score + " / " + rec.max + (run >= 2 ? " · " + run + " days in a row" : ""); }
+    else { el.className = "state todo"; el.textContent = "Today’s puzzle is waiting" + (run >= 2 ? " · " + run + " days in a row so far" : ""); }
+  });
+})();
+</script>
 </body>
 </html>

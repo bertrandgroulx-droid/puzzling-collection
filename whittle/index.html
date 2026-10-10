@@ -35,7 +35,7 @@
     <p class="rungs" id="rungs" hidden></p>
     <ul class="ladder" id="ladder"></ul>
     <div class="row" id="helpRow" hidden>
-      <button id="hintBtn" type="button">Hint &middot; 1 point</button>
+      <button id="hintBtn" type="button">Hint &middot; marks the letter &middot; 1 point</button>
       <button id="giveUp" type="button">Give up</button>
     </div>
   </section>
@@ -102,9 +102,10 @@ function drawClock(ms) {
 function readyChain() {
   const c = game[ci];
   step = 0; pts = 0; hints = 0; word = c.start; running = false;
+  $("play").classList.remove("celebrate");
   timed = Shell.timerOn();
   $("clockRow").hidden = true; $("clueRow").hidden = true;
-  instruct("Read the word, then tap Start. " + SECONDS + " seconds for three clues.");
+  instruct("Read the word, then tap Start.");
   say("");
   $("ladder").innerHTML = ""; $("rungs").hidden = true; $("rungs").innerHTML = ""; $("helpRow").hidden = true;
   drawTiles(false); drawClock(SECONDS * 1000); drawPips();
@@ -114,9 +115,9 @@ function readyChain() {
 
 function begin() {
   running = true; $("go").hidden = true; $("helpRow").hidden = false;
-  instruct("Tap the letter to take away so the word matches the clue.");
+  instruct("Tap the letter to take away.");
   $("clueRow").hidden = false; $("clockRow").hidden = !timed;
-  $("hintBtn").disabled = false; $("hintBtn").innerHTML = "Hint &middot; 1 point";
+  $("hintBtn").disabled = false; $("hintBtn").innerHTML = "Hint &middot; marks the letter &middot; 1 point";
   showStep();
   if (timed) { deadline = performance.now() + SECONDS * 1000; tick(); }
 }
@@ -138,6 +139,7 @@ function tick() {
 function finish(why) {
   running = false; cancelAnimationFrame(raf);
   const c = game[ci], p = points();
+  $("play").classList.toggle("celebrate", pts === 3);
   results[ci] = p; score += p;
   $("ladder").innerHTML = c.steps.map((s, i) =>
     '<li class="' + (i < pts ? "got" : "miss") + '"><span class="w">' + s[1] + '</span><span class="d">' + s[0] + "</span></li>").join("");
@@ -173,7 +175,7 @@ $("tiles").addEventListener("click", e => {
     $("rungs").innerHTML = [c.start].concat(c.steps.slice(0, step + 1).map(s => "<b>" + s[1] + "</b>")).join(" → ");
     say(cand + " is right.", "good");
     step++;
-    $("hintBtn").disabled = false; $("hintBtn").innerHTML = "Hint &middot; 1 point";
+    $("hintBtn").disabled = false; $("hintBtn").innerHTML = "Hint &middot; marks the letter &middot; 1 point";
     if (step === 3) { finish("Done."); return; }
     showStep();
   } else {

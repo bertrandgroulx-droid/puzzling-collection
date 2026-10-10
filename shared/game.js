@@ -71,10 +71,11 @@
     ENGINES[G.type](S.items[S.i]);
   }
   // Close a puzzle: record its points, show the answer, and offer Next.
-  function settle(points, revealHTML, text) {
+  function settle(points, revealHTML, text, good) {
     stopClock(); stage.onclick = null;
     S.results.push(points); S.score += points;
     const cls = points === G.max ? "good" : points > 0 ? "part" : "bad";
+    stage.classList.toggle("celebrate", !!good);
     stage.innerHTML = head(null) + revealHTML + '<p class="status ' + cls + '">' + esc(text) + " " + points + (points === 1 ? " point." : " points.") + "</p>" +
       '<button class="primary" id="nextBtn" type="button">' + (S.i + 1 < S.items.length ? "Next" : "See your score") + "</button>";
     $("nextBtn").onclick = () => { S.i++; next(); };
@@ -104,23 +105,24 @@
         labels.forEach((c, j) => {
           if (G.each && j > k) return;
           const done = G.each && j < k;
-          h += '<label class="field"><span>' + esc(c) + '</span><input type="text" id="a' + j + '"' + (done ? ' disabled value="' + p.answers[j] + '"' : "") + ' autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go"></label>';
+          const note = j === 1 && G.secondNote ? ' <small>(' + esc(G.secondNote) + ")</small>" : "";
+          h += '<label class="field"><span>' + esc(c) + note + '</span><input type="text" id="a' + j + '"' + (done ? ' disabled value="' + p.answers[j] + '"' : "") + ' autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go"></label>';
         });
-        h += '<p class="hint" id="hint" hidden></p><button class="primary" type="submit">Check</button></form><p class="status" id="msg" aria-live="polite"></p>' + buttons("Hint · 1 point");
+        h += '<p class="hint" id="hint" hidden></p><button class="primary" type="submit">Check</button></form><p class="status" id="msg" aria-live="polite"></p>' + buttons(G.each || n === 1 ? "Hint · first letter · 1 point" : "Hint · first letters · 1 point");
         stage.innerHTML = h;
         $("f").onsubmit = e => {
           e.preventDefault();
           if (G.each) {
             if (val("a" + k) === p.answers[k]) {
               found++; k++;
-              if (k === n) return settle(pointsNow(), reveal(true), "Both found.");
+              if (k === n) return settle(pointsNow(), reveal(true), "Both found.", true);
               draw(); say("Right. Now the bonus word.", "good"); $("a" + k).focus();
             } else { say("Not that one. Try again.", "bad"); bump($("a" + k)); }
             return;
           }
           const wrong = p.answers.map((a, j) => val("a" + j) === a ? -1 : j).filter(j => j >= 0);
           p.answers.forEach((_, j) => $("a" + j).classList.toggle("wrong", wrong.includes(j)));
-          if (!wrong.length) return settle(pointsNow(), reveal(true), hinted ? "Correct, with a hint." : "Correct.");
+          if (!wrong.length) return settle(pointsNow(), reveal(true), hinted ? "Correct, with a hint." : "Correct.", true);
           say(n > 1 && wrong.length === 1 ? "One of the two is right. Fix the other." : "Not that one. Try again.", "bad");
           bump($("a" + wrong[0]));
         };
@@ -144,12 +146,12 @@
       const opts = shuffle(p.options.slice());
       const reveal = () => '<div class="words wrap">' + p.words.map(w => '<div class="word">' + esc(w) + "</div>").join("") + '</div><p class="clue"><span>What they share</span><b>' + esc(p.options[0]) + "</b></p>";
       stage.innerHTML = head() + '<div class="words wrap">' + p.words.map(w => '<div class="word">' + esc(w) + "</div>").join("") + '</div><div class="opts" id="opts">' +
-        opts.map(o => '<button class="opt" type="button">' + esc(o) + "</button>").join("") + '</div><p class="status" id="msg" aria-live="polite"></p>' + buttons("Hint · 1 point");
+        opts.map(o => '<button class="opt" type="button">' + esc(o) + "</button>").join("") + '</div><p class="status" id="msg" aria-live="polite"></p>' + buttons("Hint · removes one option · 1 point");
       const points = () => Math.max(0, (tries === 0 ? 2 : 1) - (hinted ? 1 : 0));
       $("opts").onclick = e => {
         const b = e.target.closest(".opt");
         if (!b || b.disabled) return;
-        if (b.textContent === p.options[0]) return settle(points(), reveal(), tries === 0 ? (hinted ? "Correct, with a hint." : "Correct.") : "Correct on the second try.");
+        if (b.textContent === p.options[0]) return settle(points(), reveal(), tries === 0 ? (hinted ? "Correct, with a hint." : "Correct.") : "Correct on the second try.", true);
         tries++; b.disabled = true; b.classList.add("wrong");
         if (tries >= 2) return settle(0, reveal(), "Two misses.");
         say("Not that one. One more try.", "bad");
@@ -170,14 +172,14 @@
       const reveal = () => '<p class="clue"><span>Started from</span><b>' + p.start + "</b></p>" + rows(p.steps.map((s, j) => [s[1], s[0], j < pts]));
       const points = () => Math.max(0, pts - hints);
       const draw = () => {
-        let h = head(started ? undefined : "Read the word, then tap Start. " + G.timer + " seconds for three clues.") + (started && timed() ? CLOCK : "");
+        let h = head(started ? undefined : "Read the word, then tap Start.") + (started && timed() ? CLOCK : "");
         if (started) h += '<p class="clue"><span>Clue ' + (step + 1) + " of 3</span><b>" + esc(p.steps[step][0]) + "</b></p>";
         h += '<div class="tiles row">' + word.split("").map((c, i) => '<button class="tile' + (i === sel ? " sel" : "") + (i === hintedTile ? " hinted" : "") + '" type="button" data-i="' + i + '"' + (started ? "" : " disabled") + ' aria-label="Letter ' + c + '">' + c + "</button>").join("") + "</div>";
         h += '<p class="status" id="msg" aria-live="polite">' + (started ? (sel < 0 ? "Tap the letter to change." : "Now tap its replacement.") : "") + "</p>";
         if (started) h += '<div class="keys">' + ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"].map(row => '<div class="keyrow">' + row.split("").map(c => '<button class="key" type="button" data-k="' + c + '"' + (sel < 0 ? " disabled" : "") + ">" + c + "</button>").join("") + "</div>").join("") + "</div>";
         else h += '<button class="primary" id="go" type="button">Start</button>';
         if (pts) h += '<p class="rungs">' + [p.start].concat(p.steps.slice(0, pts).map(s => "<b>" + s[1] + "</b>")).join(" → ") + "</p>";
-        if (started) h += buttons("Hint · 1 point");
+        if (started) h += buttons("Hint · marks the letter · 1 point");
         stage.innerHTML = h;
         if (!started) { $("go").onclick = () => { started = true; draw(); startClock(G.timer, () => settle(points(), reveal(), "Time ran out.")); }; return; }
         $("hintBtn").onclick = () => {
@@ -195,7 +197,7 @@
         const cand = word.slice(0, sel) + key.dataset.k + word.slice(sel + 1);
         if (cand === p.steps[step][1]) {
           pts++; word = cand; step++; sel = -1; hintedTile = -1;
-          if (step === 3) return settle(points(), reveal(), "Ladder complete.");
+          if (step === 3) return settle(points(), reveal(), "Ladder complete.", true);
           draw(); say(cand + " is right. Tap the next letter to change.", "good");
         } else {
           sel = -1; draw();

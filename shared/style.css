@@ -64,8 +64,8 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 1.5rem; margin: 0
 .pip.zero { background: transparent; box-shadow: inset 0 0 0 2px var(--muted); }
 
 /* ---- the instruction line: what to find, then what to do. Ink, not grey, because it is read. ---- */
-.instr { margin: 0; padding: 8px 14px 10px; border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--ink); font-weight: 700; font-size: 1rem; line-height: 1.35; text-align: center; text-wrap: balance; }
-.instr::before { content: "Instructions"; display: block; font-family: var(--body); font-size: 1rem; font-weight: 800; color: var(--accent); margin-bottom: 2px; }
+.instr { margin: 0; padding: 8px 14px 10px; border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--ink); font-weight: 600; font-size: 0.92rem; line-height: 1.35; text-align: center; text-wrap: balance; }
+.instr::before { content: "Instructions"; display: block; font-family: var(--body); font-size: 0.92rem; font-weight: 800; color: var(--accent); margin-bottom: 1px; }
 .instr:empty { display: none; }
 /* When the instruction appears or changes, the block pulses once to draw the eye, then settles. */
 .instr.pulse { animation: instrPulse 0.7s ease-out 0.3s 1 both; }
@@ -81,7 +81,7 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 1.5rem; margin: 0
 /* ---- the clue box, for games that show a clue above the letters ---- */
 .clue { margin: 0; padding: 10px 14px; background: var(--surface); border-radius: var(--radius-sm); text-align: center; text-wrap: balance; }
 .clue span { display: block; font-family: var(--body); font-size: 0.88rem; font-weight: 600; color: var(--muted); margin-bottom: 2px; }
-.clue b { font-weight: 700; font-size: 1.05rem; }
+.clue b { font-family: var(--display); font-weight: 800; font-size: 1.3rem; letter-spacing: -0.01em; line-height: 1.25; }
 
 /* ---- tiles and words. Flat when read-only; raised (button.tile) when tappable. ---- */
 .tiles { display: flex; flex-direction: column; gap: 8px; }
@@ -110,7 +110,8 @@ button.tile.hinted { border-color: var(--part); background: var(--part-soft); }
 form { display: flex; flex-direction: column; gap: 10px; margin: 0; }
 .entry { display: flex; gap: 8px; }
 .field { display: flex; flex-direction: column; gap: 6px; }
-.field > span { font-weight: 600; font-size: 0.95rem; text-align: center; }
+.field > span { font-family: var(--display); font-weight: 800; font-size: 1.15rem; line-height: 1.25; text-align: center; text-wrap: balance; }
+.field > span small { display: block; font-family: var(--body); font-weight: 600; font-size: 0.85rem; color: var(--muted); }
 input[type="text"] { width: 100%; min-width: 0; text-align: center; font-family: var(--display); font-weight: 800; font-size: 1.15rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 12px 14px; border-radius: var(--radius); border: 2px solid var(--line); background: var(--surface); color: var(--ink); }
 .entry input[type="text"] { flex: 1; }
 input[type="text"]::placeholder { color: var(--muted); font-family: var(--body); font-weight: 500; text-transform: none; letter-spacing: 0; font-size: 1rem; }
@@ -225,7 +226,7 @@ dialog.help .foot a { color: var(--muted); font-size: 0.9rem; }
 
 @keyframes shake { 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
 .shake { animation: shake 0.3s; }
-@media (prefers-reduced-motion: reduce) { .shake, .instr.pulse { animation: none; } .toggle input, .toggle input::before { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .shake, .instr.pulse, .celebrate *, .reveal * { animation: none !important; } .toggle input, .toggle input::before { transition: none; } }
 
 /* Short screens (older or smaller phones): a notch tighter everywhere, so a puzzle fits without scrolling. */
 @media (max-height: 720px) {
@@ -235,10 +236,10 @@ dialog.help .foot a { color: var(--muted); font-size: 0.9rem; }
   h1 { font-size: 1.35rem; }
   .q { width: 32px; height: 32px; }
   .daily { font-size: 0.84rem; }
-  .instr { font-size: 0.95rem; padding: 6px 12px 8px; }
+  .instr { font-size: 0.88rem; padding: 6px 12px 8px; }
   .instr::before { margin-bottom: 0; font-size: 0.95rem; }
   .clue { padding: 8px 12px; }
-  .clue b { font-size: 1rem; }
+  .clue b { font-size: 1.15rem; }
   .tiles.row .tile { max-width: 52px; font-size: 1.4rem; }
   .tile, .word { padding: 10px 14px; }
   .tiles.wrap .tile, .words.wrap .word { padding: 8px 12px; font-size: 1.05rem; }
@@ -254,3 +255,40 @@ dialog.help .foot a { color: var(--muted); font-size: 0.9rem; }
   .recap li { padding: 7px 0; }
   .card { padding: 14px; }
 }
+
+/* ---- first-visit welcome card (replaces the pop-up) ---- */
+.welcome { background: var(--accent-soft); border-radius: var(--radius-sm); padding: 10px 14px 12px; text-align: center; }
+.welcome > b { display: block; color: var(--accent); font-weight: 800; margin-bottom: 2px; }
+.welcome p { margin: 0; font-weight: 600; font-size: 0.95rem; text-wrap: balance; }
+.welcome .example { background: var(--bg); border-radius: 10px; padding: 8px 10px; margin: 8px 0 0; font-size: 0.9rem; }
+.welcome .example b { font-family: var(--display); letter-spacing: 0.04em; }
+button.link { background: none; border: 0; box-shadow: none; min-height: 0; padding: 8px 4px 0; color: var(--accent); font-weight: 700; font-size: 0.9rem; text-decoration: underline; text-underline-offset: 3px; }
+button.link:active { transform: none; }
+
+/* ---- the correct-answer moment: tiles and answer rows flip to green one after another, then the tick pops ---- */
+@keyframes flipGood { 0% { transform: rotateX(0); } 45% { transform: rotateX(90deg); } 55% { transform: rotateX(90deg); } 100% { transform: rotateX(0); } }
+@keyframes pop { 0% { transform: scale(0.5); opacity: 0; } 60% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+.celebrate .tiles .tile, .celebrate .tiles.solved .tile, .celebrate .ladder li.got, .celebrate .words .word { animation: flipGood 0.45s ease both; }
+.celebrate .tiles .tile:nth-child(2), .celebrate .ladder li:nth-child(2), .celebrate .words .word:nth-child(2) { animation-delay: 0.07s; }
+.celebrate .tiles .tile:nth-child(3), .celebrate .ladder li:nth-child(3), .celebrate .words .word:nth-child(3) { animation-delay: 0.14s; }
+.celebrate .tiles .tile:nth-child(4), .celebrate .ladder li:nth-child(4) { animation-delay: 0.21s; }
+.celebrate .tiles .tile:nth-child(5) { animation-delay: 0.28s; }
+.celebrate .tiles .tile:nth-child(6) { animation-delay: 0.35s; }
+.celebrate .status.good { animation: pop 0.35s 0.4s ease both; }
+
+/* ---- the score reveal on results: pips pop in one by one, the score counts up, then the words appear ---- */
+.reveal .pip.full, .reveal .pip.half, .reveal .pip.zero { animation: pop 0.3s ease both; }
+.reveal .lead { animation: pop 0.35s var(--after, 1.2s) ease both; }
+.reveal .streakRow { animation: pop 0.35s calc(var(--after, 1.2s) + 0.15s) ease both; }
+.reveal .status { animation: pop 0.35s calc(var(--after, 1.2s) + 0.3s) ease both; }
+
+/* ---- streaks ---- */
+.streakRow { margin: 0; text-align: center; }
+.streak { display: inline-flex; align-items: center; gap: 6px; background: var(--part-soft); color: var(--part); font-weight: 800; border-radius: 999px; padding: 4px 12px; font-size: 0.9rem; }
+.streak::before { content: ""; width: 10px; height: 14px; background: currentColor; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; clip-path: polygon(50% 0, 100% 55%, 85% 100%, 15% 100%, 0 55%); }
+
+/* ---- home page: today's state on each card ---- */
+.games .state { display: block; margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--line); font-size: 0.85rem; font-weight: 700; }
+.games .state.done { color: var(--good); }
+.games .state.done::before { content: "\2713\00a0"; }
+.games .state.todo { color: var(--accent); }

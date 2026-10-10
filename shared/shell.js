@@ -51,6 +51,12 @@
     return { mode: "daily", date, iso: iso(date), number: n, items };
   }
   const recordOf = isoDate => read("daily:" + isoDate, null);
+  function streak() {
+    const t = today();
+    let d = recordOf(iso(t)) ? t : addDays(t, -1), n = 0;
+    while (recordOf(iso(d))) { n++; d = addDays(d, -1); }
+    return n;
+  }
 
   // ---- settings ----
   function timerOn() { return read("timer", true) !== false; }
@@ -81,7 +87,7 @@
     document.querySelectorAll("[data-game-ui]").forEach(el => { el.hidden = !show; });
     $("shell").hidden = show;
   }
-  function shellHTML(html) { showGame(false); $("shell").innerHTML = html; window.scrollTo(0, 0); }
+  function shellHTML(html) { showGame(false); $("shell").classList.remove("reveal"); $("shell").innerHTML = html; window.scrollTo(0, 0); }
 
   function startGame(meta) {
     current = meta;
@@ -171,7 +177,7 @@
     function fallback(t) { const ta = document.createElement("textarea"); ta.value = t; ta.readOnly = true; ta.style.cssText = "width:100%;margin-top:8px;font:inherit;font-size:0.85rem;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink)"; btn.parentNode.insertAdjacentElement("afterend", ta); ta.select(); }
   }
 
-  function showResults(res) {
+  function showResults(res, animate) {
     const meta = res.meta, daily = meta && meta.mode === "daily";
     current = null;
     history.replaceState(null, "", daily ? "?daily=" + meta.iso : "?practice");
@@ -179,10 +185,12 @@
     const ratio = res.score / res.max;
     const verdict = ratio === 1 ? "A perfect game." : ratio >= 0.7 ? "A strong game." : ratio >= 0.4 ? "A fair game." : (daily ? "A tough one. Tomorrow’s is different." : "A tough one. The next set is different.");
     const saved = daily ? (res.first ? "Saved as your score for " + (meta.iso === iso(today()) ? "today" : "this day") + "." : "Your first score for this puzzle is the one that is kept.") : "Random puzzle scores are not saved.";
-    const pips = res.results.map(r => '<span class="pip ' + (r === cfg.max ? "full" : r > 0 ? "half" : "zero") + '"></span>').join("");
+    const pips = res.results.map((r, i) => '<span class="pip ' + (r === cfg.max ? "full" : r > 0 ? "half" : "zero") + '" style="animation-delay:' + (0.15 + i * 0.2) + 's"></span>').join("");
+    const run = daily && meta.iso === iso(today()) ? streak() : 0;
     shellHTML('<div class="pips" aria-hidden="true">' + pips + "</div>" +
-      '<div class="big">' + res.score + " <small>/ " + res.max + "</small></div>" +
+      '<div class="big"><span id="scoreNum">' + res.score + "</span> <small>/ " + res.max + "</small></div>" +
       '<p class="lead">' + verdict + "</p>" +
+      (run >= 2 ? '<p class="streakRow"><span class="streak">' + run + " days in a row</span></p>" : "") +
       '<p class="status ' + (daily && res.first ? "good" : "note") + '">' + saved + "</p>" +
       '<ul class="recap">' + res.recap.map(r => "<li><span>" + esc(r[0]) + "</span><span>" + r[1] + (r[1] === 1 ? " pt" : " pts") + "</span></li>").join("") + "</ul>" +
       '<button class="primary" id="randomBtn" type="button">' + (daily ? "Play random puzzles" : "More random puzzles") + "</button>" +
@@ -192,6 +200,14 @@
     $("shareBtn").onclick = () => share(res, $("shareBtn"));
     if ($("againBtn")) $("againBtn").onclick = () => startGame(meta);
     bindPlaces($("shell"));
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (animate && !reduce) {
+      $("shell").classList.add("reveal");
+      $("shell").style.setProperty("--after", (0.3 + res.results.length * 0.2) + "s");
+      const el = $("scoreNum"), total = res.score, ms = Math.max(400, Math.min(1200, res.results.length * 200)), t0 = performance.now();
+      el.textContent = "0";
+      (function tick() { const f = Math.min(1, (performance.now() - t0) / ms); el.textContent = Math.round(f * total); if (f < 1) requestAnimationFrame(tick); })();
+    }
     $("randomBtn").focus();
   }
 
@@ -205,13 +221,23 @@
       (cfg.timed ? '<h3>Settings</h3><div class="settings"><label class="toggle"><span>Timer<small>Off means no clock and no penalties. Applies from the next puzzle.</small></span><input type="checkbox" id="helpTimer" role="switch"></label></div>' : "") +
       '<div class="foot"><a href="../">All games</a><button class="primary" id="helpClose" type="button">Got it</button></div>';
     if ($("helpTimer")) $("helpTimer").onchange = e => { write("timer", e.target.checked); const t = $("timerToggle"); if (t) t.checked = e.target.checked; };
-    $("helpClose").onclick = () => { $("help").close(); write("help-seen", true); };
+    $("helpClose").onclick = () => { $("help").close(); write("help-seen", true); const w = $("welcome"); if (w) w.remove(); };
   }
   function showHelp() {
     if ($("helpTimer")) $("helpTimer").checked = timerOn();
     $("help").showModal();
   }
-  function maybeHelp() { if (!read("help-seen", false)) { showHelp(); } }
+  // A first visit gets a short welcome card above the puzzle instead of a pop-up: the goal in one
+  // line, the example, and a Got it link. The ? button still opens the full panel.
+  function maybeHelp() {
+    if (read("help-seen", false) || $("welcome")) return;
+    const h = cfg.how, card = document.createElement("div");
+    card.id = "welcome"; card.className = "welcome";
+    card.innerHTML = "<b>First time? Here is the idea</b><p>" + esc(h.goal) + "</p>" + (h.example ? '<div class="example">' + h.example + "</div>" : "") +
+      '<button class="link" id="welcomeClose" type="button">Got it</button>';
+    $("shell").insertAdjacentElement("beforebegin", card);
+    $("welcomeClose").onclick = () => { write("help-seen", true); card.remove(); };
+  }
 
   // Give up asks for a second tap, so a stray touch cannot end a puzzle.
   function confirmGiveUp(btn, fn) {
@@ -239,8 +265,8 @@
       const meta = res.meta;
       let first = false;
       if (meta && meta.mode === "daily" && !recordOf(meta.iso)) { write("daily:" + meta.iso, { score: res.score, max: res.max, results: res.results, recap: res.recap, at: Date.now() }); first = true; }
-      showResults(Object.assign({ first }, res));
+      showResults(Object.assign({ first }, res), true);
     },
-    timerOn, label, showPast, showHelp, confirmGiveUp, current: () => current
+    timerOn, label, showPast, showHelp, confirmGiveUp, streak, current: () => current
   };
 })();

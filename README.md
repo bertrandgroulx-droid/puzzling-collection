@@ -31,7 +31,8 @@ already been scored.
 ## How the files are organised
 
 ```
-index.html            The home page. It links to every game.
+index.html            The home page. It links to every game and shows whether
+                      today's puzzle has been played, with the score and streak.
 common-thread/        One folder per game ...
 whittle/
 tumble/
@@ -76,8 +77,13 @@ starts unexpectedly.
   other places you can go (for example "Past puzzles" and "Random puzzles"
   while on today's puzzle). After a puzzle, the main button on the results
   screen is Play random puzzles.
-- **How to play.** The **?** button. It opens by itself on a first visit. On
-  timed games it also holds the timer switch.
+- **First visit.** A short welcome card sits above the first puzzle: the
+  goal in one line, the example, and Got it. Nothing pops up over the game.
+- **How to play.** The **?** button opens the full panel. On timed games it
+  also holds the timer switch.
+- **Streaks.** Days in a row with today's puzzle played. Shown on the results
+  screen and on the home page once it reaches two. Missing a day resets it;
+  playing a past day does not count.
 - **Share.** The results screen has a Share button that copies a short text:
   the game, its number and date, the score, and one square per puzzle.
 
