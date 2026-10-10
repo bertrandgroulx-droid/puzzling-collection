@@ -178,6 +178,7 @@ $("tiles").addEventListener("click", e => {
     $("hintBtn").disabled = false; $("hintBtn").innerHTML = "Hint &middot; marks the letter &middot; 1 point";
     if (step === 3) { finish("Done."); return; }
     showStep();
+    $("tiles").querySelectorAll(".tile").forEach(b => b.classList.add("flip"));
   } else {
     if (timed) { deadline -= PENALTY * 1000; say("Not that letter. " + PENALTY + " seconds lost.", "bad"); }
     else say("Not that letter. Try another.", "bad");

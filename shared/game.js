@@ -66,7 +66,7 @@
     next();
   }
   function next() {
-    stage.onclick = null;
+    stage.onclick = null; stage.classList.remove("celebrate");
     if (S.i >= S.items.length) return endGame();
     ENGINES[G.type](S.items[S.i]);
   }
@@ -168,19 +168,20 @@
 
     // Word ladder: tap a tile, then pick its replacement letter. Hint marks the tile to change.
     swap(p) {
-      let step = 0, word = p.start, sel = -1, pts = 0, hints = 0, started = !timed(), hintedTile = -1;
+      let step = 0, word = p.start, sel = -1, pts = 0, hints = 0, started = !timed(), hintedTile = -1, flipTile = -1;
       const reveal = () => '<p class="clue"><span>Started from</span><b>' + p.start + "</b></p>" + rows(p.steps.map((s, j) => [s[1], s[0], j < pts]));
       const points = () => Math.max(0, pts - hints);
       const draw = () => {
         let h = head(started ? undefined : "Read the word, then tap Start.") + (started && timed() ? CLOCK : "");
         if (started) h += '<p class="clue"><span>Clue ' + (step + 1) + " of 3</span><b>" + esc(p.steps[step][0]) + "</b></p>";
-        h += '<div class="tiles row">' + word.split("").map((c, i) => '<button class="tile' + (i === sel ? " sel" : "") + (i === hintedTile ? " hinted" : "") + '" type="button" data-i="' + i + '"' + (started ? "" : " disabled") + ' aria-label="Letter ' + c + '">' + c + "</button>").join("") + "</div>";
+        h += '<div class="tiles row">' + word.split("").map((c, i) => '<button class="tile' + (i === sel ? " sel" : "") + (i === hintedTile ? " hinted" : "") + (i === flipTile ? " flip" : "") + '" type="button" data-i="' + i + '"' + (started ? "" : " disabled") + ' aria-label="Letter ' + c + '">' + c + "</button>").join("") + "</div>";
         h += '<p class="status" id="msg" aria-live="polite">' + (started ? (sel < 0 ? "Tap the letter to change." : "Now tap its replacement.") : "") + "</p>";
         if (started) h += '<div class="keys">' + ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"].map(row => '<div class="keyrow">' + row.split("").map(c => '<button class="key" type="button" data-k="' + c + '"' + (sel < 0 ? " disabled" : "") + ">" + c + "</button>").join("") + "</div>").join("") + "</div>";
         else h += '<button class="primary" id="go" type="button">Start</button>';
         if (pts) h += '<p class="rungs">' + [p.start].concat(p.steps.slice(0, pts).map(s => "<b>" + s[1] + "</b>")).join(" → ") + "</p>";
         if (started) h += buttons("Hint · marks the letter · 1 point");
         stage.innerHTML = h;
+        flipTile = -1; // the flip plays on the draw right after a correct swap, never on later redraws
         if (!started) { $("go").onclick = () => { started = true; draw(); startClock(G.timer, () => settle(points(), reveal(), "Time ran out.")); }; return; }
         $("hintBtn").onclick = () => {
           hints++;
@@ -196,6 +197,7 @@
         if (!key || sel < 0) return;
         const cand = word.slice(0, sel) + key.dataset.k + word.slice(sel + 1);
         if (cand === p.steps[step][1]) {
+          flipTile = sel;
           pts++; word = cand; step++; sel = -1; hintedTile = -1;
           if (step === 3) return settle(points(), reveal(), "Ladder complete.", true);
           draw(); say(cand + " is right. Tap the next letter to change.", "good");

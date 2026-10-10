@@ -226,7 +226,7 @@ dialog.help .foot a { color: var(--muted); font-size: 0.9rem; }
 
 @keyframes shake { 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
 .shake { animation: shake 0.3s; }
-@media (prefers-reduced-motion: reduce) { .shake, .instr.pulse, .celebrate *, .reveal * { animation: none !important; } .toggle input, .toggle input::before { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .shake, .instr.pulse, .tile.flip, .celebrate *, .reveal * { animation: none !important; } .toggle input, .toggle input::before { transition: none; } }
 
 /* Short screens (older or smaller phones): a notch tighter everywhere, so a puzzle fits without scrolling. */
 @media (max-height: 720px) {
@@ -275,6 +275,10 @@ button.link:active { transform: none; }
 .celebrate .tiles .tile:nth-child(5) { animation-delay: 0.28s; }
 .celebrate .tiles .tile:nth-child(6) { animation-delay: 0.35s; }
 .celebrate .status.good { animation: pop 0.35s 0.4s ease both; }
+/* A correct move: the tile that changed flips once, green at the turn, then settles. */
+@keyframes flipMove { 0% { transform: rotateX(0); } 40%, 50% { transform: rotateX(90deg); background: var(--good-soft); border-color: var(--good); } 80% { transform: rotateX(0); background: var(--good-soft); border-color: var(--good); } 100% { transform: rotateX(0); } }
+.tiles .tile.flip { animation: flipMove 0.6s ease; }
+.tiles .tile.flip:nth-child(2) { animation-delay: 0.05s; } .tiles .tile.flip:nth-child(3) { animation-delay: 0.1s; } .tiles .tile.flip:nth-child(4) { animation-delay: 0.15s; } .tiles .tile.flip:nth-child(5) { animation-delay: 0.2s; }
 
 /* ---- the score reveal on results: pips pop in one by one, the score counts up, then the words appear ---- */
 .reveal .pip.full, .reveal .pip.half, .reveal .pip.zero { animation: pop 0.3s ease both; }
