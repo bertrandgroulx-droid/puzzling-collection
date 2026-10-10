@@ -137,8 +137,14 @@ format. In short:
 
 In Whittle, no step may simply drop a plural S (CHATS to CHAT is not a
 whittle). The checker refuses such a chain. A puzzle marked `retired: true`
-is kept only so past daily sets still load; it is left out of random play and
-of any day scheduled from now on.
+is left out of random play and of any schedule made from then on; it stays in
+the file only for reference. Whittle's 2026 schedule was re-dealt from scratch
+on 10 October, so no day uses a retired chain. To re-deal one game's schedule
+without touching the others:
+
+```
+node tools/make-daily.js 2026 --force --only whittle
+```
 | Tumble | `{ letters: "HEART", clues: ["The ground beneath you", "Bonus: someone full of dislike"], answers: ["EARTH", "HATER"] }` |
 | Stowaway | `{ clues: ["A hot drink", "A group of players"], answers: ["TEA", "TEAM"] }` |
 | Soundalike | `{ clues: ["Two of something", "A juicy fruit"], answers: ["PAIR", "PEAR"] }` |

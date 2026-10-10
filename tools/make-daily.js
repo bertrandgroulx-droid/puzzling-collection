@@ -2,6 +2,7 @@
 //
 //   node tools/make-daily.js 2027
 //   node tools/make-daily.js 2026 --refresh
+//   node tools/make-daily.js 2026 --force --only whittle
 //
 // --refresh is for when puzzles have been added part way through a year: days up to and
 // including today keep exactly the sets they had (so past scores still match), and every
@@ -17,6 +18,9 @@ const root = path.join(__dirname, "..");
 const year = Number(process.argv[2]);
 const force = process.argv.includes("--force");
 const refresh = process.argv.includes("--refresh");
+// --only <game> limits the run to one game folder; every other game's schedule is left alone.
+const onlyAt = process.argv.indexOf("--only"), only = onlyAt > 0 ? process.argv[onlyAt + 1] : null;
+if (only && !KEYS[only]) { console.log("Unknown game: " + only); process.exit(1); }
 if (!year || year < 2000 || year > 2200) { console.log("Usage: node tools/make-daily.js <year>"); process.exit(1); }
 const days = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0 ? 366 : 365;
 
@@ -51,7 +55,7 @@ function schedule(game, keys, seed) {
   return sets;
 }
 
-for (const game of Object.keys(KEYS)) {
+for (const game of Object.keys(KEYS).filter(g => !only || g === only)) {
   const file = path.join(root, game, "daily-" + year + ".js");
   if (fs.existsSync(file) && !force && !refresh) { console.log(game + ": daily-" + year + ".js already exists, left as is"); continue; }
   const puzzles = loadPuzzles(game).filter(p => !p.retired), keys = puzzles.map(KEYS[game]);
