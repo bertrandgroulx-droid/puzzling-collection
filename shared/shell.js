@@ -10,8 +10,11 @@
 // Daily schedules live in <game>/daily-<year>.js and are loaded when needed.
 (function () {
   const $ = id => document.getElementById(id);
+  // The version this page was loaded with, read from this script's own ?v= (see tools/stamp.js).
+  const SELF = document.currentScript ? document.currentScript.src : "";
+  const VERSION = SELF ? (new URL(SELF).searchParams.get("v") || "") : "";
   const PAST_DAYS = 100;
-  let cfg = null, schedules = {}, pending = {}, current = null, store = "";
+  let cfg = null, schedules = {}, pending = {}, current = null, store = "", busy = false;
 
   const pad = n => String(n).padStart(2, "0");
   const iso = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
@@ -32,7 +35,7 @@
     if (pending[y]) return pending[y];
     pending[y] = new Promise(resolve => {
       const s = document.createElement("script");
-      s.src = "daily-" + y + ".js";
+      s.src = "daily-" + y + ".js" + (VERSION ? "?v=" + VERSION : "");
       s.onload = () => { schedules[y] = (window.DAILY_SCHEDULE || {})[y] || null; resolve(schedules[y]); };
       s.onerror = () => { schedules[y] = null; resolve(null); };
       document.head.appendChild(s);
@@ -95,6 +98,7 @@
     setDailyLine(lineFor(meta), meta.mode === "daily" ? ["past", "random"] : ["today", "past"]);
     if (cfg.timed) return startCard(meta);
     showGame(true);
+    busy = true;
     cfg.onStart(meta);
     window.scrollTo(0, 0);
     maybeHelp();
@@ -108,13 +112,13 @@
       '<label class="toggle"><span>Timer<small>Off means no clock and no penalties</small></span><input type="checkbox" id="timerToggle" role="switch"' + (timerOn() ? " checked" : "") + "></label>" +
       '<button class="primary" id="startBtn" type="button">Start</button></div>');
     $("timerToggle").onchange = e => write("timer", e.target.checked);
-    $("startBtn").onclick = () => { showGame(true); cfg.onStart(meta); window.scrollTo(0, 0); };
+    $("startBtn").onclick = () => { showGame(true); busy = true; cfg.onStart(meta); window.scrollTo(0, 0); };
     $("startBtn").focus();
     maybeHelp();
   }
 
   function showPast() {
-    current = null;
+    current = null; busy = false;
     history.replaceState(null, "", "?past");
     const t = today(), years = [t.getFullYear()];
     if (dayOfYear(t) <= PAST_DAYS) years.push(t.getFullYear() - 1);
@@ -179,6 +183,7 @@
 
   function showResults(res, animate) {
     const meta = res.meta, daily = meta && meta.mode === "daily";
+    busy = !daily;
     current = null;
     history.replaceState(null, "", daily ? "?daily=" + meta.iso : "?practice");
     setDailyLine(lineFor(meta), daily ? ["past", "random"] : ["today", "past"]);
@@ -239,6 +244,27 @@
     $("welcomeClose").onclick = () => { write("help-seen", true); card.remove(); };
   }
 
+  // ---- staying up to date ----
+  // A phone can keep an old copy of a game for a while, or bring back a tab without reloading it.
+  // When the game is opened or brought back to the front, ask the site which version is current;
+  // if it is newer and no puzzle is under way, reload. Each new version is tried once per tab,
+  // so a page still being served from a cache can never loop.
+  function checkForUpdate() {
+    if (!VERSION || !window.fetch || busy) return;
+    fetch(new URL("version.json", SELF).href + "?t=" + Date.now(), { cache: "no-store" })
+      .then(r => r.ok ? r.json() : null)
+      .then(j => {
+        if (!j || !j.v || j.v === VERSION || busy) return;
+        let tried = null; try { tried = sessionStorage.getItem("puzzling:reloaded-for"); } catch (e) {}
+        if (tried === j.v) return;
+        try { sessionStorage.setItem("puzzling:reloaded-for", j.v); } catch (e) {}
+        location.reload();
+      })
+      .catch(() => {});
+  }
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") checkForUpdate(); });
+  window.addEventListener("pageshow", e => { if (e.persisted) checkForUpdate(); });
+
   // Give up asks for a second tap, so a stray touch cannot end a puzzle.
   function confirmGiveUp(btn, fn) {
     let armed = 0;
@@ -253,6 +279,7 @@
     init(settings) {
       cfg = settings;
       store = cfg.game.replace(/-/g, "") + ":";
+      checkForUpdate();
       buildHelp();
       $("helpBtn").onclick = showHelp;
       const q = new URLSearchParams(location.search);

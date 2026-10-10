@@ -54,6 +54,7 @@ tools/
   check-puzzles.js    Checks every puzzle file and daily schedule for mistakes.
   make-daily.js       Makes the daily schedule for a new year.
   package-game.js     Packs one game into a folder that works on its own.
+  stamp.js            Stamps a new version on every page before a push.
 ```
 
 Common Thread and Whittle have their own game code inside their page. The
@@ -187,6 +188,19 @@ node tools/check-puzzles.js
 
 The site is published with GitHub Pages from the `main` branch of this
 repository. Any change pushed to `main` goes live within a minute or two.
+
+Before pushing a change, stamp a new version:
+
+```
+node tools/stamp.js
+```
+
+It tags every file the pages load with the new version, so a reload never
+mixes old and new code, and writes `shared/version.json`. A game that is
+already open on a phone checks that file when it is opened or brought back to
+the front, and refreshes itself if a newer version is out. It never refreshes
+in the middle of a puzzle. GitHub can take up to ten minutes to hand out the
+new version everywhere.
 
 ### Packing one game as its own app
 
