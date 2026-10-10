@@ -215,6 +215,7 @@ dialog.help h3 { font-family: var(--display); font-size: 1rem; margin: 16px 0 8p
 dialog.help .settings { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
 dialog.help .foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 8px; }
 dialog.help .foot a { color: var(--muted); font-size: 0.9rem; }
+dialog.help .ver { margin: 10px 0 0; text-align: center; color: var(--muted); font-size: 0.75rem; font-variant-numeric: tabular-nums; }
 
 /* ---- home page ---- */
 .games { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
