@@ -1,4 +1,4 @@
-// Daily puzzle schedule for 2026. Made by: node tools/make-daily.js 2026 --refresh (days 1 to 282 kept from the earlier schedule)
+// Daily puzzle schedule for 2026. Made by: node tools/make-daily.js 2026 --refresh (days 1 to 283 kept from the earlier schedule)
 // One line per day. Day 1 is January 1. Each puzzle is named by its key (see shared/keys.js).
 // Do not edit by hand: past days should stay as they were.
 window.DAILY_SCHEDULE = window.DAILY_SCHEDULE || {};
