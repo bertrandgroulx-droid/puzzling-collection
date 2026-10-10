@@ -153,13 +153,14 @@ first letter instead, like every other game.
 
 All puzzles must be original. The game formats are inspired by the puzzle
 segments on CBC Radio's *That's Puzzling!*, but none of the show's clues or
-answers are used. Each game's How to play panel carries this credit, in the
-wording the studio asked for:
+answers are used. The credit is public and plain, and lives on the studio
+site, as a line under the Puzzling shelf on shozbot.com:
 
-> Inspired by *That's Puzzling!* on CBC Radio's *The Sunday Magazine*. Not
-> affiliated with CBC.
+> Inspired by *That's Puzzling!* on CBC Radio's *The Sunday Magazine*, where
+> puzzle master Peter Brown sets the games. Every clue and answer here is
+> original, and Shozbot is not affiliated with CBC.
 
-The show's name appears only in that credit.
+Nothing inside the games carries it for now.
 
 ## Where the games came from
 
@@ -196,6 +197,26 @@ node tools/check-puzzles.js
 The site is published with GitHub Pages from the `main` branch of this
 repository. Any change pushed to `main` goes live within a minute or two.
 
+### On shozbot.com
+
+The studio site serves this whole repository under one prefix:
+`shozbot.com/puzzling/` is the collection page, and each game lives at
+`shozbot.com/puzzling/<folder>/`, so `../shared/` resolves on its own. Every
+page carries, as the studio's other apps do:
+
+- a canonical link to its shozbot.com address;
+- a small script that moves anyone arriving at the old github.io address
+  across, swapping `/puzzling-collection/` for `/puzzling/` and keeping the
+  rest of the path, the query and the hash. Its hostname test stops it firing
+  at shozbot.com, where the same file is served through the rewrite. Do not
+  remove that test;
+- the studio kit, which puts "by shozbot" under the game's name and counts
+  the visit.
+
+GitHub Pages still serves the files; shozbot.com shows them under its own
+address. Scores and streaks are saved per address, which is why the old
+address forwards.
+
 Before pushing a change, stamp a new version:
 
 ```
@@ -227,7 +248,8 @@ of them to `tools/icons-preview.png` for a quick look.
 
 ### Packing one game as its own app
 
-Each game is meant to become its own app on shozbot.com. This command copies
+Not needed for shozbot.com, which serves the repository as it is. Kept for
+putting one game somewhere else on its own. This command copies
 a game and everything it needs into `dist/<game>/`, a folder that works on
 its own and can be dropped into another site:
 
