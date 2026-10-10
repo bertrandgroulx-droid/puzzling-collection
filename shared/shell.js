@@ -224,6 +224,7 @@
       "<ul>" + h.steps.map(s => "<li>" + s + "</li>").join("") + "</ul>" +
       (h.example ? '<div class="example">' + h.example + "</div>" : "") +
       (cfg.timed ? '<h3>Settings</h3><div class="settings"><label class="toggle"><span>Timer<small>Off means no clock and no penalties. Applies from the next puzzle.</small></span><input type="checkbox" id="helpTimer" role="switch"></label></div>' : "") +
+      '<p class="credit">Inspired by <i>That’s Puzzling!</i> on CBC Radio’s <i>The Sunday Magazine</i>. Not affiliated with CBC.</p>' +
       '<div class="foot"><a href="../">All games</a><button class="primary" id="helpClose" type="button">Got it</button></div>' +
       (VERSION ? '<p class="ver">Version ' + esc(VERSION) + "</p>" : "");
     if ($("helpTimer")) $("helpTimer").onchange = e => { write("timer", e.target.checked); const t = $("timerToggle"); if (t) t.checked = e.target.checked; };

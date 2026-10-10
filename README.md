@@ -153,15 +153,21 @@ first letter instead, like every other game.
 
 All puzzles must be original. The game formats are inspired by the puzzle
 segments on CBC Radio's *That's Puzzling!*, but none of the show's clues or
-answers are used, and the show's name appears nowhere in the games.
+answers are used. Each game's How to play panel carries this credit, in the
+wording the studio asked for:
+
+> Inspired by *That's Puzzling!* on CBC Radio's *The Sunday Magazine*. Not
+> affiliated with CBC.
+
+The show's name appears only in that credit.
 
 ## Where the games came from
 
 Each game was first built under the name of the format it copies, which is
 the segment name used on CBC Radio's *That's Puzzling!*. The games were
 renamed when the collection became Puzzling, so each could stand as its own
-app. The original names are kept here for reference; neither they nor the
-show's name appear in the games.
+app. The original names are kept here for reference and do not appear in
+the games.
 
 | Game now | Original name | Format |
 | --- | --- | --- |

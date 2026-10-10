@@ -217,6 +217,7 @@ dialog.help h3 { font-family: var(--display); font-size: 1rem; margin: 16px 0 8p
 dialog.help .settings { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
 dialog.help .foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 8px; }
 dialog.help .foot a { color: var(--muted); font-size: 0.9rem; }
+dialog.help .credit { margin: 4px 0 14px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.85rem; line-height: 1.4; text-align: center; text-wrap: balance; }
 dialog.help .ver { margin: 10px 0 0; text-align: center; color: var(--muted); font-size: 0.75rem; font-variant-numeric: tabular-nums; }
 
 /* ---- home page ---- */
