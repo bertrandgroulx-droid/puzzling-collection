@@ -64,7 +64,7 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 1.5rem; margin: 0
 .pip.zero { background: transparent; box-shadow: inset 0 0 0 2px var(--muted); }
 
 /* ---- the instruction line: what to find, then what to do. Ink, not grey, because it is read. ---- */
-.instr { margin: 0; padding: 8px 14px 10px; border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--ink); font-weight: 700; font-size: 1rem; line-height: 1.35; }
+.instr { margin: 0; padding: 8px 14px 10px; border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--ink); font-weight: 700; font-size: 1rem; line-height: 1.35; text-align: center; text-wrap: balance; }
 .instr::before { content: "Instructions"; display: block; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; }
 .instr:empty { display: none; }
 /* When the instruction appears or changes, the block pulses once to draw the eye, then settles. */
@@ -75,10 +75,11 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 1.5rem; margin: 0
   100% { box-shadow: 0 0 0 0 transparent; background: var(--accent-soft); }
 }
 .lead { margin: 0; color: var(--muted); }
+#shell .lead, #shell .note { text-align: center; text-wrap: balance; }
 .note { margin: 0; color: var(--muted); font-size: 0.88rem; }
 
 /* ---- the clue box, for games that show a clue above the letters ---- */
-.clue { margin: 0; padding: 10px 14px; background: var(--surface); border-radius: var(--radius-sm); }
+.clue { margin: 0; padding: 10px 14px; background: var(--surface); border-radius: var(--radius-sm); text-align: center; text-wrap: balance; }
 .clue span { display: block; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
 .clue b { font-weight: 700; font-size: 1.05rem; }
 
@@ -86,7 +87,7 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 1.5rem; margin: 0
 .tiles { display: flex; flex-direction: column; gap: 8px; }
 .tiles.stack { gap: 6px; }
 .tiles.stack .tile { padding: 10px 14px; font-size: 1.2rem; text-align: center; }
-.tiles.wrap { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+.tiles.wrap { flex-direction: row; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .tiles.wrap .tile { flex: 1 1 auto; padding: 10px 14px; font-size: 1.15rem; text-align: center; }
 .tiles.row { flex-direction: row; gap: 6px; justify-content: center; }
 .tile { background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 13px 16px; font-family: var(--display); font-weight: 800; font-size: 1.3rem; letter-spacing: 0.04em; text-transform: uppercase; min-width: 0; overflow-wrap: anywhere; color: var(--ink); }
@@ -101,7 +102,7 @@ button.tile:not(:disabled):active { transform: translateY(1.5px); box-shadow: no
 button.tile.sel { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 1.5px 0 var(--accent-edge); }
 button.tile.hinted { border-color: var(--part); background: var(--part-soft); }
 .words { display: flex; flex-direction: column; gap: 8px; }
-.words.wrap { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+.words.wrap { flex-direction: row; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .words.wrap .word { flex: 1 1 auto; padding: 10px 14px; font-size: 1.15rem; text-align: center; }
 .word { background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 13px 16px; font-family: var(--display); font-weight: 800; font-size: 1.25rem; letter-spacing: 0.04em; text-transform: uppercase; overflow-wrap: anywhere; }
 
@@ -109,14 +110,14 @@ button.tile.hinted { border-color: var(--part); background: var(--part-soft); }
 form { display: flex; flex-direction: column; gap: 10px; margin: 0; }
 .entry { display: flex; gap: 8px; }
 .field { display: flex; flex-direction: column; gap: 6px; }
-.field > span { font-weight: 600; font-size: 0.95rem; }
-input[type="text"] { width: 100%; min-width: 0; font-family: var(--display); font-weight: 800; font-size: 1.15rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 12px 14px; border-radius: var(--radius); border: 2px solid var(--line); background: var(--surface); color: var(--ink); }
+.field > span { font-weight: 600; font-size: 0.95rem; text-align: center; }
+input[type="text"] { width: 100%; min-width: 0; text-align: center; font-family: var(--display); font-weight: 800; font-size: 1.15rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 12px 14px; border-radius: var(--radius); border: 2px solid var(--line); background: var(--surface); color: var(--ink); }
 .entry input[type="text"] { flex: 1; }
 input[type="text"]::placeholder { color: var(--muted); font-family: var(--body); font-weight: 500; text-transform: none; letter-spacing: 0; font-size: 1rem; }
 input[type="text"]:focus-visible { outline: none; border-color: var(--accent); }
 input[type="text"].wrong { border-color: var(--muted); }
 input[type="text"]:disabled { border-color: var(--good); background: var(--good-soft); }
-.hint { margin: 0; font-family: var(--mono); font-weight: 700; letter-spacing: 0.14em; color: var(--part); font-size: 1.05rem; }
+.hint { margin: 0; text-align: center; font-family: var(--mono); font-weight: 700; letter-spacing: 0.14em; color: var(--part); font-size: 1.05rem; }
 
 /* ---- buttons: filled and raised, so a control never reads as a label. One accent-filled button per screen. ---- */
 button, .btn { font-family: var(--body); font-weight: 800; font-size: 0.95rem; border-radius: var(--radius); min-height: 48px; padding: 10px 16px; border: 1px solid var(--btn-line); background: var(--btn); color: var(--ink); box-shadow: 0 1.5px 0 var(--btn-line); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center; text-decoration: none; }
@@ -129,7 +130,7 @@ button:focus-visible, .btn:focus-visible, a:focus-visible { outline: 3px solid v
 .row { display: flex; gap: 8px; flex-wrap: wrap; }
 .row > button, .row > .btn { flex: 1; }
 .opts { display: flex; flex-direction: column; gap: 8px; }
-.opt { justify-content: flex-start; text-align: left; font-weight: 600; min-height: 48px; }
+.opt { font-weight: 600; min-height: 48px; }
 button.confirm { border-color: var(--part); background: var(--part-soft); color: var(--part); }
 .opt.wrong { background: var(--surface); border-color: var(--line); color: var(--muted); box-shadow: none; }
 .opt.wrong::before { content: "\2715"; font-size: 0.75rem; }
@@ -140,7 +141,7 @@ button.confirm { border-color: var(--part); background: var(--part-soft); color:
 .key { min-height: 44px; padding: 0; font-family: var(--display); font-weight: 800; font-size: 1rem; border-radius: var(--radius-sm); min-width: 0; }
 
 /* ---- the status line: what happened, in the state colour, with an icon so colour is never alone ---- */
-.status { margin: 0; display: flex; align-items: center; gap: 8px; min-height: 2.3em; padding: 8px 12px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.92rem; border: 1px solid transparent; }
+.status { margin: 0; display: flex; align-items: center; justify-content: center; text-align: center; gap: 8px; min-height: 2.3em; padding: 8px 12px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.92rem; border: 1px solid transparent; }
 .status:empty { padding: 0; min-height: 1.4em; }
 .status::before { content: ""; display: none; width: 18px; height: 18px; border-radius: 50%; flex: none; place-items: center; font-size: 0.65rem; line-height: 1; color: var(--bg); }
 .status.good { background: var(--good-soft); color: var(--good); }
@@ -163,14 +164,14 @@ button.confirm { border-color: var(--part); background: var(--part-soft); color:
 .rungs b { color: var(--good); }
 .ladder { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 /* Each answer on its own line, with its clue underneath. */
-.ladder li { display: flex; flex-direction: column; gap: 2px; padding: 9px 14px 10px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); }
+.ladder li { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; padding: 9px 14px 10px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); }
 .ladder .w { font-family: var(--display); font-weight: 800; font-size: 1.1rem; letter-spacing: 0.06em; overflow-wrap: anywhere; min-width: 0; }
 .ladder .d { color: var(--muted); font-size: 0.88rem; line-height: 1.3; min-width: 0; }
 .ladder li.got { border-color: var(--good); background: var(--good-soft); }
 .ladder li.miss .w { color: var(--muted); }
 
 /* ---- results ---- */
-.big { font-family: var(--display); font-weight: 800; font-size: 3.2rem; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.big { text-align: center; font-family: var(--display); font-weight: 800; font-size: 3.2rem; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
 .big small { font-size: 1.1rem; color: var(--muted); font-weight: 700; letter-spacing: 0; }
 .recap { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .recap li { display: flex; justify-content: space-between; gap: 12px; font-family: var(--mono); font-size: 0.82rem; padding: 9px 0; border-bottom: 1px solid var(--line); }
@@ -178,7 +179,8 @@ button.confirm { border-color: var(--part); background: var(--part-soft); color:
 .recap li span:last-child { color: var(--muted); white-space: nowrap; }
 
 /* ---- the start card for timed games, and the past-puzzles list ---- */
-.card { background: var(--surface); border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.card { background: var(--surface); border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column; gap: 10px; text-align: center; }
+.card .toggle { text-align: left; }
 .card small { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
 .card b { font-family: var(--display); font-weight: 800; font-size: 1.15rem; }
 .card p { margin: 0; color: var(--muted); font-size: 0.92rem; }
