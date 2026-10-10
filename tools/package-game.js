@@ -29,6 +29,7 @@ for (const game of list) {
     fs.writeFileSync(path.join(out, f), text);
   }
   for (const f of fs.readdirSync(path.join(root, "shared"))) fs.copyFileSync(path.join(root, "shared", f), path.join(out, "shared", f));
+  if (fs.existsSync(path.join(src, "icons"))) fs.cpSync(path.join(src, "icons"), path.join(out, "icons"), { recursive: true });
   const files = fs.readdirSync(out).filter(f => f !== "shared").length + fs.readdirSync(path.join(out, "shared")).length;
   console.log("Packed " + game + " into dist/" + game + "/ (" + files + " files)");
 }

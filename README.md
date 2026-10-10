@@ -55,6 +55,7 @@ tools/
   make-daily.js       Makes the daily schedule for a new year.
   package-game.js     Packs one game into a folder that works on its own.
   stamp.js            Stamps a new version on every page before a push.
+  make-icons.py       Draws every app icon and writes each game's manifest.
 ```
 
 Common Thread and Whittle have their own game code inside their page. The
@@ -201,6 +202,22 @@ already open on a phone checks that file when it is opened or brought back to
 the front, and refreshes itself if a newer version is out. It never refreshes
 in the middle of a puzzle. GitHub can take up to ten minutes to hand out the
 new version everywhere.
+
+### App icons
+
+Each game folder has an `icons/` folder and a `manifest.webmanifest`, so
+"Add to Home Screen" installs it as its own app with its own name and icon.
+The icons follow the studio's style: one bold glyph of flat blocks, azure on
+near-black. In every icon the single white piece is the move the game asks
+of you. They are all drawn by one tool; edit a glyph there and run:
+
+```
+pip install cairosvg pillow
+python3 tools/make-icons.py
+```
+
+It rewrites every icon size and manifest, and saves a contact sheet of all
+of them to `tools/icons-preview.png` for a quick look.
 
 ### Packing one game as its own app
 
