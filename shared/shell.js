@@ -234,7 +234,7 @@
     $("help").showModal();
   }
   // A first visit gets a short welcome card above the puzzle instead of a pop-up: the goal in one
-  // line, the example, and a Got it link. The ? button still opens the full panel.
+  // line, the example, and a Got it link. The How to play button still opens the full panel.
   function maybeHelp() {
     if (read("help-seen", false) || $("welcome")) return;
     const h = cfg.how, card = document.createElement("div");

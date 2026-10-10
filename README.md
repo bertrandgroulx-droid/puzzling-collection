@@ -81,7 +81,7 @@ starts unexpectedly.
   screen is Play random puzzles.
 - **First visit.** A short welcome card sits above the first puzzle: the
   goal in one line, the example, and Got it. Nothing pops up over the game.
-- **How to play.** The **?** button opens the full panel. On timed games it
+- **How to play.** The **How to play** button at the top opens the full panel. On timed games it
   also holds the timer switch.
 - **Streaks.** Days in a row with today's puzzle played. Shown on the results
   screen and on the home page once it reaches two. Missing a day resets it;
