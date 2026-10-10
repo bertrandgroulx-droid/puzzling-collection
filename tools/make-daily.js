@@ -54,7 +54,7 @@ function schedule(game, keys, seed) {
 for (const game of Object.keys(KEYS)) {
   const file = path.join(root, game, "daily-" + year + ".js");
   if (fs.existsSync(file) && !force && !refresh) { console.log(game + ": daily-" + year + ".js already exists, left as is"); continue; }
-  const puzzles = loadPuzzles(game), keys = puzzles.map(KEYS[game]);
+  const puzzles = loadPuzzles(game).filter(p => !p.retired), keys = puzzles.map(KEYS[game]);
   if (keys.length < PER_GAME[game] * 2) { console.log(game + ": too few puzzles to schedule"); continue; }
   let sets, kept = 0;
   if (refresh && fs.existsSync(file)) {

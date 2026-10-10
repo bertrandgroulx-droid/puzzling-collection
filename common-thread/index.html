@@ -70,7 +70,7 @@ function newGame(m) {
   meta = m && m.mode === "daily" ? m : null;
   if (meta) game = meta.items.map(p => PUZZLES[RAW.indexOf(p)]);
   else {
-    if (queue.length < PER_GAME) queue = shuffle(PUZZLES.map((_, i) => i));
+    if (queue.length < PER_GAME) queue = shuffle(PUZZLES.map((_, i) => i).filter(i => !RAW[i].retired));
     game = queue.splice(0, PER_GAME).map(i => PUZZLES[i]);
   }
   idx = 0; score = 0; results = [];

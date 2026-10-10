@@ -59,7 +59,7 @@
     let items;
     if (meta && meta.mode === "daily") items = meta.items.map(p => prepare(p, G.type));
     else {
-      if (queue.length < G.per) queue = shuffle(G.items.map((_, i) => i));
+      if (queue.length < G.per) queue = shuffle(G.items.map((_, i) => i).filter(i => !G.items[i].retired));
       items = queue.splice(0, G.per).map(i => G.items[i]);
     }
     S = { items, i: 0, score: 0, results: [], meta: meta && meta.mode === "daily" ? meta : null };
@@ -212,7 +212,7 @@
   // Called once by each game's page.
   window.startGame = function (settings) {
     G = Object.assign({}, settings);
-    G.items = (settings.puzzles || []).map(p => prepare(p, G.type));
+    G.items = (settings.puzzles || []).map(p => Object.assign(prepare(p, G.type), { retired: !!p.retired }));
     stage = $("stage");
     if (!G.items.length) { stage.innerHTML = '<p class="lead">No puzzles found. Check puzzles.js.</p>'; return; }
     Shell.init({ game: G.game, title: G.title, puzzles: settings.puzzles, per: G.per, max: G.max, timed: G.timed, how: G.how, onStart: newGame });

@@ -132,6 +132,11 @@ format. In short:
 | --- | --- |
 | Common Thread | `{ link: "LIGHT", hint: "You flip a switch to get it.", clues: ["SUN_", "FLASH_", "_HOUSE"] }` |
 | Whittle | `{ start: "PLANET", steps: [["Something that grows", "PLANT"], ["A scheme", "PLAN"], ["You fry an egg in it", "PAN"]] }` |
+
+In Whittle, no step may simply drop a plural S (CHATS to CHAT is not a
+whittle). The checker refuses such a chain. A puzzle marked `retired: true`
+is kept only so past daily sets still load; it is left out of random play and
+of any day scheduled from now on.
 | Tumble | `{ letters: "HEART", clues: ["The ground beneath you", "Bonus: someone full of dislike"], answers: ["EARTH", "HATER"] }` |
 | Stowaway | `{ clues: ["A hot drink", "A group of players"], answers: ["TEA", "TEAM"] }` |
 | Soundalike | `{ clues: ["Two of something", "A juicy fruit"], answers: ["PAIR", "PEAR"] }` |

@@ -139,6 +139,8 @@ const choose = (n, k) => { let r = 1; for (let i = 1; i <= k; i++) r = r * (n - 
 const fmt = n => n.toLocaleString("en-CA");
 const games = [["Common Thread", ML, 5], ["Whittle", M3, 4], ["Tumble", AN, 5], ["Stowaway", PO, 5], ["Soundalike", HH, 5], ["Switcheroo", SO, 4], ["Three of a Kind", SP, 5], ["Splice", MU, 5]];
 console.log("Game              Puzzles  Per game  Games before a repeat  Different games");
-for (const [n, l, k] of games) console.log(n.padEnd(18) + String(l.length).padStart(7) + String(k).padStart(10) + String(Math.floor(l.length / k)).padStart(23) + fmt(choose(l.length, k)).padStart(17));
+for (const [n, l0, k] of games) { const l = l0.filter(p => !p.retired); console.log(n.padEnd(18) + String(l.length).padStart(7) + String(k).padStart(10) + String(Math.floor(l.length / k)).padStart(23) + fmt(choose(l.length, k)).padStart(17) + (l0.length > l.length ? "   (" + (l0.length - l.length) + " retired)" : "")); }
+// Whittle: no step may simply drop a plural S (retired chains are allowed to, they are history).
+for (const p of M3) if (!p.retired) { let prev = p.start; for (const [, a] of p.steps) { if (prev.endsWith("S") && prev.slice(0, -1) === a) bad("whittle", "a step just drops the S: " + prev + " to " + a, p); prev = a; } }
 console.log(problems ? problems + " problem(s) found." : "All puzzle files look good.");
 process.exit(problems ? 1 : 0);
