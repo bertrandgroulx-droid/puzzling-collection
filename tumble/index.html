@@ -19,7 +19,7 @@
     location.replace("https://shozbot.com" + location.pathname.replace(/^\/puzzling-collection(\/|$)/, "/puzzling/") + location.search + location.hash);
   })();
 </script>
-<meta name="description" content="Rearrange the letters to fit the clue, then find a bonus word in the same letters.">
+<meta name="description" content="An anagram game: rearrange the letters to fit the clue, then find a bonus word in the same letters.">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#121214" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
@@ -31,7 +31,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../shared/style.css?v=20261010-220710">
+<link rel="stylesheet" href="../shared/style.css?v=20261011-002433">
 </head>
 <body>
 <main class="app">
@@ -45,10 +45,10 @@
   <dialog class="help" id="help"></dialog>
 </main>
 
-<script src="puzzles.js?v=20261010-220710"></script>
-<script src="../shared/keys.js?v=20261010-220710"></script>
-<script src="../shared/shell.js?v=20261010-220710"></script>
-<script src="../shared/game.js?v=20261010-220710"></script>
+<script src="puzzles.js?v=20261011-002433"></script>
+<script src="../shared/keys.js?v=20261011-002433"></script>
+<script src="../shared/shell.js?v=20261011-002433"></script>
+<script src="../shared/game.js?v=20261011-002433"></script>
 <script>
 // The settings for this game. Puzzles live in puzzles.js; the look in ../shared/style.css.
 startGame({
@@ -60,9 +60,9 @@ startGame({
   per: 5,             // puzzles per game
   max: 2,             // points per puzzle
   timed: { title: "Five puzzles, 30 seconds each", rules: "Both words in 30 seconds. 1 point per word." },
-  instruction: "Type the clue’s word, then tap Check.",
+  instruction: "Make an anagram: use every letter to fit the clue, then tap Check.",
   how: {
-    goal: "Rearrange the letters into the word the clue describes, then find a second word in the same letters.",
+    goal: "An anagram game. Rearrange the letters into the word the clue describes, then find a second word in the same letters.",
     steps: [
       "The letters of a real word are shown, five or six of them. Type a word that uses every letter and matches the clue, then tap Check.",
       "Once the first word is right, a bonus clue asks for a second word made from the same letters.",

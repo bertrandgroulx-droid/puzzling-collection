@@ -1,7 +1,7 @@
 {
   "name": "Tumble",
   "short_name": "Tumble",
-  "description": "Rearrange the letters to fit the clue, then find a bonus word in the same letters.",
+  "description": "An anagram game: rearrange the letters to fit the clue, then find a bonus word in the same letters.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

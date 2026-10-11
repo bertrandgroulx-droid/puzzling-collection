@@ -118,7 +118,7 @@ def svg(parts, share, note=""):
 APPS = {
     "common-thread": ("Common Thread", "Three words, and one missing word that pairs with every one of them."),
     "whittle": ("Whittle", "Take one letter away at a time to match three clues before the clock runs out."),
-    "tumble": ("Tumble", "Rearrange the letters to fit the clue, then find a bonus word in the same letters."),
+    "tumble": ("Tumble", "An anagram game: rearrange the letters to fit the clue, then find a bonus word in the same letters."),
     "stowaway": ("Stowaway", "Two clues, two words: the second is the first with one letter smuggled in."),
     "soundalike": ("Soundalike", "Two clues, two words that sound the same but are spelled differently."),
     "switcheroo": ("Switcheroo", "Change one letter at a time to climb a three-step word ladder."),
