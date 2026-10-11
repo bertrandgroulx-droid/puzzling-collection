@@ -31,7 +31,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../shared/style.css?v=20261011-002433">
+<link rel="stylesheet" href="../shared/style.css?v=20261011-020905">
 </head>
 <body>
 <main class="app">
@@ -43,9 +43,9 @@
   <section id="shell" class="stack" hidden></section>
 
   <section id="play" class="stack" data-game-ui>
-    <div class="pips" id="pips" aria-hidden="true"></div>
+    <div class="progress"><span class="count" id="count"></span><div class="pips" id="pips" aria-hidden="true"></div></div>
     <p class="instr">Type the word that goes with all three.</p>
-    <div class="tiles stack" id="tiles"></div>
+    <div class="group"><span class="lbl">The three words</span><div class="tiles stack" id="tiles"></div></div>
     <form id="form" class="entry" autocomplete="off">
       <input type="text" id="guess" name="guess" placeholder="The missing word" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-label="Your answer">
       <button class="primary" id="check" type="submit">Check</button>
@@ -53,7 +53,7 @@
     <p class="hint" id="hint" hidden></p>
     <p class="status" id="msg" aria-live="polite"></p>
     <div class="row" id="helpRow">
-      <button id="hintBtn" type="button">Hint &middot; first letter &middot; 1 point</button>
+      <button id="hintBtn" type="button">Hint (−1 point)</button>
       <button id="giveUp" type="button">Give up</button>
     </div>
     <div class="row" id="nextRow" hidden>
@@ -64,9 +64,9 @@
   <dialog class="help" id="help"></dialog>
 </main>
 
-<script src="puzzles.js?v=20261011-002433"></script>
-<script src="../shared/keys.js?v=20261011-002433"></script>
-<script src="../shared/shell.js?v=20261011-002433"></script>
+<script src="puzzles.js?v=20261011-020905"></script>
+<script src="../shared/keys.js?v=20261011-020905"></script>
+<script src="../shared/shell.js?v=20261011-020905"></script>
 <script>
 // Puzzles live in puzzles.js. Each clue is written like "SUN_" (link goes after)
 // or "_HOUSE" (link goes before). A space beside the underscore means a two-word phrase.
@@ -99,6 +99,7 @@ function newGame(m) {
 }
 
 function drawPips() {
+  $("count").textContent = "Puzzle " + (idx + 1) + " of " + game.length;
   $("pips").innerHTML = game.map((_, i) => {
     const r = results[i];
     const cls = r === undefined ? (i === idx ? "now" : "") : r === MAX ? "full" : r > 0 ? "half" : "zero";
@@ -115,7 +116,7 @@ function showPuzzle() {
   $("hint").hidden = true; $("hint").textContent = p.link[0] + " _".repeat(p.link.length - 1);
   say("");
   $("guess").value = ""; $("guess").disabled = false; $("check").disabled = false;
-  $("hintBtn").disabled = false; $("hintBtn").innerHTML = "Hint &middot; first letter &middot; 1 point";
+  $("hintBtn").disabled = false; $("hintBtn").innerHTML = "Hint (−1 point)";
   $("form").hidden = false; $("helpRow").hidden = false; $("nextRow").hidden = true;
   drawPips();
   $("guess").focus();

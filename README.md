@@ -79,8 +79,12 @@ starts unexpectedly.
   other places you can go (for example "Past puzzles" and "Random puzzles"
   while on today's puzzle). After a puzzle, the main button on the results
   screen is Play random puzzles.
-- **First visit.** A short welcome card sits above the first puzzle: the
-  goal in one line, the example, and Got it. Nothing pops up over the game.
+- **First visit.** The Instructions block above the first puzzle opens out
+  to show the goal, the example, and Got it; Got it shrinks it back to the
+  one-line instruction. Nothing pops up over the game.
+- **Labels.** Every part of a puzzle says what it is in a small grey label
+  ("Puzzle 1 of 5", "Clue 1", "The letters", "Your answer"). Clues are set in
+  the reading face; the bold display face is kept for the puzzle's own words.
 - **How to play.** The **How to play** button at the top opens the full panel. On timed games it
   also holds the timer switch.
 - **Streaks.** Days in a row with today's puzzle played. Shown on the results

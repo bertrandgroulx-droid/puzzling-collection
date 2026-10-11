@@ -227,22 +227,24 @@
       '<div class="foot"><a href="../">All games</a><button class="primary" id="helpClose" type="button">Got it</button></div>' +
       (VERSION ? '<p class="ver">Version ' + esc(VERSION) + "</p>" : "");
     if ($("helpTimer")) $("helpTimer").onchange = e => { write("timer", e.target.checked); const t = $("timerToggle"); if (t) t.checked = e.target.checked; };
-    $("helpClose").onclick = () => { $("help").close(); write("help-seen", true); const w = $("welcome"); if (w) w.remove(); };
+    $("helpClose").onclick = () => { $("help").close(); write("help-seen", true); const w = $("welcome"); if (w) w.remove(); document.body.classList.remove("first-visit"); };
   }
   function showHelp() {
     if ($("helpTimer")) $("helpTimer").checked = timerOn();
     $("help").showModal();
   }
-  // A first visit gets a short welcome card above the puzzle instead of a pop-up: the goal in one
-  // line, the example, and a Got it link. The How to play button still opens the full panel.
+  // A first visit gets a fuller Instructions block above the puzzle instead of a pop-up: the goal,
+  // the example, and a Got it link. While it shows, the short instruction line stays hidden, so
+  // there is one blue block, not two; Got it swaps in the short line. How to play still opens the panel.
   function maybeHelp() {
     if (read("help-seen", false) || $("welcome")) return;
     const h = cfg.how, card = document.createElement("div");
     card.id = "welcome"; card.className = "welcome";
-    card.innerHTML = "<b>First time? Here is the idea</b><p>" + esc(h.goal) + "</p>" + (h.example ? '<div class="example">' + h.example + "</div>" : "") +
+    card.innerHTML = "<b>Instructions</b><p>" + esc(h.goal) + "</p>" + (h.example ? '<div class="example">' + h.example + "</div>" : "") +
       '<button class="link" id="welcomeClose" type="button">Got it</button>';
     $("shell").insertAdjacentElement("beforebegin", card);
-    $("welcomeClose").onclick = () => { write("help-seen", true); card.remove(); };
+    document.body.classList.add("first-visit");
+    $("welcomeClose").onclick = () => { write("help-seen", true); card.remove(); document.body.classList.remove("first-visit"); };
   }
 
   // ---- staying up to date ----

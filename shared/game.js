@@ -46,13 +46,16 @@
     if (instruction === undefined) instruction = G.instruction;
     const changed = instruction !== lastInstruction;
     lastInstruction = instruction;
-    return '<div class="pips" aria-hidden="true">' + S.items.map((_, j) => '<span class="pip ' + pipClass(S.results[j], j) + '"></span>').join("") + "</div>" +
+    return '<div class="progress"><span class="count">Puzzle ' + (S.i + 1) + " of " + S.items.length + '</span><div class="pips" aria-hidden="true">' + S.items.map((_, j) => '<span class="pip ' + pipClass(S.results[j], j) + '"></span>').join("") + "</div></div>" +
       (instruction ? '<p class="instr' + (changed ? " pulse" : "") + '">' + esc(instruction) + "</p>" : "");
   }
   function rows(list) { return '<ul class="ladder">' + list.map(r => '<li class="' + (r[2] ? "got" : "miss") + '"><span class="w">' + esc(r[0]) + '</span><span class="d">' + esc(r[1]) + "</span></li>").join("") + "</ul>"; }
   function label(p) { return p.words ? p.words.join(", ") : p.start ? p.start + " → " + p.steps[2][1] : p.given ? p.given + " → " + p.answers.join(", ") : p.answers.join(" / "); }
-  function buttons(hintLabel) {
-    return '<div class="row">' + (hintLabel ? '<button id="hintBtn" type="button">' + hintLabel + "</button>" : "") + '<button id="giveUp" type="button">Give up</button></div>';
+  // Every puzzle part says what it is: a small label, then the thing.
+  function clue(label, text, word) { return '<p class="clue"><span>' + esc(label) + "</span><b" + (word ? ' class="w"' : "") + ">" + esc(text) + "</b></p>"; }
+  function group(label, html) { return '<div class="group"><span class="lbl">' + esc(label) + "</span>" + html + "</div>"; }
+  function buttons() {
+    return '<div class="row"><button id="hintBtn" type="button">Hint (−1 point)</button><button id="giveUp" type="button">Give up</button></div>';
   }
 
   function newGame(meta) {
@@ -92,23 +95,25 @@
       let hinted = false, k = 0, found = 0, hints = 0;
       const n = p.answers.length;
       const pointsNow = () => G.each ? Math.max(0, found - hints) : (hinted ? 1 : 2);
-      const reveal = (ok) => (p.parts ? '<p class="clue"><span>The two words</span><b>' + esc(p.parts.join(" + ")) + "</b></p>" : "") +
-        (p.given ? '<div class="tiles row">' + p.given.split("").map(c => '<div class="tile">' + c + "</div>").join("") + "</div>" : "") +
+      const letters = () => '<div class="tiles row">' + p.given.split("").map(c => '<div class="tile">' + c + "</div>").join("") + "</div>";
+      const reveal = (ok) => (p.parts ? clue("The two words", p.parts.join(" + "), true) : "") +
+        (p.given ? group("The letters", letters()) : "") +
         rows(p.answers.map((a, j) => [a, p.clues ? p.clues[j] : p.lead.join(" + "), G.each ? j < found : ok]));
       const draw = () => {
         let h = head();
         if (timed()) h += CLOCK;
-        if (p.given) h += '<div class="tiles row">' + p.given.split("").map(c => '<div class="tile">' + c + "</div>").join("") + "</div>";
-        if (p.lead) h += '<div class="words">' + p.lead.map(t => '<p class="clue"><b>' + esc(t) + "</b></p>").join("") + "</div>";
+        if (p.given) h += group("The letters", letters());
+        if (p.lead) h += '<div class="clues">' + p.lead.map((t, j) => clue("Clue " + (j + 1), t)).join("") + "</div>";
         h += '<form id="f" autocomplete="off">';
-        const labels = p.clues || ["The two words blended into one"];
-        labels.forEach((c, j) => {
+        // Each answer box says what goes in it: the clue it answers, or, in Splice, the blend.
+        const fields = p.clues ? p.clues.map((c, j) => [G.each ? (j ? "Bonus clue" : "Clue") : "Clue " + (j + 1) + (j === 1 && G.secondNote ? " · " + G.secondNote : ""), c, "Your answer"])
+          : [["Your answer", "", "Both words blended into one"]];
+        fields.forEach(([lab, c, ph], j) => {
           if (G.each && j > k) return;
           const done = G.each && j < k;
-          const note = j === 1 && G.secondNote ? ' <small>(' + esc(G.secondNote) + ")</small>" : "";
-          h += '<label class="field"><span>' + esc(c) + note + '</span><input type="text" id="a' + j + '"' + (done ? ' disabled value="' + p.answers[j] + '"' : "") + ' autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go"></label>';
+          h += '<label class="field"><span class="lbl">' + esc(lab) + "</span>" + (c ? '<span class="q">' + esc(c) + "</span>" : "") + '<input type="text" id="a' + j + '" placeholder="' + esc(ph) + '"' + (done ? ' disabled value="' + p.answers[j] + '"' : "") + ' autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go"></label>';
         });
-        h += '<p class="hint" id="hint" hidden></p><button class="primary" type="submit">Check</button></form><p class="status" id="msg" aria-live="polite"></p>' + buttons(G.each || n === 1 ? "Hint · first letter · 1 point" : "Hint · first letters · 1 point");
+        h += '<p class="hint" id="hint" hidden></p><button class="primary" type="submit">Check</button></form><p class="status" id="msg" aria-live="polite"></p>' + buttons();
         stage.innerHTML = h;
         $("f").onsubmit = e => {
           e.preventDefault();
@@ -144,9 +149,10 @@
     choice(p) {
       let tries = 0, hinted = false;
       const opts = shuffle(p.options.slice());
-      const reveal = () => '<div class="words wrap">' + p.words.map(w => '<div class="word">' + esc(w) + "</div>").join("") + '</div><p class="clue"><span>What they share</span><b>' + esc(p.options[0]) + "</b></p>";
-      stage.innerHTML = head() + '<div class="words wrap">' + p.words.map(w => '<div class="word">' + esc(w) + "</div>").join("") + '</div><div class="opts" id="opts">' +
-        opts.map(o => '<button class="opt" type="button">' + esc(o) + "</button>").join("") + '</div><p class="status" id="msg" aria-live="polite"></p>' + buttons("Hint · removes one option · 1 point");
+      const words = group("The three words", '<div class="words wrap">' + p.words.map(w => '<div class="word">' + esc(w) + "</div>").join("") + "</div>");
+      const reveal = () => words + clue("What they share", p.options[0]);
+      stage.innerHTML = head() + words + group("What do they have in common?", '<div class="opts" id="opts">' +
+        opts.map(o => '<button class="opt" type="button">' + esc(o) + "</button>").join("") + "</div>") + '<p class="status" id="msg" aria-live="polite"></p>' + buttons();
       const points = () => Math.max(0, (tries === 0 ? 2 : 1) - (hinted ? 1 : 0));
       $("opts").onclick = e => {
         const b = e.target.closest(".opt");
@@ -169,17 +175,17 @@
     // Word ladder: tap a tile, then pick its replacement letter. Hint marks the tile to change.
     swap(p) {
       let step = 0, word = p.start, sel = -1, pts = 0, hints = 0, started = !timed(), hintedTile = -1, flipTile = -1;
-      const reveal = () => '<p class="clue"><span>Started from</span><b>' + p.start + "</b></p>" + rows(p.steps.map((s, j) => [s[1], s[0], j < pts]));
+      const reveal = () => clue("Started from", p.start, true) + rows(p.steps.map((s, j) => [s[1], s[0], j < pts]));
       const points = () => Math.max(0, pts - hints);
       const draw = () => {
         let h = head(started ? undefined : "Read the word, then tap Start.") + (started && timed() ? CLOCK : "");
-        if (started) h += '<p class="clue"><span>Clue ' + (step + 1) + " of 3</span><b>" + esc(p.steps[step][0]) + "</b></p>";
+        if (started) h += clue("Clue " + (step + 1) + " of 3", p.steps[step][0]);
         h += '<div class="tiles row">' + word.split("").map((c, i) => '<button class="tile' + (i === sel ? " sel" : "") + (i === hintedTile ? " hinted" : "") + (i === flipTile ? " flip" : "") + '" type="button" data-i="' + i + '"' + (started ? "" : " disabled") + ' aria-label="Letter ' + c + '">' + c + "</button>").join("") + "</div>";
         h += '<p class="status" id="msg" aria-live="polite">' + (started ? (sel < 0 ? "Tap the letter to change." : "Now tap its replacement.") : "") + "</p>";
         if (started) h += '<div class="keys">' + ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"].map(row => '<div class="keyrow">' + row.split("").map(c => '<button class="key" type="button" data-k="' + c + '"' + (sel < 0 ? " disabled" : "") + ">" + c + "</button>").join("") + "</div>").join("") + "</div>";
         else h += '<button class="primary" id="go" type="button">Start</button>';
         if (pts) h += '<p class="rungs">' + [p.start].concat(p.steps.slice(0, pts).map(s => "<b>" + s[1] + "</b>")).join(" → ") + "</p>";
-        if (started) h += buttons("Hint · marks the letter · 1 point");
+        if (started) h += buttons();
         stage.innerHTML = h;
         flipTile = -1; // the flip plays on the draw right after a correct swap, never on later redraws
         if (!started) { $("go").onclick = () => { started = true; draw(); startClock(G.timer, () => settle(points(), reveal(), "Time ran out.")); }; return; }

@@ -31,7 +31,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../shared/style.css?v=20261011-002433">
+<link rel="stylesheet" href="../shared/style.css?v=20261011-020905">
 </head>
 <body>
 <main class="app">
@@ -43,7 +43,7 @@
   <section id="shell" class="stack" hidden></section>
 
   <section id="play" class="stack" data-game-ui>
-    <div class="pips" id="pips" aria-hidden="true"></div>
+    <div class="progress"><span class="count" id="count"></span><div class="pips" id="pips" aria-hidden="true"></div></div>
     <p class="instr" id="instr"></p>
     <div class="clock" id="clockRow">
       <div class="bar" id="bar"><span id="barFill"></span></div>
@@ -56,7 +56,7 @@
     <p class="rungs" id="rungs" hidden></p>
     <ul class="ladder" id="ladder"></ul>
     <div class="row" id="helpRow" hidden>
-      <button id="hintBtn" type="button">Hint &middot; marks the letter &middot; 1 point</button>
+      <button id="hintBtn" type="button">Hint (−1 point)</button>
       <button id="giveUp" type="button">Give up</button>
     </div>
   </section>
@@ -64,9 +64,9 @@
   <dialog class="help" id="help"></dialog>
 </main>
 
-<script src="puzzles.js?v=20261011-002433"></script>
-<script src="../shared/keys.js?v=20261011-002433"></script>
-<script src="../shared/shell.js?v=20261011-002433"></script>
+<script src="puzzles.js?v=20261011-020905"></script>
+<script src="../shared/keys.js?v=20261011-020905"></script>
+<script src="../shared/shell.js?v=20261011-020905"></script>
 <script>
 // Chains live in puzzles.js: a six-letter start, then three [clue, answer] steps.
 const RAW = window.WHITTLE_PUZZLES || [];
@@ -100,6 +100,7 @@ function newGame(m) {
 }
 
 function drawPips() {
+  $("count").textContent = "Puzzle " + (ci + 1) + " of " + game.length;
   $("pips").innerHTML = game.map((_, i) => {
     const r = results[i];
     const cls = r === undefined ? (i === ci ? "now" : "") : r === MAX ? "full" : r > 0 ? "half" : "zero";
@@ -138,12 +139,13 @@ function begin() {
   running = true; $("go").hidden = true; $("helpRow").hidden = false;
   instruct("Tap the letter to take away.");
   $("clueRow").hidden = false; $("clockRow").hidden = !timed;
-  $("hintBtn").disabled = false; $("hintBtn").innerHTML = "Hint &middot; marks the letter &middot; 1 point";
+  $("hintBtn").disabled = false; $("hintBtn").innerHTML = "Hint (−1 point)";
   showStep();
   if (timed) { deadline = performance.now() + SECONDS * 1000; tick(); }
 }
 
 function showStep() {
+  $("clueText").className = "";
   $("clueLabel").textContent = "Clue " + (step + 1) + " of 3";
   $("clueText").textContent = game[ci].steps[step][0];
   drawTiles(true, -1);
@@ -166,7 +168,7 @@ function finish(why) {
     '<li class="' + (i < pts ? "got" : "miss") + '"><span class="w">' + s[1] + '</span><span class="d">' + s[0] + "</span></li>").join("");
   instruct(""); $("clockRow").hidden = true;
   $("clueLabel").textContent = "Started from";
-  $("clueText").textContent = c.start;
+  $("clueText").textContent = c.start; $("clueText").className = "w";
   say((pts === 3 ? "All three found." : why) + " " + p + (p === 1 ? " point." : " points."), p === MAX ? "good" : p > 0 ? "part" : "bad");
   $("tiles").innerHTML = ""; $("rungs").hidden = true; $("helpRow").hidden = true;
   $("go").hidden = false; $("go").textContent = ci + 1 < game.length ? "Next" : "See your score";
@@ -196,7 +198,7 @@ $("tiles").addEventListener("click", e => {
     $("rungs").innerHTML = [c.start].concat(c.steps.slice(0, step + 1).map(s => "<b>" + s[1] + "</b>")).join(" → ");
     say(cand + " is right.", "good");
     step++;
-    $("hintBtn").disabled = false; $("hintBtn").innerHTML = "Hint &middot; marks the letter &middot; 1 point";
+    $("hintBtn").disabled = false; $("hintBtn").innerHTML = "Hint (−1 point)";
     if (step === 3) { finish("Done."); return; }
     showStep();
     $("tiles").querySelectorAll(".tile").forEach(b => b.classList.add("flip"));
