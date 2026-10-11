@@ -51,7 +51,7 @@ window.TUMBLE_PUZZLES = [
   { letters: "DIETS", clues: ["The sea's daily rise and fall", "Bonus: corrects text"], answers: ["TIDES", "EDITS"] },
   { letters: "SWEAR", clues: ["Has on, as clothes", "Bonus: goods for sale"], answers: ["WEARS", "WARES"] },
   { letters: "BREAD", clues: ["Hair on the chin", "Bonus: uncovered"], answers: ["BEARD", "BARED"] },
-  { letters: "TRADE", clues: ["The grip on a tyre", "Bonus: given a score"], answers: ["TREAD", "RATED"] },
+  { letters: "TRADE", clues: ["The grip on a tire", "Bonus: given a score"], answers: ["TREAD", "RATED"] },
   { letters: "THREE", clues: ["In that place", "Bonus: an old-fashioned anaesthetic gas"], answers: ["THERE", "ETHER"] },
   { letters: "BEGIN", clues: ["A living creature", "Bonus: a spree of too much eating"], answers: ["BEING", "BINGE"] },
   { letters: "BRUTE", clues: ["A potato is one", "Bonus: to argue against"], answers: ["TUBER", "REBUT"] },

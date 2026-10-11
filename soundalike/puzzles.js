@@ -184,7 +184,7 @@ window.SOUNDALIKE_PUZZLES = [
   { clues: ["No, in an old vote", "The sound a horse makes"], answers: ["NAY", "NEIGH"] },
   { clues: ["A tiny hole in the skin", "To tip liquid out"], answers: ["PORE", "POUR"] },
   { clues: ["Quarter gallons", "A hard, glassy mineral"], answers: ["QUARTS", "QUARTZ"] },
-  { clues: ["A wide, flat, grassy plain", "To step, or a flat tyre"], answers: ["STEPPE", "STEP"] },
+  { clues: ["A wide, flat, grassy plain", "One stair in a flight"], answers: ["STEPPE", "STEP"] },
   { clues: ["Ice cream with sauce and nuts", "The day after Saturday"], answers: ["SUNDAE", "SUNDAY"] },
   { clues: ["Gave lessons", "Pulled tight"], answers: ["TAUGHT", "TAUT"] },
   { clues: ["Sun, rain and wind", "A word for \"if\""], answers: ["WEATHER", "WHETHER"] },

@@ -55,7 +55,7 @@ window.WHITTLE_PUZZLES = [
   { retired: true, start: "BEASTS", steps: [["A wild animal", "BEAST"], ["To defeat", "BEAT"], ["It hangs upside down in caves", "BAT"]] },
   { retired: true, start: "TRENDS", steps: [["A fashion", "TREND"], ["To look after", "TEND"], ["Twice five", "TEN"]] },
   { retired: true, start: "SPARES", steps: [["An extra kept in reserve", "SPARE"], ["To practise boxing lightly", "SPAR"], ["A place to soak and relax", "SPA"]] },
-  { start: "THREAD", steps: [["The grip on a tyre", "TREAD"], ["To take in words on a page", "READ"], ["The colour of a stop sign", "RED"]] },
+  { start: "THREAD", steps: [["The grip on a tire", "TREAD"], ["To take in words on a page", "READ"], ["The colour of a stop sign", "RED"]] },
   { retired: true, start: "SPOUTS", steps: [["A kettle pours from it", "SPOUT"], ["To push out your lips sulkily", "POUT"], ["Not in", "OUT"]] },
   { retired: true, start: "FLINTS", steps: [["A stone that makes sparks", "FLINT"], ["Fluff from the dryer", "LINT"], ["Set alight", "LIT"]] },
   { retired: true, start: "BLOATS", steps: [["To swell up", "BLOAT"], ["It floats", "BOAT"], ["A grain for porridge", "OAT"]] },
