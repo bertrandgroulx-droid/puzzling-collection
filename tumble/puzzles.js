@@ -89,7 +89,7 @@ window.TUMBLE_PUZZLES = [
   { letters: "BEARS", clues: ["A curved sword", "Bonus: uncovers"], answers: ["SABRE", "BARES"] },
   { letters: "FEAST", clues: ["Impressive deeds", "Bonus: what will happen, destinies"], answers: ["FEATS", "FATES"] },
   { letters: "SPINE", clues: ["Evergreen trees", "Bonus: a wading bird, or a nasty remark"], answers: ["PINES", "SNIPE"] },
-  { letters: "FIRES", clues: ["Chips, in America", "Bonus: the little foot on a letter in some typefaces"], answers: ["FRIES", "SERIF"] },
+  { letters: "FIRES", clues: ["Thin fried potato sticks", "Bonus: the little foot on a letter in some typefaces"], answers: ["FRIES", "SERIF"] },
   { letters: "MARES", clues: ["To spread grease on something", "Bonus: packs of paper"], answers: ["SMEAR", "REAMS"] },
   { letters: "POLES", clues: ["A hillside", "Bonus: runs with long strides"], answers: ["SLOPE", "LOPES"] },
   { letters: "CAPER", clues: ["A runner who sets the speed", "Bonus: a short summary"], answers: ["PACER", "RECAP"] },
