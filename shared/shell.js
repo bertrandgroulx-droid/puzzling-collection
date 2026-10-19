@@ -15,6 +15,9 @@
   const VERSION = SELF ? (new URL(SELF).searchParams.get("v") || "") : "";
   const PAST_DAYS = 100;
   let cfg = null, schedules = {}, pending = {}, current = null, store = "", busy = false;
+  // The day's puzzle on screen (in play or on its results), or null for random puzzles and the past list.
+  // The header's share icon links to it.
+  let shownDay = null;
 
   const pad = n => String(n).padStart(2, "0");
   const iso = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
@@ -93,7 +96,7 @@
   function shellHTML(html) { showGame(false); $("shell").classList.remove("reveal"); $("shell").innerHTML = html; window.scrollTo(0, 0); }
 
   function startGame(meta) {
-    current = meta;
+    current = meta; shownDay = meta.mode === "daily" ? meta : null;
     history.replaceState(null, "", meta.mode === "daily" ? "?daily=" + meta.iso : "?practice");
     setDailyLine(lineFor(meta), meta.mode === "daily" ? ["past", "random"] : ["today", "past"]);
     if (cfg.timed) return startCard(meta);
@@ -118,7 +121,7 @@
   }
 
   function showPast() {
-    current = null; busy = false;
+    current = null; shownDay = null; busy = false;
     history.replaceState(null, "", "?past");
     const t = today(), years = [t.getFullYear()];
     if (dayOfYear(t) <= PAST_DAYS) years.push(t.getFullYear() - 1);
@@ -184,7 +187,7 @@
   function showResults(res, animate) {
     const meta = res.meta, daily = meta && meta.mode === "daily";
     busy = !daily;
-    current = null;
+    current = null; shownDay = daily ? meta : null;
     history.replaceState(null, "", daily ? "?daily=" + meta.iso : "?practice");
     setDailyLine(lineFor(meta), daily ? ["past", "random"] : ["today", "past"]);
     const ratio = res.score / res.max;
@@ -268,6 +271,41 @@
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") checkForUpdate(); });
   window.addEventListener("pageshow", e => { if (e.persisted) checkForUpdate(); });
 
+  // ---- the share icon in the header ----
+  // One link per state, built from the page's canonical address (never location.href: the same
+  // file is also served from github.io, and saved progress lives per address). A specific day's
+  // puzzle, in play or on its results, gets the dated link, so it opens the same puzzle tomorrow.
+  // Random puzzles and the past list get the plain address. The studio's other apps do the same.
+  function shareLink() {
+    const can = document.querySelector('link[rel="canonical"]');
+    const base = can ? can.href : location.origin + location.pathname;
+    if (shownDay) return { title: cfg.title + " · Daily No. " + shownDay.number, url: base + "?daily=" + shownDay.iso };
+    return { title: cfg.title, url: base };
+  }
+  // On a phone the share sheet opens; otherwise the link is copied and a small toast says so.
+  function shareThis() {
+    const { title, url } = shareLink();
+    if (navigator.share) { navigator.share({ title, url }).catch(() => {}); return; }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(() => toast("Link copied"), () => toast(url));
+    else toast(url);
+  }
+  let toastTimer = 0;
+  function toast(text) {
+    let el = $("toast");
+    if (!el) { el = document.createElement("div"); el.id = "toast"; el.className = "toast"; el.setAttribute("role", "status"); document.body.appendChild(el); }
+    el.textContent = text; el.classList.add("show");
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 1800);
+  }
+  function buildShareIcon() {
+    const help = $("helpBtn");
+    if (!help || $("shareIcon")) return;
+    const b = document.createElement("button");
+    b.id = "shareIcon"; b.className = "share-btn"; b.type = "button"; b.setAttribute("aria-label", "Share a link to this puzzle");
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11H5v9h14v-9h-1"/></svg>';
+    b.onclick = shareThis;
+    help.insertAdjacentElement("beforebegin", b);
+  }
+
   // Give up asks for a second tap, so a stray touch cannot end a puzzle.
   function confirmGiveUp(btn, fn) {
     let armed = 0;
@@ -285,6 +323,7 @@
       checkForUpdate();
       buildHelp();
       $("helpBtn").onclick = showHelp;
+      buildShareIcon();
       const q = new URLSearchParams(location.search);
       if (q.has("past")) return showPast();
       if (q.has("practice")) return startGame({ mode: "practice" });
@@ -297,6 +336,6 @@
       if (meta && meta.mode === "daily" && !recordOf(meta.iso)) { write("daily:" + meta.iso, { score: res.score, max: res.max, results: res.results, recap: res.recap, at: Date.now() }); first = true; }
       showResults(Object.assign({ first }, res), true);
     },
-    timerOn, label, showPast, showHelp, confirmGiveUp, streak, current: () => current
+    timerOn, label, showPast, showHelp, confirmGiveUp, streak, shareLink, current: () => current
   };
 })();

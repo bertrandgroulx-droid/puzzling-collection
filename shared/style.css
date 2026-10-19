@@ -50,6 +50,14 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 1.5rem; margin: 0
 .howto { flex: none; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 5px 16px 5px 6px; border-radius: 999px; border: 1.5px solid var(--btn-line); background: var(--surface); color: var(--ink); font-family: var(--body); font-weight: 800; font-size: 0.95rem; white-space: nowrap; cursor: pointer; box-shadow: 0 1.5px 0 var(--btn-line); }
 .howto .qmark { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: var(--bg); font-family: var(--display); font-weight: 800; font-size: 1.05rem; line-height: 1; }
 .howto:hover { border-color: var(--muted); }
+/* The share icon: the studio's upload arrow, left of How to play, in the muted ink until hovered or focused. */
+.share-btn { flex: none; display: grid; place-items: center; width: 34px; height: 34px; margin-left: auto; padding: 0; min-height: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: var(--muted); cursor: pointer; }
+.share-btn svg { width: 18px; height: 18px; }
+.share-btn:hover, .share-btn:focus-visible { color: var(--ink); background: var(--surface); }
+.share-btn:not(:disabled):active { transform: none; box-shadow: none; }
+/* The small "Link copied" note after a share on a device without a share sheet. */
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 8px); max-width: calc(100% - 32px); padding: 8px 14px; border-radius: 999px; background: var(--ink); color: var(--bg); font-size: 0.88rem; font-weight: 700; overflow-wrap: anywhere; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 10; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
 .daily { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 14px; font-size: 0.88rem; color: var(--muted); min-height: 1.4em; }
 .daily > span { white-space: nowrap; }
 .daily b { color: var(--ink); font-weight: 800; }
@@ -241,7 +249,7 @@ dialog.help .ver { margin: 10px 0 0; text-align: center; color: var(--muted); fo
 
 @keyframes shake { 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
 .shake { animation: shake 0.3s; }
-@media (prefers-reduced-motion: reduce) { .shake, .instr.pulse, .tile.flip, .celebrate *, .reveal * { animation: none !important; } .toggle input, .toggle input::before { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .shake, .instr.pulse, .tile.flip, .celebrate *, .reveal * { animation: none !important; } .toggle input, .toggle input::before, .toast { transition: none; } }
 
 /* Short screens (older or smaller phones): a notch tighter everywhere, so a puzzle fits without scrolling. */
 @media (max-height: 720px) {
