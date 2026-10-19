@@ -322,3 +322,13 @@ button.link:active { transform: none; }
 .games .state.done { color: var(--good); }
 .games .state.done::before { content: "\2713\00a0"; }
 .games .state.todo { color: var(--accent); }
+
+/* Phone width: the name, the share icon and the pill share one row, so the name stays on one line
+   even for Common Thread. The pill gives up a little padding, the title a little size. This sits
+   after the short-screen rules above so it wins on a phone that is both narrow and short. */
+@media (max-width: 400px) {
+  .top { gap: 8px; }
+  h1 { font-size: 1.3rem; }
+  .howto { min-height: 40px; padding: 4px 11px 4px 4px; font-size: 0.88rem; gap: 6px; }
+  .howto .qmark { width: 27px; height: 27px; font-size: 0.95rem; }
+}
