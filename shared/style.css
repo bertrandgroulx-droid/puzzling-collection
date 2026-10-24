@@ -47,6 +47,9 @@ button, .tile, .key { touch-action: manipulation; -webkit-user-select: none; use
 .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .name { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-width: 0; }
 h1 { font-family: var(--display); font-weight: 800; font-size: 1.5rem; margin: 0; letter-spacing: -0.02em; }
+/* In a game, the name is the way back to the Puzzling page. It looks like a title, not a link; "by shozbot" under it is the way to the studio. */
+h1 a { color: inherit; text-decoration: none; }
+h1 a:hover { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 2px; }
 /* How to play: a labelled pill, so a first-time player knows what it does. The ? stays for those who look for it. */
 .howto { flex: none; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 5px 16px 5px 6px; border-radius: 999px; border: 1.5px solid var(--btn-line); background: var(--surface); color: var(--ink); font-family: var(--body); font-weight: 800; font-size: 0.95rem; white-space: nowrap; cursor: pointer; box-shadow: 0 1.5px 0 var(--btn-line); }
 .howto .qmark { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: var(--bg); font-family: var(--display); font-weight: 800; font-size: 1.05rem; line-height: 1; }
