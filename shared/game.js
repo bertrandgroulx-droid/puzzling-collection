@@ -73,10 +73,15 @@
     if (S.i >= S.items.length) return endGame();
     ENGINES[G.type](S.items[S.i]);
   }
-  // Close a puzzle: record its points, show the answer, and offer Next.
+  function summary() {
+    return { score: S.score, max: S.items.length * G.max, results: S.results, recap: S.items.map((p, j) => [label(p), S.results[j]]), meta: S.meta };
+  }
+  // Close a puzzle: record its points, show the answer, and offer Next. When it was the last
+  // puzzle the day's score is saved right here, before See your score is tapped.
   function settle(points, revealHTML, text, good) {
     stopClock(); stage.onclick = null;
     S.results.push(points); S.score += points;
+    if (S.i + 1 >= S.items.length) Shell.record(summary());
     const cls = points === G.max ? "good" : points > 0 ? "part" : "bad";
     stage.classList.toggle("celebrate", !!good);
     stage.innerHTML = head(null) + revealHTML + '<p class="status ' + cls + '">' + esc(text) + " " + points + (points === 1 ? " point." : " points.") + "</p>" +
@@ -84,9 +89,7 @@
     $("nextBtn").onclick = () => { S.i++; next(); };
     $("nextBtn").focus();
   }
-  function endGame() {
-    Shell.finish({ score: S.score, max: S.items.length * G.max, results: S.results, recap: S.items.map((p, j) => [label(p), S.results[j]]), meta: S.meta });
-  }
+  function endGame() { Shell.finish(summary()); }
 
   const ENGINES = {
     // Typed answers. "each" mode (Tumble) scores every word on its own against one clock;

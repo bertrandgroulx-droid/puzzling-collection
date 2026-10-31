@@ -316,6 +316,18 @@
     };
   }
 
+  // The day's score is written the moment the last puzzle settles, not when See your score is
+  // tapped, so closing the game at that point loses nothing. finish() then shows the results
+  // and still says "Saved as your score for today" for the score this game just wrote.
+  let justSaved = null;
+  function record(res) {
+    const meta = res.meta;
+    if (!meta || meta.mode !== "daily" || recordOf(meta.iso)) return false;
+    write("daily:" + meta.iso, { score: res.score, max: res.max, results: res.results, recap: res.recap, at: Date.now() });
+    justSaved = meta.iso;
+    return true;
+  }
+
   window.Shell = {
     init(settings) {
       cfg = settings;
@@ -332,10 +344,11 @@
     },
     finish(res) {
       const meta = res.meta;
-      let first = false;
-      if (meta && meta.mode === "daily" && !recordOf(meta.iso)) { write("daily:" + meta.iso, { score: res.score, max: res.max, results: res.results, recap: res.recap, at: Date.now() }); first = true; }
+      const first = record(res) || (meta && meta.mode === "daily" && justSaved === meta.iso);
+      justSaved = null;
       showResults(Object.assign({ first }, res), true);
     },
+    record,
     timerOn, label, showPast, showHelp, confirmGiveUp, streak, shareLink, current: () => current
   };
 })();

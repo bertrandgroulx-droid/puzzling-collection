@@ -70,8 +70,10 @@ card first (the rules, a timer switch and a Start button) so the clock never
 starts unexpectedly.
 
 - **Today's puzzle.** The same set for everyone, numbered by the day of the
-  year (No. 1 is January 1) and dated. The first score on a day is the one that
-  is kept; playing it again is allowed but does not change the score.
+  year (No. 1 is January 1) and dated. The score is saved the moment the last
+  puzzle is finished, before See your score is tapped, so closing the game at
+  that point loses nothing. The first score on a day is the one that is kept;
+  playing it again is allowed but does not change the score.
 - **Past puzzles.** Lists the previous 100 days, newest first, with the score
   beside any that have been played. Tomorrow's puzzle cannot be opened early.
 - **Random puzzles.** As many sets as you like. Nothing is saved.

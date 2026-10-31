@@ -31,7 +31,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../shared/style.css?v=20261024-194204">
+<link rel="stylesheet" href="../shared/style.css?v=20261031-165009">
 </head>
 <body>
 <main class="app">
@@ -64,9 +64,9 @@
   <dialog class="help" id="help"></dialog>
 </main>
 
-<script src="puzzles.js?v=20261024-194204"></script>
-<script src="../shared/keys.js?v=20261024-194204"></script>
-<script src="../shared/shell.js?v=20261024-194204"></script>
+<script src="puzzles.js?v=20261031-165009"></script>
+<script src="../shared/keys.js?v=20261031-165009"></script>
+<script src="../shared/shell.js?v=20261031-165009"></script>
 <script>
 // Chains live in puzzles.js: a six-letter start, then three [clue, answer] steps.
 const RAW = window.WHITTLE_PUZZLES || [];
@@ -159,11 +159,13 @@ function tick() {
   raf = requestAnimationFrame(tick);
 }
 
+const summary = () => ({ score, max: game.length * MAX, results, recap: game.map((c, i) => [c.start + " → " + c.steps[2][1], results[i]]), meta });
 function finish(why) {
   running = false; cancelAnimationFrame(raf);
   const c = game[ci], p = points();
   $("play").classList.toggle("celebrate", pts === 3);
   results[ci] = p; score += p;
+  if (ci + 1 >= game.length) Shell.record(summary()); // the last word: the day's score is saved now, not on See your score
   $("ladder").innerHTML = c.steps.map((s, i) =>
     '<li class="' + (i < pts ? "got" : "miss") + '"><span class="w">' + s[1] + '</span><span class="d">' + s[0] + "</span></li>").join("");
   instruct(""); $("clockRow").hidden = true;
@@ -180,7 +182,7 @@ $("go").addEventListener("click", () => {
   if (results[ci] !== undefined) {
     ci++;
     if (ci < game.length) { readyChain(); return; }
-    Shell.finish({ score, max: game.length * MAX, results, recap: game.map((c, i) => [c.start + " → " + c.steps[2][1], results[i]]), meta });
+    Shell.finish(summary());
     return;
   }
   begin();
