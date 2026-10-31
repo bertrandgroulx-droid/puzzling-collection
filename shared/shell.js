@@ -14,6 +14,8 @@
   const SELF = document.currentScript ? document.currentScript.src : "";
   const VERSION = SELF ? (new URL(SELF).searchParams.get("v") || "") : "";
   const PAST_DAYS = 100;
+  // The eight games in home-page order, so today's results can offer the next one not yet played.
+  const GAMES = [["common-thread", "Common Thread"], ["whittle", "Whittle"], ["tumble", "Tumble"], ["stowaway", "Stowaway"], ["soundalike", "Soundalike"], ["switcheroo", "Switcheroo"], ["three-of-a-kind", "Three of a Kind"], ["splice", "Splice"]];
   let cfg = null, schedules = {}, pending = {}, current = null, store = "", busy = false;
   // The day's puzzle on screen (in play or on its results), or null for random puzzles and the past list.
   // The header's share icon links to it.
@@ -168,6 +170,17 @@
     });
   }
 
+  // ---- the other games today ----
+  // Every game saves under its own prefix in the same storage, so one game can see which of the
+  // eight have today's score. Next game is the first one after this, in home-page order, that has not.
+  const playedToday = folder => { try { return localStorage.getItem(folder.replace(/-/g, "") + ":daily:" + iso(today())) !== null; } catch (e) { return false; } };
+  function nextGame() {
+    const i = GAMES.findIndex(g => g[0] === cfg.game);
+    for (let k = 1; k < GAMES.length; k++) { const g = GAMES[(i + k) % GAMES.length]; if (!playedToday(g[0])) return g; }
+    return null;
+  }
+  const playedCount = () => GAMES.filter(g => playedToday(g[0])).length;
+
   // ---- results ----
   function squares(results, max) { return results.map(r => r === max ? "🟩" : r > 0 ? "🟨" : "⬜").join(""); }
   function shareText(res) {
@@ -194,16 +207,23 @@
     const verdict = ratio === 1 ? "A perfect game." : ratio >= 0.7 ? "A strong game." : ratio >= 0.4 ? "A fair game." : (daily ? "A tough one. Tomorrow’s is different." : "A tough one. The next set is different.");
     const saved = daily ? (res.first ? "Saved as your score for " + (meta.iso === iso(today()) ? "today" : "this day") + "." : "Your first score for this puzzle is the one that is kept.") : "Random puzzle scores are not saved.";
     const pips = res.results.map((r, i) => '<span class="pip ' + (r === cfg.max ? "full" : r > 0 ? "half" : "zero") + '" style="animation-delay:' + (0.15 + i * 0.2) + 's"></span>').join("");
-    const run = daily && meta.iso === iso(today()) ? streak() : 0;
+    const isToday = daily && meta.iso === iso(today());
+    const run = isToday ? streak() : 0;
+    // On today's results the main step is the next of the eight games, so a player can go round
+    // them all without returning to the collection page (which a saved app makes awkward).
+    const nx = isToday ? nextGame() : null, done = isToday ? playedCount() : 0;
+    const tally = isToday ? (done >= GAMES.length ? "All eight games played today." : done + " of " + GAMES.length + " games played today.") : "";
     shellHTML('<div class="pips" aria-hidden="true">' + pips + "</div>" +
       '<div class="big"><span id="scoreNum">' + res.score + "</span> <small>/ " + res.max + "</small></div>" +
       '<p class="lead">' + verdict + "</p>" +
       (run >= 2 ? '<p class="streakRow"><span class="streak">' + run + " days in a row</span></p>" : "") +
-      '<p class="status ' + (daily && res.first ? "good" : "note") + '">' + saved + "</p>" +
+      '<p class="status ' + (daily && res.first ? "good" : "note") + '">' + saved + (tally ? " " + tally : "") + "</p>" +
       '<ul class="recap">' + res.recap.map(r => "<li><span>" + esc(r[0]) + "</span><span>" + r[1] + (r[1] === 1 ? " pt" : " pts") + "</span></li>").join("") + "</ul>" +
-      '<button class="primary" id="randomBtn" type="button">' + (daily ? "Play random puzzles" : "More random puzzles") + "</button>" +
+      (nx ? '<a class="primary btn" id="nextGame" href="../' + nx[0] + '/">Next game · ' + esc(nx[1]) + "</a>" : "") +
+      '<button class="' + (nx ? "" : "primary") + '" id="randomBtn" type="button">' + (daily ? "Play random puzzles" : "More random puzzles") + "</button>" +
       '<div class="row"><button id="shareBtn" type="button">Share</button><a class="btn" href="?past" data-go="past">Past puzzles</a></div>' +
-      '<div class="row">' + (daily ? '<button class="quiet" id="againBtn" type="button">Play it again</button>' : '<a class="quiet btn" href="./" data-go="today">Today’s puzzle</a>') + "</div>");
+      '<div class="row">' + (daily ? '<button class="quiet" id="againBtn" type="button">Play it again</button>' : '<a class="quiet btn" href="./" data-go="today">Today’s puzzle</a>') +
+      (isToday && !nx ? '<a class="quiet btn" href="../">All games</a>' : "") + "</div>");
     $("randomBtn").onclick = () => startGame({ mode: "practice" });
     $("shareBtn").onclick = () => share(res, $("shareBtn"));
     if ($("againBtn")) $("againBtn").onclick = () => startGame(meta);
@@ -216,7 +236,7 @@
       el.textContent = "0";
       (function tick() { const f = Math.min(1, (performance.now() - t0) / ms); el.textContent = Math.round(f * total); if (f < 1) requestAnimationFrame(tick); })();
     }
-    $("randomBtn").focus();
+    ($("nextGame") || $("randomBtn")).focus();
   }
 
   // ---- How to play ----

@@ -3,7 +3,7 @@
   "short_name": "Splice",
   "description": "Two clues, two words, blended into one where they overlap.",
   "start_url": "./",
-  "scope": "./",
+  "scope": "../",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",

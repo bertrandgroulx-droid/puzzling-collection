@@ -3,7 +3,7 @@
   "short_name": "Three of a Kind",
   "description": "Three words have something in common. Spot what it is.",
   "start_url": "./",
-  "scope": "./",
+  "scope": "../",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",

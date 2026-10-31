@@ -3,7 +3,7 @@
   "short_name": "Tumble",
   "description": "An anagram game: rearrange the letters to fit the clue, then find a bonus word in the same letters.",
   "start_url": "./",
-  "scope": "./",
+  "scope": "../",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",

@@ -133,7 +133,7 @@ def manifest(folder):
              {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
              {"src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
              {"src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml"}]
-    return json.dumps({"name": name, "short_name": name, "description": desc, "start_url": "./", "scope": "./",
+    return json.dumps({"name": name, "short_name": name, "description": desc, "start_url": "./", "scope": "../",
                        "display": "standalone", "orientation": "portrait", "background_color": "#ffffff",
                        "theme_color": "#ffffff", "icons": icons}, indent=2) + "\n"
 

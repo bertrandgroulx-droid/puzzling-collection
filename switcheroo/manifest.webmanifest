@@ -3,7 +3,7 @@
   "short_name": "Switcheroo",
   "description": "Change one letter at a time to climb a three-step word ladder.",
   "start_url": "./",
-  "scope": "./",
+  "scope": "../",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",

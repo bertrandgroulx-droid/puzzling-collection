@@ -3,7 +3,7 @@
   "short_name": "Soundalike",
   "description": "Two clues, two words that sound the same but are spelled differently.",
   "start_url": "./",
-  "scope": "./",
+  "scope": "../",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",

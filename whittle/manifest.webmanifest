@@ -3,7 +3,7 @@
   "short_name": "Whittle",
   "description": "Take one letter away at a time to match three clues before the clock runs out.",
   "start_url": "./",
-  "scope": "./",
+  "scope": "../",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",

@@ -79,8 +79,11 @@ starts unexpectedly.
 - **Random puzzles.** As many sets as you like. Nothing is saved.
 - **Getting around.** The line under the title always shows two links to the
   other places you can go (for example "Past puzzles" and "Random puzzles"
-  while on today's puzzle). After a puzzle, the main button on the results
-  screen is Play random puzzles.
+  while on today's puzzle). After today's puzzle, the main button on the
+  results screen is **Next game**: the next of the eight games not yet played
+  today, in home-page order, with a count of how many are done. Once all
+  eight are played it becomes Play random puzzles. Tapping the game's name
+  goes to the collection page.
 - **First visit.** The Instructions block above the first puzzle opens out
   to show the goal, the example, and Got it; Got it shrinks it back to the
   one-line instruction. Nothing pops up over the game.
@@ -246,6 +249,10 @@ new version everywhere.
 
 Each game folder has an `icons/` folder and a `manifest.webmanifest`, so
 "Add to Home Screen" installs it as its own app with its own name and icon.
+Every game's manifest has the whole collection as its scope, so moving to
+another game from a saved app stays inside that app instead of opening a
+browser sheet. (A saved app keeps its own scores, separate from the browser's,
+which is how phones treat web apps.)
 The icons follow the studio's style: one bold glyph of flat blocks, azure on
 near-black. In every icon the single white piece is the move the game asks
 of you. They are all drawn by one tool; edit a glyph there and run:

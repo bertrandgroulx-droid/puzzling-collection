@@ -3,7 +3,7 @@
   "short_name": "Common Thread",
   "description": "Three words, and one missing word that pairs with every one of them.",
   "start_url": "./",
-  "scope": "./",
+  "scope": "../",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
