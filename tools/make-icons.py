@@ -45,7 +45,7 @@ def row(n, size, gap, y, fill=BLUE, centre=50, skip=(), whites=()):
     x0 = centre - (n * size + (n - 1) * gap) / 2
     return [rect(x0 + i * (size + gap), y, size, size, MOVE if i in whites else fill) for i in range(n) if i not in skip]
 
-# ---- the eight glyphs ----
+# ---- the nine glyphs ----
 
 def common_thread():
     # Three words stacked, one thread running through them all.
@@ -59,6 +59,14 @@ def whittle():
     for i, n in enumerate((5, 4, 3)):
         out += row(n, 16, 4.5, 6 + i * 22, centre=43)
     return out + [rect(70, 70, 20, 20, MOVE, rot=24)]
+
+def snowball():
+    # A word growing a letter at a time: three, four, five, six. The white block is the letter
+    # just added, dropping into place. The mirror of Whittle.
+    out = []
+    for i, n in enumerate((3, 4, 5)):
+        out += row(n, 16, 4.5, 6 + i * 22, centre=43)
+    return out + [rect(72, 66, 20, 20, MOVE, rot=-18)]
 
 def tumble():
     # Five letter blocks tumbling into a new order; the white one is mid-leap.
@@ -101,7 +109,7 @@ def puzzling():
             rect(61, 25, 19, 22, MOVE, rot=12)]
 
 GLYPHS = {
-    "common-thread": common_thread, "whittle": whittle, "tumble": tumble, "stowaway": stowaway,
+    "common-thread": common_thread, "whittle": whittle, "snowball": snowball, "tumble": tumble, "stowaway": stowaway,
     "soundalike": soundalike, "switcheroo": switcheroo, "three-of-a-kind": three_of_a_kind, "splice": splice,
     ".": puzzling,
 }
@@ -118,13 +126,14 @@ def svg(parts, share, note=""):
 APPS = {
     "common-thread": ("Common Thread", "Three words, and one missing word that pairs with every one of them."),
     "whittle": ("Whittle", "Take one letter away at a time to match three clues before the clock runs out."),
+    "snowball": ("Snowball", "Start with three letters and add one at a time to match three clues, so the word grows."),
     "tumble": ("Tumble", "An anagram game: rearrange the letters to fit the clue, then find a bonus word in the same letters."),
     "stowaway": ("Stowaway", "Two clues, two words: the second is the first with one letter smuggled in."),
     "soundalike": ("Soundalike", "Two clues, two words that sound the same but are spelled differently."),
     "switcheroo": ("Switcheroo", "Change one letter at a time to climb a three-step word ladder."),
     "three-of-a-kind": ("Three of a Kind", "Three words have something in common. Spot what it is."),
     "splice": ("Splice", "Two clues, two words, blended into one where they overlap."),
-    ".": ("Puzzling", "Eight quick word games for your phone, each with a new puzzle every day."),
+    ".": ("Puzzling", "Nine quick word games for your phone, each with a new puzzle every day."),
 }
 
 def manifest(folder):

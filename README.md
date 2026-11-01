@@ -16,6 +16,7 @@ tiles, Public Sans for everything else).
 | --- | --- | --- |
 | Common Thread | Find the one word that pairs with all three words shown. | 5 puzzles, 2 points each |
 | Whittle | Take one letter away at a time to match three clues, against a 25-second clock. | 4 words, 3 points each |
+| Snowball | Start with three letters and add one at a time to match three clues, so the word grows. | 4 chains, 3 points each |
 | Tumble | An anagram game: rearrange the letters to fit the clue, then find a bonus word in the same letters, in 30 seconds. | 5 puzzles, 2 points each |
 | Stowaway | Two clues, two words: the second is the first with one letter added. | 5 puzzles, 2 points each |
 | Soundalike | Two clues, two words that sound the same but are spelled differently. | 5 puzzles, 2 points each |
@@ -35,6 +36,7 @@ index.html            The home page. It links to every game and shows whether
                       today's puzzle has been played, with the score and streak.
 common-thread/        One folder per game ...
 whittle/
+snowball/
 tumble/
 stowaway/
 soundalike/
@@ -47,8 +49,8 @@ splice/
 shared/
   style.css           The look shared by every game and the home page.
   shell.js            Everything around the puzzle: today's puzzle, past puzzles, How to play,
-                      settings, results, sharing and saved scores. Used by all eight games.
-  game.js             The game engine shared by six of the games.
+                      settings, results, sharing and saved scores. Used by all nine games.
+  game.js             The game engine shared by seven of the games.
   keys.js             How each game names a puzzle, so schedules can refer to it.
 tools/
   check-puzzles.js    Checks every puzzle file and daily schedule for mistakes.
@@ -59,7 +61,7 @@ tools/
 ```
 
 Common Thread and Whittle have their own game code inside their page. The
-other six share one engine in `shared/game.js`. All eight share the stylesheet
+other seven share one engine in `shared/game.js`. All nine share the stylesheet
 and the shell, so a fix there fixes every game at once.
 
 ## How a game opens
@@ -80,9 +82,9 @@ starts unexpectedly.
 - **Getting around.** The line under the title always shows two links to the
   other places you can go (for example "Past puzzles" and "Random puzzles"
   while on today's puzzle). After today's puzzle, the main button on the
-  results screen is **Next game**: the next of the eight games not yet played
+  results screen is **Next game**: the next of the nine games not yet played
   today, in home-page order, with a count of how many are done. Once all
-  eight are played it becomes Play random puzzles. Tapping the game's name
+  nine are played it becomes Play random puzzles. Tapping the game's name
   goes to the collection page.
 - **First visit.** The Instructions block above the first puzzle opens out
   to show the goal, the example, and Got it; Got it shrinks it back to the
@@ -143,6 +145,7 @@ format. In short:
 | --- | --- |
 | Common Thread | `{ link: "LIGHT", hint: "You flip a switch to get it.", clues: ["SUN_", "FLASH_", "_HOUSE"] }` |
 | Whittle | `{ start: "PLANET", steps: [["Something that grows", "PLANT"], ["A scheme", "PLAN"], ["You fry an egg in it", "PAN"]] }` |
+| Snowball | `{ start: "MAN", steps: [["Hair on a horse's neck", "MANE"], ["A skin disease of dogs", "MANGE"], ["To run a shop", "MANAGE"]] }` |
 
 In Whittle, no step may simply drop a plural S (CHATS to CHAT is not a
 whittle). The checker refuses such a chain. A puzzle marked `retired: true`
@@ -154,6 +157,11 @@ without touching the others:
 ```
 node tools/make-daily.js 2026 --force --only whittle
 ```
+
+In Snowball, each step adds one letter anywhere and keeps the rest in order.
+No step may simply add a plural S or a past-tense D or ED, and no chain may be
+a live Whittle chain backwards; the checker refuses both. A less common word
+is fine when its clue defines it.
 | Tumble | `{ letters: "HEART", clues: ["The ground beneath you", "Bonus: someone full of dislike"], answers: ["EARTH", "HATER"] }` |
 | Stowaway | `{ clues: ["A hot drink", "A group of players"], answers: ["TEA", "TEAM"] }` |
 | Soundalike | `{ clues: ["Two of something", "A juicy fruit"], answers: ["PAIR", "PEAR"] }` |
@@ -189,6 +197,7 @@ the games.
 | --- | --- | --- |
 | Common Thread | Missing Link | Three words, one missing word that pairs with each (*That's Puzzling!*) |
 | Whittle | Minus 3 | Take one letter away at a time to match three clues (*That's Puzzling!*) |
+| Snowball | Add Three (as heard on air) | Start with three letters and add one at a time to match three clues (*That's Puzzling!*) |
 | Tumble | Anagrams | Rearrange the letters to fit a clue, then a bonus word (*That's Puzzling!*) |
 | Stowaway | Plus One | Two clues, two words, the second with one letter added (*That's Puzzling!*) |
 | Soundalike | Hear, Here | Two clues, two words that sound the same (*That's Puzzling!*) |

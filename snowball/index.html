@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Snowball</title>
+<link rel="canonical" href="https://shozbot.com/puzzling/snowball/">
+<script>
+  /* This game lives at shozbot.com/puzzling/ now. Anyone still arriving at the old GitHub
+     Pages address is moved across, keeping the rest of the path, the query and the hash,
+     so that scores, streaks and settings (which a browser files under whichever address
+     they were made on) pile up in one place instead of quietly splitting in two.
+
+     The hostname test is load-bearing, not defensive. shozbot.com serves this very file
+     through a rewrite, so without the test the redirect would fire there too and bounce
+     the browser against the same address for ever. */
+  (function () {
+    if (location.hostname !== "bertrandgroulx-droid.github.io") return;
+    location.replace("https://shozbot.com" + location.pathname.replace(/^\/puzzling-collection(\/|$)/, "/puzzling/") + location.search + location.hash);
+  })();
+</script>
+<meta name="description" content="Start with three letters and add one at a time to match three clues, so the word grows.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121214" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Snowball">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../shared/style.css?v=20261101-172810">
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div class="name"><h1><a href="../" title="All Puzzling games">Snowball</a></h1></div>
+    <button class="howto" id="helpBtn" type="button"><span class="qmark" aria-hidden="true">?</span>How to play</button>
+  </header>
+  <div class="daily"><span id="dailyText"></span><nav class="links" id="links" aria-label="Where to go next"></nav></div>
+  <section id="shell" class="stack" hidden></section>
+  <section id="stage" class="stack" data-game-ui></section>
+  <dialog class="help" id="help"></dialog>
+</main>
+
+<script src="puzzles.js?v=20261101-172810"></script>
+<script src="../shared/keys.js?v=20261101-172810"></script>
+<script src="../shared/shell.js?v=20261101-172810"></script>
+<script src="../shared/game.js?v=20261101-172810"></script>
+<script>
+// The settings for this game. Puzzles live in puzzles.js; the look in ../shared/style.css.
+startGame({
+  game: "snowball",
+  title: "Snowball",
+  type: "grow",       // the word grows by one letter a step
+  per: 4,             // chains per game
+  max: 3,             // points per chain
+  instruction: "Add one letter so the word matches the clue, then tap Check.",
+  how: {
+    goal: "Start with a three-letter word and add one letter at a time, so each answer matches its clue and the word grows to six letters.",
+    steps: [
+      "A three-letter word is shown. Each clue describes the word you get by adding one letter anywhere and keeping the rest in order.",
+      "Type the longer word, then tap Check. Three clues, three words.",
+      "1 point for each clue. There is no clock.",
+      "<b>Hint</b> marks the gap where the new letter goes and costs 1 point. <b>Give up</b> (tapped twice) shows the rest and keeps what you have scored."
+    ],
+    example: "<b>MAN</b>, then “the long hair on a horse's neck” is <b>MANE</b>, “a skin disease of dogs” is <b>MANGE</b>, and “to run a shop” is <b>MANAGE</b>."
+  },
+  puzzles: window.SNOWBALL_PUZZLES
+});
+</script>
+<!-- The studio kit. data-by puts the words "by shozbot" on its own line under the game's
+     name, linking to the studio; it also counts the visit. See shozbot.com/kit/kit.js. -->
+<script src="https://shozbot.com/kit/kit.js"
+        data-by=".top .name h1" data-by-block defer></script>
+</body>
+</html>

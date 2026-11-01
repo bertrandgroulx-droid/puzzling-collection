@@ -5,6 +5,7 @@
   const KEYS = {
     "common-thread": p => String(p.link).toUpperCase(),
     "whittle": p => String(p.start).toUpperCase(),
+    "snowball": p => String(p.start).toUpperCase(),
     "tumble": p => String(p.letters).toUpperCase(),
     "stowaway": p => String(p.answers[0]).toUpperCase(),
     "soundalike": p => String(p.answers[0]).toUpperCase(),
@@ -13,11 +14,11 @@
     "splice": p => String(p.answer).toUpperCase()
   };
   const GLOBALS = {
-    "common-thread": "COMMON_THREAD_PUZZLES", "whittle": "WHITTLE_PUZZLES", "tumble": "TUMBLE_PUZZLES",
+    "common-thread": "COMMON_THREAD_PUZZLES", "whittle": "WHITTLE_PUZZLES", "snowball": "SNOWBALL_PUZZLES", "tumble": "TUMBLE_PUZZLES",
     "stowaway": "STOWAWAY_PUZZLES", "soundalike": "SOUNDALIKE_PUZZLES", "switcheroo": "SWITCHEROO_PUZZLES",
     "three-of-a-kind": "THREE_OF_A_KIND_PUZZLES", "splice": "SPLICE_PUZZLES"
   };
-  const PER_GAME = { "common-thread": 5, "whittle": 4, "tumble": 5, "stowaway": 5, "soundalike": 5, "switcheroo": 4, "three-of-a-kind": 5, "splice": 5 };
+  const PER_GAME = { "common-thread": 5, "whittle": 4, "snowball": 4, "tumble": 5, "stowaway": 5, "soundalike": 5, "switcheroo": 4, "three-of-a-kind": 5, "splice": 5 };
   const out = { KEYS, GLOBALS, PER_GAME };
   if (typeof module !== "undefined" && module.exports) module.exports = out; else root.PUZZLE_KEYS = out;
 })(this);

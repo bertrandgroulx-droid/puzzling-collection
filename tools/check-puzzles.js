@@ -38,6 +38,26 @@ for (const p of M3) {
 }
 dupes("whittle", M3.map(p => p.start));
 
+// Snowball: a three-letter start, then three steps that each add one letter anywhere, keeping the
+// rest in order. No step may just add a plural S or a past D or ED, and no chain may be a live
+// Whittle chain backwards.
+const SB = load("snowball", "SNOWBALL_PUZZLES");
+const whittleStarts = new Set(M3.filter(p => !p.retired).map(p => p.start.toUpperCase()));
+for (const p of SB) {
+  if (!letters(p.start) || p.start.length !== 3) bad("snowball", "start must be three capital letters", p);
+  if (!Array.isArray(p.steps) || p.steps.length !== 3) { bad("snowball", "needs exactly 3 steps", p); continue; }
+  let w = p.start;
+  for (const [clue, ans] of p.steps) {
+    if (!clue) bad("snowball", "missing clue", p);
+    if (!letters(ans) || !oneRemoved(ans, w)) bad("snowball", ans + " is not " + w + " with one letter added", p);
+    if (!p.retired && (ans === w + "S" || ans === w + "ES" || ans === w + "D" || ans === w + "ED")) bad("snowball", "a step just adds " + ans.slice(w.length) + ": " + w + " to " + ans, p);
+    w = ans;
+  }
+  if (!p.retired && whittleStarts.has(w)) bad("snowball", "ends at " + w + ", which is a live Whittle chain backwards", p);
+}
+dupes("snowball", SB.map(p => p.start));
+dupes("snowball", SB.map(p => p.steps.length === 3 ? p.steps[2][1] : ""));
+
 const AN = load("tumble", "TUMBLE_PUZZLES");
 for (const p of AN) {
   if (!letters(p.letters)) bad("tumble", "letters must be capitals", p);
@@ -104,8 +124,8 @@ dupes("anagrams (same letters)", AN.map(p => sorted(p.letters || "")));
 
 // Daily schedules: every <game>/daily-<year>.js must name real puzzles, one set per day, all different.
 const { KEYS } = require("../shared/keys.js");
-const allLists = { "common-thread": ML, "whittle": M3, "tumble": AN, "stowaway": PO, "soundalike": HH, "switcheroo": SO, "three-of-a-kind": SP, "splice": MU };
-const PER = { "common-thread": 5, "whittle": 4, "tumble": 5, "stowaway": 5, "soundalike": 5, "switcheroo": 4, "three-of-a-kind": 5, "splice": 5 };
+const allLists = { "common-thread": ML, "whittle": M3, "snowball": SB, "tumble": AN, "stowaway": PO, "soundalike": HH, "switcheroo": SO, "three-of-a-kind": SP, "splice": MU };
+const PER = { "common-thread": 5, "whittle": 4, "snowball": 4, "tumble": 5, "stowaway": 5, "soundalike": 5, "switcheroo": 4, "three-of-a-kind": 5, "splice": 5 };
 const yearsFound = {};
 for (const game of Object.keys(allLists)) {
   const keys = new Set(allLists[game].map(KEYS[game]));
@@ -137,7 +157,7 @@ if (!Object.keys(yearsFound).length) console.log("No daily schedules found. Make
 // "different games" = distinct sets of puzzles a game can be (order ignored).
 const choose = (n, k) => { let r = 1; for (let i = 1; i <= k; i++) r = r * (n - k + i) / i; return Math.round(r); };
 const fmt = n => n.toLocaleString("en-CA");
-const games = [["Common Thread", ML, 5], ["Whittle", M3, 4], ["Tumble", AN, 5], ["Stowaway", PO, 5], ["Soundalike", HH, 5], ["Switcheroo", SO, 4], ["Three of a Kind", SP, 5], ["Splice", MU, 5]];
+const games = [["Common Thread", ML, 5], ["Whittle", M3, 4], ["Snowball", SB, 4], ["Tumble", AN, 5], ["Stowaway", PO, 5], ["Soundalike", HH, 5], ["Switcheroo", SO, 4], ["Three of a Kind", SP, 5], ["Splice", MU, 5]];
 console.log("Game              Puzzles  Per game  Games before a repeat  Different games");
 for (const [n, l0, k] of games) { const l = l0.filter(p => !p.retired); console.log(n.padEnd(18) + String(l.length).padStart(7) + String(k).padStart(10) + String(Math.floor(l.length / k)).padStart(23) + fmt(choose(l.length, k)).padStart(17) + (l0.length > l.length ? "   (" + (l0.length - l.length) + " retired)" : "")); }
 // Whittle: no step may simply drop a plural S (retired chains are allowed to, they are history).

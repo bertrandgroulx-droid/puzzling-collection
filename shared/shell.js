@@ -15,7 +15,7 @@
   const VERSION = SELF ? (new URL(SELF).searchParams.get("v") || "") : "";
   const PAST_DAYS = 100;
   // The eight games in home-page order, so today's results can offer the next one not yet played.
-  const GAMES = [["common-thread", "Common Thread"], ["whittle", "Whittle"], ["tumble", "Tumble"], ["stowaway", "Stowaway"], ["soundalike", "Soundalike"], ["switcheroo", "Switcheroo"], ["three-of-a-kind", "Three of a Kind"], ["splice", "Splice"]];
+  const GAMES = [["common-thread", "Common Thread"], ["whittle", "Whittle"], ["snowball", "Snowball"], ["tumble", "Tumble"], ["stowaway", "Stowaway"], ["soundalike", "Soundalike"], ["switcheroo", "Switcheroo"], ["three-of-a-kind", "Three of a Kind"], ["splice", "Splice"]];
   let cfg = null, schedules = {}, pending = {}, current = null, store = "", busy = false;
   // The day's puzzle on screen (in play or on its results), or null for random puzzles and the past list.
   // The header's share icon links to it.
@@ -212,7 +212,7 @@
     // On today's results the main step is the next of the eight games, so a player can go round
     // them all without returning to the collection page (which a saved app makes awkward).
     const nx = isToday ? nextGame() : null, done = isToday ? playedCount() : 0;
-    const tally = isToday ? (done >= GAMES.length ? "All eight games played today." : done + " of " + GAMES.length + " games played today.") : "";
+    const tally = isToday ? (done >= GAMES.length ? "All " + GAMES.length + " games played today." : done + " of " + GAMES.length + " games played today.") : "";
     shellHTML('<div class="pips" aria-hidden="true">' + pips + "</div>" +
       '<div class="big"><span id="scoreNum">' + res.score + "</span> <small>/ " + res.max + "</small></div>" +
       '<p class="lead">' + verdict + "</p>" +
