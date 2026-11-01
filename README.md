@@ -145,7 +145,7 @@ format. In short:
 | --- | --- |
 | Common Thread | `{ link: "LIGHT", hint: "You flip a switch to get it.", clues: ["SUN_", "FLASH_", "_HOUSE"] }` |
 | Whittle | `{ start: "PLANET", steps: [["Something that grows", "PLANT"], ["A scheme", "PLAN"], ["You fry an egg in it", "PAN"]] }` |
-| Snowball | `{ start: "MAN", steps: [["Hair on a horse's neck", "MANE"], ["A skin disease of dogs", "MANGE"], ["To run a shop", "MANAGE"]] }` |
+| Snowball | `{ start: "PEA", steps: [["A fruit with a narrow top", "PEAR"], ["A gem from an oyster", "PEARL"], ["Pale and shimmering", "PEARLY"]] }` |
 
 In Whittle, no step may simply drop a plural S (CHATS to CHAT is not a
 whittle). The checker refuses such a chain. A puzzle marked `retired: true`

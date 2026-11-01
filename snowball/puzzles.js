@@ -3,7 +3,7 @@
 // Each puzzle has:
 //   start - a three-letter word, in capitals
 //   steps - three [clue, answer] pairs. Each answer is the word before it with one letter
-//           added anywhere and the other letters kept in order (MAN, MANE, MANGE, MANAGE).
+//           added anywhere and the other letters kept in order (PEA, PEAR, PEARL, PEARLY).
 //
 // Every game picks four of these at random. All puzzles must be original.
 //
@@ -11,7 +11,6 @@
 // may be a Whittle chain backwards; a less common word is fine when its clue defines it.
 // A chain marked retired: true is left out of random play and of any day scheduled from then on.
 window.SNOWBALL_PUZZLES = [
-  { start: "MAN", steps: [["The long hair on a horse's neck", "MANE"], ["A skin disease of dogs and foxes", "MANGE"], ["To run a shop or a team", "MANAGE"]] },
   { start: "EAT", steps: [["Warmth", "HEAT"], ["Open land covered in heather", "HEATH"], ["Being well, not ill", "HEALTH"]] },
   { start: "RAM", steps: [["To stuff in, or to study at the last minute", "CRAM"], ["The thick top of the milk", "CREAM"], ["A loud frightened cry", "SCREAM"]] },
   { start: "TOY", steps: [["A Conservative, in Canadian politics", "TORY"], ["A tale", "STORY"], ["Wild and windy", "STORMY"]] },
@@ -42,7 +41,6 @@ window.SNOWBALL_PUZZLES = [
   { start: "EEL", steps: [["A spool for fishing line, or a lively dance", "REEL"], ["To enjoy yourself noisily", "REVEL"], ["To make known", "REVEAL"]] },
   { start: "NIP", steps: [["To cut with small quick strokes", "SNIP"], ["A long-billed wading bird, or to shoot from hiding", "SNIPE"], ["A marksman who shoots from hiding", "SNIPER"]] },
   { start: "OUT", steps: [["To praise something loudly to sell it", "TOUT"], ["A freshwater fish with speckles", "TROUT"], ["A trial to make the team", "TRYOUT"]] },
-  { start: "PIN", steps: [["To turn round fast", "SPIN"], ["Your backbone", "SPINE"], ["Lying flat on your back", "SUPINE"]] },
   { start: "APE", steps: [["Sticky stuff on a roll", "TAPE"], ["A slim candle, or to narrow towards one end", "TAPER"], ["To meddle with something you shouldn't", "TAMPER"]] },
   { start: "ATE", steps: [["Speed, or a price per unit", "RATE"], ["Very angry", "IRATE"], ["A robber at sea", "PIRATE"]] },
   { start: "RIM", steps: [["Stiffly proper", "PRIM"], ["The best time of life, or the first coat of paint", "PRIME"], ["A first reading book, or an undercoat of paint", "PRIMER"]] },
@@ -57,7 +55,6 @@ window.SNOWBALL_PUZZLES = [
   { start: "LED", steps: [["Ran away", "FLED"], ["Put away in a folder", "FILED"], ["Stopped before it could happen", "FOILED"]] },
   { start: "ODE", steps: [["A vein of metal in rock", "LODE"], ["A small country house, or to make a complaint", "LODGE"], ["Someone renting a room in your house", "LODGER"]] },
   { start: "ANT", steps: [["Your mother's sister", "AUNT"], ["That sister, fondly", "AUNTY"], ["Cheerful and confident", "JAUNTY"]] },
-  { start: "BEE", steps: [["A sweet red root vegetable", "BEET"], ["A soft round flat cap", "BERET"], ["Sadly deprived of something", "BEREFT"]] },
   { start: "SEE", steps: [["Someone who foretells the future", "SEER"], ["An underground drain", "SEWER"], ["A long pin for grilling meat", "SKEWER"]] },
   { start: "FRY", steps: [["Wild anger", "FURY"], ["Covered in soft hair", "FURRY"], ["A brief fall of snow", "FLURRY"]] },
   { start: "WOE", steps: [["Had on, as clothes", "WORE"], ["Less good", "WORSE"], ["To get less good", "WORSEN"]] },
@@ -72,7 +69,10 @@ window.SNOWBALL_PUZZLES = [
   { start: "ILL", steps: [["To make full", "FILL"], ["A ruffled edge on a dress", "FRILL"], ["Fussy with ruffles and bows", "FRILLY"]] },
   { start: "HIP", steps: [["A small piece broken off, or a fried potato slice", "CHIP"], ["A small bird's short sharp call", "CHIRP"], ["Cheerful and lively", "CHIRPY"]] },
   { start: "LAM", steps: [["Unable to walk properly", "LAME"], ["A tongue of fire", "FLAME"], ["On fire", "AFLAME"]] },
-  { start: "HIT", steps: [["The smallest amount, as in \"not a ___\"", "WHIT"], ["The colour of fresh snow", "WHITE"], ["Paler than before", "WHITER"]] },
   { start: "ROE", steps: [["The flower of love", "ROSE"], ["Got up, or came into being", "AROSE"], ["To stir up a feeling", "AROUSE"]] },
-  { start: "ERE", steps: [["No more than, as in \"a ___ child\"", "MERE"], ["To join together into one", "MERGE"], ["To come out into view", "EMERGE"]] }
+  { start: "HUN", steps: [["A big handsome man, in slang", "HUNK"], ["A thick piece", "CHUNK"], ["Thick and solid, as a sweater", "CHUNKY"]] },
+  { start: "SOL", steps: [["The bottom of a shoe, or a flatfish", "SOLE"], ["To work out the answer", "SOLVE"], ["Someone who works out the answer", "SOLVER"]] },
+  { start: "GIN", steps: [["To get more of something", "GAIN"], ["Wheat, oats or rice", "GRAIN"], ["A dish baked under a browned cheese crust", "GRATIN"]] },
+  { start: "USE", steps: [["A source of inspiration", "MUSE"], ["A tiny squeaker", "MOUSE"], ["Dull brown, as hair", "MOUSEY"]] },
+  { start: "PIT", steps: [["A measure of beer or milk", "PINT"], ["The sharp end", "POINT"], ["On the tips of the toes, in ballet", "POINTE"]] }
 ];
