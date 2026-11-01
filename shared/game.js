@@ -109,7 +109,7 @@
         if (p.lead) h += '<div class="clues">' + p.lead.map((t, j) => clue("Clue " + (j + 1), t)).join("") + "</div>";
         h += '<form id="f" autocomplete="off">';
         // Each answer box says what goes in it: the clue it answers, or, in Splice, the blend.
-        const fields = p.clues ? p.clues.map((c, j) => [G.each ? (j ? "Bonus clue" : "Clue") : "Clue " + (j + 1) + (j === 1 && G.secondNote ? " · " + G.secondNote : ""), c, "Your answer"])
+        const fields = p.clues ? p.clues.map((c, j) => [G.each ? (j ? "Bonus clue" : "Clue") : "Clue " + (j + 1) + (j === 1 && G.secondNote ? " · " + G.secondNote : ""), c, "Type your answer here"])
           : [["Your answer", "", "Both words blended into one"]];
         fields.forEach(([lab, c, ph], j) => {
           if (G.each && j > k) return;
