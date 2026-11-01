@@ -38,19 +38,19 @@ for (const p of M3) {
 }
 dupes("whittle", M3.map(p => p.start));
 
-// Snowball: a three-letter start, then three steps that each add one letter anywhere, keeping the
-// rest in order. No step may just add a plural S or a past D or ED, and no chain may be a live
-// Whittle chain backwards.
+// Snowball: a three- or four-letter start, then three steps that each add one letter anywhere,
+// keeping the rest in order. No step may just add a plural S, a past D or ED, or a Y on the end,
+// and no chain may be a live Whittle chain backwards.
 const SB = load("snowball", "SNOWBALL_PUZZLES");
 const whittleStarts = new Set(M3.filter(p => !p.retired).map(p => p.start.toUpperCase()));
 for (const p of SB) {
-  if (!letters(p.start) || p.start.length !== 3) bad("snowball", "start must be three capital letters", p);
+  if (!letters(p.start) || p.start.length < 3 || p.start.length > 4) bad("snowball", "start must be three or four capital letters", p);
   if (!Array.isArray(p.steps) || p.steps.length !== 3) { bad("snowball", "needs exactly 3 steps", p); continue; }
   let w = p.start;
   for (const [clue, ans] of p.steps) {
     if (!clue) bad("snowball", "missing clue", p);
     if (!letters(ans) || !oneRemoved(ans, w)) bad("snowball", ans + " is not " + w + " with one letter added", p);
-    if (!p.retired && (ans === w + "S" || ans === w + "ES" || ans === w + "D" || ans === w + "ED")) bad("snowball", "a step just adds " + ans.slice(w.length) + ": " + w + " to " + ans, p);
+    if (!p.retired && (ans === w + "S" || ans === w + "ES" || ans === w + "D" || ans === w + "ED" || ans === w + "Y")) bad("snowball", "a step just adds " + ans.slice(w.length) + ": " + w + " to " + ans, p);
     w = ans;
   }
   if (!p.retired && whittleStarts.has(w)) bad("snowball", "ends at " + w + ", which is a live Whittle chain backwards", p);

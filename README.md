@@ -16,7 +16,7 @@ tiles, Public Sans for everything else).
 | --- | --- | --- |
 | Common Thread | Find the one word that pairs with all three words shown. | 5 puzzles, 2 points each |
 | Whittle | Take one letter away at a time to match three clues, against a 25-second clock. | 4 words, 3 points each |
-| Snowball | Start with three letters and add one at a time to match three clues, so the word grows. | 4 chains, 3 points each |
+| Snowball | Start with a short word and add one letter at a time to match three clues, so the word grows. | 4 chains, 3 points each |
 | Tumble | An anagram game: rearrange the letters to fit the clue, then find a bonus word in the same letters, in 30 seconds. | 5 puzzles, 2 points each |
 | Stowaway | Two clues, two words: the second is the first with one letter added. | 5 puzzles, 2 points each |
 | Soundalike | Two clues, two words that sound the same but are spelled differently. | 5 puzzles, 2 points each |
@@ -145,7 +145,7 @@ format. In short:
 | --- | --- |
 | Common Thread | `{ link: "LIGHT", hint: "You flip a switch to get it.", clues: ["SUN_", "FLASH_", "_HOUSE"] }` |
 | Whittle | `{ start: "PLANET", steps: [["Something that grows", "PLANT"], ["A scheme", "PLAN"], ["You fry an egg in it", "PAN"]] }` |
-| Snowball | `{ start: "PEA", steps: [["A fruit with a narrow top", "PEAR"], ["A gem from an oyster", "PEARL"], ["Pale and shimmering", "PEARLY"]] }` |
+| Snowball | `{ start: "ORE", steps: [["A larger amount", "MORE"], ["The code of dots and dashes", "MORSE"], ["A small bite of food", "MORSEL"]] }` |
 
 In Whittle, no step may simply drop a plural S (CHATS to CHAT is not a
 whittle). The checker refuses such a chain. A puzzle marked `retired: true`
@@ -158,10 +158,11 @@ without touching the others:
 node tools/make-daily.js 2026 --force --only whittle
 ```
 
-In Snowball, each step adds one letter anywhere and keeps the rest in order.
-No step may simply add a plural S or a past-tense D or ED, and no chain may be
-a live Whittle chain backwards; the checker refuses both. A less common word
-is fine when its clue defines it.
+In Snowball, each step adds one letter anywhere and keeps the rest in order,
+and a start may be three or four letters. No step may simply add a plural S, a
+past-tense D or ED, or a Y on the end (TRUST to TRUSTY is not a snowball), and
+no chain may be a live Whittle chain backwards; the checker refuses all of
+these. A less common word is fine when its clue defines it.
 | Tumble | `{ letters: "HEART", clues: ["The ground beneath you", "Bonus: someone full of dislike"], answers: ["EARTH", "HATER"] }` |
 | Stowaway | `{ clues: ["A hot drink", "A group of players"], answers: ["TEA", "TEAM"] }` |
 | Soundalike | `{ clues: ["Two of something", "A juicy fruit"], answers: ["PAIR", "PEAR"] }` |
@@ -197,7 +198,7 @@ the games.
 | --- | --- | --- |
 | Common Thread | Missing Link | Three words, one missing word that pairs with each (*That's Puzzling!*) |
 | Whittle | Minus 3 | Take one letter away at a time to match three clues (*That's Puzzling!*) |
-| Snowball | Add Three (as heard on air) | Start with three letters and add one at a time to match three clues (*That's Puzzling!*) |
+| Snowball | Add Three (as heard on air) | Start with a short word and add one letter at a time to match three clues (*That's Puzzling!*) |
 | Tumble | Anagrams | Rearrange the letters to fit a clue, then a bonus word (*That's Puzzling!*) |
 | Stowaway | Plus One | Two clues, two words, the second with one letter added (*That's Puzzling!*) |
 | Soundalike | Hear, Here | Two clues, two words that sound the same (*That's Puzzling!*) |
