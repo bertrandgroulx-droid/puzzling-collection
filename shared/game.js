@@ -177,14 +177,14 @@
     },
 
     // Snowball: the word grows by one letter a step. Type the longer word; Hint marks the gap
-    // where the new letter goes, for a point. The new letter flips in green when it is right.
+    // where the new letter goes, for a point. The tiles simply grow: no colour on the new letter.
     grow(p) {
-      let step = 0, word = p.start, pts = 0, hints = 0, gapAt = -1, newAt = -1;
+      let step = 0, word = p.start, pts = 0, hints = 0, gapAt = -1;
       const points = () => Math.max(0, pts - hints);
       const reveal = () => clue("Started from", p.start, true) + rows(p.steps.map((s, j) => [s[1], s[0], j < pts]));
       // where one letter was added to go from a to b, keeping the rest in order
       const addedAt = (a, b) => { for (let i = 0; i < b.length; i++) if (b.slice(0, i) + b.slice(i + 1) === a) return i; return -1; };
-      const tiles = () => '<div class="tiles row">' + word.split("").map((c, i) => (i === gapAt ? '<div class="gap" aria-hidden="true"></div>' : "") + '<div class="tile' + (i === newAt ? " new" : "") + '">' + c + "</div>").join("") + (gapAt === word.length ? '<div class="gap" aria-hidden="true"></div>' : "") + "</div>";
+      const tiles = () => '<div class="tiles row">' + word.split("").map((c, i) => (i === gapAt ? '<div class="gap" aria-hidden="true"></div>' : "") + '<div class="tile">' + c + "</div>").join("") + (gapAt === word.length ? '<div class="gap" aria-hidden="true"></div>' : "") + "</div>";
       const draw = () => {
         let h = head() + group(step ? "The word so far" : "Start with", tiles());
         h += '<form id="f" autocomplete="off"><label class="field"><span class="lbl">Clue ' + (step + 1) + ' of 3 · add one letter</span><span class="q">' + esc(p.steps[step][0]) + '</span><input type="text" id="a0" placeholder="Type your answer here" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go"></label><button class="primary" type="submit">Check</button></form>';
@@ -192,12 +192,11 @@
         if (pts) h += '<p class="rungs">' + [p.start].concat(p.steps.slice(0, pts).map(s => "<b>" + s[1] + "</b>")).join(" → ") + "</p>";
         h += buttons();
         stage.innerHTML = h;
-        newAt = -1; // the flip plays on the draw right after a correct answer, never on later redraws
         $("f").onsubmit = e => {
           e.preventDefault();
           const g = val("a0"), want = p.steps[step][1];
           if (g === want) {
-            newAt = addedAt(word, want); pts++; word = want; step++; gapAt = -1;
+            pts++; word = want; step++; gapAt = -1;
             if (step === 3) return settle(points(), reveal(), "All three found.", true);
             draw(); say(want + " is right. Now the next clue.", "good"); $("a0").focus();
             return;

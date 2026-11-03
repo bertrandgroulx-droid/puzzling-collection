@@ -129,8 +129,7 @@ button.tile:disabled { cursor: default; color: var(--muted); box-shadow: none; }
 button.tile:not(:disabled):active { transform: translateY(1.5px); box-shadow: none; }
 button.tile.sel { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 1.5px 0 var(--accent-edge); }
 button.tile.hinted { border-color: var(--part); background: var(--part-soft); }
-/* Snowball: the letter just added, and the hint's marker for where the next one goes. */
-.tiles.row .tile.new { border-color: var(--good); background: var(--good-soft); }
+/* Snowball: the hint's marker for where the next letter goes. */
 .tiles.row .gap { flex: none; width: 6px; max-width: 6px; min-width: 6px; aspect-ratio: auto; height: 46px; align-self: center; border-radius: 3px; background: var(--part); border: 0; padding: 0; }
 .words { display: flex; flex-direction: column; gap: 8px; }
 .words.wrap { flex-direction: row; flex-wrap: wrap; gap: 6px; justify-content: center; }
