@@ -218,10 +218,12 @@
     },
 
     // Word ladder: tap a tile, then pick its replacement letter. Hint marks the tile to change.
+    // A second wrong letter on the same rung loses it: the word moves on, that rung scores nothing.
     swap(p) {
-      let step = 0, word = p.start, sel = -1, pts = 0, hints = 0, started = !timed(), hintedTile = -1, flipTile = -1;
-      const reveal = () => clue("Started from", p.start, true) + rows(p.steps.map((s, j) => [s[1], s[0], j < pts]));
-      const points = () => Math.max(0, pts - hints);
+      let step = 0, word = p.start, sel = -1, got = [], misses = 0, hints = 0, started = !timed(), hintedTile = -1, flipTile = -1;
+      const found = () => got.filter(Boolean).length;
+      const reveal = () => clue("Started from", p.start, true) + rows(p.steps.map((s, j) => [s[1], s[0], !!got[j]]));
+      const points = () => Math.max(0, found() - hints);
       const draw = () => {
         let h = head(started ? undefined : "Read the word, then tap Start.") + (started && timed() ? CLOCK : "");
         if (started) h += clue("Clue " + (step + 1) + " of 3", p.steps[step][0]);
@@ -229,7 +231,7 @@
         h += '<p class="status" id="msg" aria-live="polite">' + (started ? (sel < 0 ? "Tap the letter to change." : "Now tap its replacement.") : "") + "</p>";
         if (started) h += '<div class="keys">' + ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"].map(row => '<div class="keyrow">' + row.split("").map(c => '<button class="key" type="button" data-k="' + c + '"' + (sel < 0 ? " disabled" : "") + ">" + c + "</button>").join("") + "</div>").join("") + "</div>";
         else h += '<button class="primary" id="go" type="button">Start</button>';
-        if (pts) h += '<p class="rungs">' + [p.start].concat(p.steps.slice(0, pts).map(s => "<b>" + s[1] + "</b>")).join(" → ") + "</p>";
+        if (step) h += '<p class="rungs">' + [p.start].concat(p.steps.slice(0, step).map((s, j) => got[j] ? "<b>" + s[1] + "</b>" : s[1])).join(" → ") + "</p>";
         if (started) h += buttons();
         stage.innerHTML = h;
         flipTile = -1; // the flip plays on the draw right after a correct swap, never on later redraws
@@ -246,16 +248,24 @@
         const t = e.target.closest(".tile"), key = e.target.closest("[data-k]");
         if (t) { sel = Number(t.dataset.i); draw(); return; }
         if (!key || sel < 0) return;
-        const cand = word.slice(0, sel) + key.dataset.k + word.slice(sel + 1);
-        if (cand === p.steps[step][1]) {
-          flipTile = sel;
-          pts++; word = cand; step++; sel = -1; hintedTile = -1;
+        const cand = word.slice(0, sel) + key.dataset.k + word.slice(sel + 1), want = p.steps[step][1];
+        const advance = () => { step++; sel = -1; hintedTile = -1; misses = 0; };
+        if (cand === want) {
+          flipTile = sel; got[step] = true; word = cand; advance();
           if (step === 3) return settle(points(), reveal(), "Ladder complete.", true);
           draw(); say(cand + " is right. Tap the next letter to change.", "good");
         } else {
+          misses++;
+          if (timed()) clockEnd -= 3000;
+          if (misses >= 2) {
+            // The second wrong letter on a rung loses it: the word moves on, this rung scores nothing.
+            got[step] = false; word = want; advance();
+            if (step === 3) return settle(points(), reveal(), "Ladder complete.");
+            draw(); say(cand + " does not fit either. It was " + want + ". No point for this rung.", "bad");
+            return;
+          }
           sel = -1; draw();
-          if (timed()) { clockEnd -= 3000; say(cand + " does not fit. 3 seconds lost.", "bad"); }
-          else say(cand + " does not fit. Try again.", "bad");
+          say(cand + " does not fit." + (timed() ? " 3 seconds lost." : "") + " One more try.", "bad");
         }
       };
       draw();

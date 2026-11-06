@@ -31,7 +31,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../shared/style.css?v=20261103-140830">
+<link rel="stylesheet" href="../shared/style.css?v=20261106-151236">
 </head>
 <body>
 <main class="app">
@@ -45,10 +45,10 @@
   <dialog class="help" id="help"></dialog>
 </main>
 
-<script src="puzzles.js?v=20261103-140830"></script>
-<script src="../shared/keys.js?v=20261103-140830"></script>
-<script src="../shared/shell.js?v=20261103-140830"></script>
-<script src="../shared/game.js?v=20261103-140830"></script>
+<script src="puzzles.js?v=20261106-151236"></script>
+<script src="../shared/keys.js?v=20261106-151236"></script>
+<script src="../shared/shell.js?v=20261106-151236"></script>
+<script src="../shared/game.js?v=20261106-151236"></script>
 <script>
 // The settings for this game. Puzzles live in puzzles.js; the look in ../shared/style.css.
 startGame({
@@ -58,14 +58,14 @@ startGame({
   timer: 25,          // seconds per ladder
   per: 4,             // ladders per game
   max: 3,             // points per ladder
-  timed: { title: "Four ladders, 25 seconds each", rules: "Three steps per ladder. 1 point per step; a wrong swap costs 3 seconds." },
+  timed: { title: "Four ladders, 25 seconds each", rules: "Three steps per ladder. 1 point per step. A wrong swap costs 3 seconds; two wrong swaps lose the step." },
   instruction: "Tap a letter, then its replacement.",
   how: {
     goal: "Climb a word ladder: change one letter at a time so the word matches each clue.",
     steps: [
       "Start with a four-letter word. Each clue describes a new word that differs from the last one by exactly one letter, in any position.",
       "Tap the letter to change, then tap its replacement on the keyboard.",
-      "1 point for each of the three steps. 25 seconds per ladder, and a wrong swap costs 3 seconds, unless the timer is off.",
+      "1 point for each of the three steps. 25 seconds per ladder, and a wrong swap costs 3 seconds, unless the timer is off. Two wrong swaps on the same step lose that step.",
       "<b>Hint</b> marks the letter to change and costs 1 point. <b>Give up</b> (tapped twice) shows the rest of the ladder and keeps what you have scored."
     ],
     example: "<b>COLD</b>, then “a length of string” is <b>CORD</b>, “it comes in a deck” is <b>CARD</b>, and “not soft” is <b>HARD</b>."

@@ -15,12 +15,12 @@ tiles, Public Sans for everything else).
 | Game | What you do | Points |
 | --- | --- | --- |
 | Common Thread | Find the one word that pairs with all three words shown. | 5 puzzles, 2 points each |
-| Whittle | Take one letter away at a time to match three clues, against a 25-second clock. | 4 words, 3 points each |
+| Whittle | Take one letter away at a time to match three clues, against a 25-second clock. Two wrong taps on a clue lose it. | 4 words, 3 points each |
 | Snowball | Start with a short word and add one letter at a time to match three clues, so the word grows. | 4 chains, 3 points each |
 | Tumble | An anagram game: rearrange the letters to fit the clue, then find a bonus word in the same letters, in 30 seconds. | 5 puzzles, 2 points each |
 | Stowaway | Two clues, two words: the second is the first with one letter added. | 5 puzzles, 2 points each |
 | Soundalike | Two clues, two words that sound the same but are spelled differently. | 5 puzzles, 2 points each |
-| Switcheroo | Change one letter at a time to climb a three-step word ladder, against a 25-second clock. | 4 ladders, 3 points each |
+| Switcheroo | Change one letter at a time to climb a three-step word ladder, against a 25-second clock. Two wrong swaps on a step lose it. | 4 ladders, 3 points each |
 | Three of a Kind | Three words have something in common. Spot what it is. | 5 puzzles, 2 points each |
 | Splice | Two clues, two words, blended into one where they overlap. | 5 puzzles, 2 points each |
 

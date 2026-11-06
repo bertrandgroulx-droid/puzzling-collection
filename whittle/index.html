@@ -31,7 +31,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../shared/style.css?v=20261103-140830">
+<link rel="stylesheet" href="../shared/style.css?v=20261106-151236">
 </head>
 <body>
 <main class="app">
@@ -64,20 +64,22 @@
   <dialog class="help" id="help"></dialog>
 </main>
 
-<script src="puzzles.js?v=20261103-140830"></script>
-<script src="../shared/keys.js?v=20261103-140830"></script>
-<script src="../shared/shell.js?v=20261103-140830"></script>
+<script src="puzzles.js?v=20261106-151236"></script>
+<script src="../shared/keys.js?v=20261106-151236"></script>
+<script src="../shared/shell.js?v=20261106-151236"></script>
 <script>
 // Chains live in puzzles.js: a six-letter start, then three [clue, answer] steps.
 const RAW = window.WHITTLE_PUZZLES || [];
 const CHAINS = RAW.map(c => ({ start: c.start.toUpperCase(), steps: c.steps.map(s => [s[0], s[1].toUpperCase()]) }));
 const PER_GAME = 4, MAX = 3, SECONDS = 25, PENALTY = 3;
 const $ = id => document.getElementById(id);
-let queue = [], game = [], ci = 0, step = 0, word = "", pts = 0, hints = 0, score = 0, results = [], running = false, timed = true, deadline = 0, raf = 0, meta = null;
+let queue = [], game = [], ci = 0, step = 0, word = "", got = [], misses = 0, hints = 0, score = 0, results = [], running = false, timed = true, deadline = 0, raf = 0, meta = null;
+// Points for the chain so far: one per clue found, less one per hint.
+const found = () => got.filter(Boolean).length;
 
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function say(text, cls) { $("msg").textContent = text; $("msg").className = "status " + (cls || ""); }
-const points = () => Math.max(0, pts - hints);
+const points = () => Math.max(0, found() - hints);
 // Show an instruction; the block pulses once whenever the text changes or it reappears.
 function instruct(text) {
   const el = $("instr");
@@ -123,7 +125,7 @@ function drawClock(ms) {
 // The timer setting is read at the start of each word, so a change applies from the next one.
 function readyChain() {
   const c = game[ci];
-  step = 0; pts = 0; hints = 0; word = c.start; running = false;
+  step = 0; got = []; misses = 0; hints = 0; word = c.start; running = false;
   $("play").classList.remove("celebrate");
   timed = Shell.timerOn();
   $("clockRow").hidden = true; $("clueRow").hidden = true;
@@ -146,6 +148,7 @@ function begin() {
 
 function showStep() {
   $("clueText").className = "";
+  misses = 0;
   $("clueLabel").textContent = "Clue " + (step + 1) + " of 3";
   $("clueText").textContent = game[ci].steps[step][0];
   drawTiles(true, -1);
@@ -163,15 +166,15 @@ const summary = () => ({ score, max: game.length * MAX, results, recap: game.map
 function finish(why) {
   running = false; cancelAnimationFrame(raf);
   const c = game[ci], p = points();
-  $("play").classList.toggle("celebrate", pts === 3);
+  $("play").classList.toggle("celebrate", found() === 3);
   results[ci] = p; score += p;
   if (ci + 1 >= game.length) Shell.record(summary()); // the last word: the day's score is saved now, not on See your score
   $("ladder").innerHTML = c.steps.map((s, i) =>
-    '<li class="' + (i < pts ? "got" : "miss") + '"><span class="w">' + s[1] + '</span><span class="d">' + s[0] + "</span></li>").join("");
+    '<li class="' + (got[i] ? "got" : "miss") + '"><span class="w">' + s[1] + '</span><span class="d">' + s[0] + "</span></li>").join("");
   instruct(""); $("clockRow").hidden = true;
   $("clueLabel").textContent = "Started from";
   $("clueText").textContent = c.start; $("clueText").className = "w";
-  say((pts === 3 ? "All three found." : why) + " " + p + (p === 1 ? " point." : " points."), p === MAX ? "good" : p > 0 ? "part" : "bad");
+  say((found() === 3 ? "All three found." : why) + " " + p + (p === 1 ? " point." : " points."), p === MAX ? "good" : p > 0 ? "part" : "bad");
   $("tiles").innerHTML = ""; $("rungs").hidden = true; $("helpRow").hidden = true;
   $("go").hidden = false; $("go").textContent = ci + 1 < game.length ? "Next" : "See your score";
   $("go").focus();
@@ -194,19 +197,29 @@ $("tiles").addEventListener("click", e => {
   const i = Number(b.dataset.i);
   const cand = word.slice(0, i) + word.slice(i + 1);
   const c = game[ci];
-  if (cand === c.steps[step][1]) {
-    pts++; word = cand;
-    $("rungs").hidden = false;
-    $("rungs").innerHTML = [c.start].concat(c.steps.slice(0, step + 1).map(s => "<b>" + s[1] + "</b>")).join(" → ");
-    say(cand + " is right.", "good");
-    step++;
+  const rungs = () => { $("rungs").hidden = false; $("rungs").innerHTML = [c.start].concat(c.steps.slice(0, step + 1).map((s, i) => got[i] ? "<b>" + s[1] + "</b>" : s[1])).join(" → "); };
+  const advance = () => {
     $("hintBtn").disabled = false; $("hintBtn").innerHTML = "Hint (−1 point)";
+    step++;
     if (step === 3) { finish("Done."); return; }
     showStep();
     $("tiles").querySelectorAll(".tile").forEach(b => b.classList.add("flip"));
+  };
+  if (cand === c.steps[step][1]) {
+    got[step] = true; word = cand; rungs();
+    say(cand + " is right.", "good");
+    advance();
   } else {
-    if (timed) { deadline -= PENALTY * 1000; say("Not that letter. " + PENALTY + " seconds lost.", "bad"); }
-    else say("Not that letter. Try another.", "bad");
+    misses++;
+    if (timed) deadline -= PENALTY * 1000;
+    if (misses >= 2) {
+      // The second wrong tap on a clue loses it: the word moves on, this clue scores nothing.
+      got[step] = false; word = c.steps[step][1]; rungs();
+      say("Not that one either. It was " + word + ". No point for this clue.", "bad");
+      advance();
+      return;
+    }
+    say("Not that letter." + (timed ? " " + PENALTY + " seconds lost." : "") + " One more try.", "bad");
     b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake");
   }
 });
@@ -223,13 +236,13 @@ Shell.confirmGiveUp($("giveUp"), () => { if (running) finish("Given up."); });
 
 Shell.init({
   game: "whittle", title: "Whittle", puzzles: RAW, per: PER_GAME, max: MAX,
-  timed: { title: "Four words, 25 seconds each", rules: "Three clues per word. 1 point per clue; a wrong tap costs 3 seconds." },
+  timed: { title: "Four words, 25 seconds each", rules: "Three clues per word. 1 point per clue. A wrong tap costs 3 seconds; two wrong taps lose the clue." },
   how: {
     goal: "Take one letter away at a time so the word matches each clue, from six letters down to three.",
     steps: [
       "A six-letter word is shown. Each clue describes the word you get by removing one letter and keeping the rest in order.",
       "Tap the letter to take away. Three clues, three taps.",
-      "1 point for each clue. 25 seconds for all three, and a wrong tap costs 3 seconds, unless the timer is off.",
+      "1 point for each clue. 25 seconds for all three, and a wrong tap costs 3 seconds, unless the timer is off. Two wrong taps on the same clue lose that clue.",
       "<b>Hint</b> marks the letter to take away and costs 1 point. <b>Give up</b> (tapped twice) shows the rest and keeps what you have scored."
     ],
     example: "<b>PLANET</b>, then “something that grows in soil” is <b>PLANT</b>, “a scheme” is <b>PLAN</b>, and “you fry an egg in it” is <b>PAN</b>."
