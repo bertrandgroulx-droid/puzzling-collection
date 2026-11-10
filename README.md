@@ -58,6 +58,7 @@ tools/
   package-game.js     Packs one game into a folder that works on its own.
   stamp.js            Stamps a new version on every page before a push.
   make-icons.py       Draws every app icon and writes each game's manifest.
+  tests/              Browser tests that play every game (see below).
 ```
 
 Common Thread and Whittle have their own game code inside their page. The
@@ -205,6 +206,19 @@ the games.
 | Switcheroo | Swap One | Change one letter at a time to climb a word ladder (*That's Puzzling!*) |
 | Three of a Kind | Shared Property | Three words with something in common (*That's Puzzling!*) |
 | Splice | Mash-Ups | Two words blended into one where they overlap (*That's Puzzling!*) |
+
+### The browser tests (optional)
+
+`tools/tests/` holds scripts that open every game in a headless browser and
+play it: the full flow (`playthrough.js`), screen heights on a small phone
+(`heights.js`), the share icon and link per state (`share.js`,
+`homeshare.js`), the Next game button (`nextgame.js`), the score saved on the
+last puzzle (`savedearly.js`), the home page cards (`home.js`), Snowball
+(`snowball.js`), the two-misses rule (`twomiss.js`) and random play never
+dealing a retired puzzle (`retired.js`). They need Node.js and Playwright
+with Chromium (`npm install playwright && npx playwright install chromium`).
+Run one with `node tools/tests/playthrough.js`; each prints a line per check
+and ends with "all passed" or the number that failed.
 
 ### Checking the puzzles (optional)
 

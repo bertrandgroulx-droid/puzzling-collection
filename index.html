@@ -20,6 +20,16 @@
   })();
 </script>
 <meta name="description" content="Nine quick word games for your phone, each with a new puzzle every day. No sign-up, nothing to install.">
+<!-- The card an app shows when this link is pasted into a chat. The image is the studio's, served from shozbot.com. -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://shozbot.com/puzzling/">
+<meta property="og:title" content="Puzzling — nine daily word games">
+<meta property="og:description" content="Nine quick word games for your phone, each with a new puzzle every day. No sign-up, nothing to install.">
+<meta property="og:image" content="https://shozbot.com/assets/og-puzzling.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Puzzling: the nine game icons in a row.">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#121214" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
@@ -31,12 +41,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="shared/style.css?v=20261106-151236">
+<link rel="stylesheet" href="shared/style.css?v=20261110-191202">
 </head>
 <body>
 <main class="app">
   <header class="top">
     <div class="name"><h1>Puzzling</h1></div>
+    <button class="share-btn" id="shareIcon" type="button" aria-label="Share a link to Puzzling"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11H5v9h14v-9h-1"/></svg></button>
   </header>
   <p class="lead">Nine quick word games for your phone. Each one has a new puzzle every day, the previous 100 days to catch up on, and random puzzles for as long as you like. No sign-up, nothing to install.</p>
 
@@ -73,6 +84,27 @@
     if (rec) { el.className = "state done"; el.textContent = "Played today · " + rec.score + " / " + rec.max + (run >= 2 ? " · " + run + " days in a row" : ""); }
     else { el.className = "state todo"; el.textContent = "Today’s puzzle is waiting" + (run >= 2 ? " · " + run + " days in a row so far" : ""); }
   });
+})();
+</script>
+<script>
+// The share icon: the plain address from the canonical link (never location.href, since the same
+// file is also served from github.io). The share sheet on a phone; otherwise the link is copied
+// and a small toast says so, or shows the link where the clipboard is unavailable.
+(function () {
+  const can = document.querySelector('link[rel="canonical"]');
+  const url = can ? can.href : location.origin + location.pathname, title = "Puzzling";
+  let timer = 0;
+  function toast(text) {
+    let el = document.getElementById("toast");
+    if (!el) { el = document.createElement("div"); el.id = "toast"; el.className = "toast"; el.setAttribute("role", "status"); document.body.appendChild(el); }
+    el.textContent = text; el.classList.add("show");
+    clearTimeout(timer); timer = setTimeout(() => el.classList.remove("show"), 1800);
+  }
+  document.getElementById("shareIcon").onclick = () => {
+    if (navigator.share) { navigator.share({ title, url }).catch(() => {}); return; }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(() => toast("Link copied"), () => toast(url));
+    else toast(url);
+  };
 })();
 </script>
 <!-- The studio kit. data-by puts the words "by shozbot" on its own line under the game's
