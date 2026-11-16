@@ -71,6 +71,7 @@
   }
   function next() {
     stage.onclick = null; stage.classList.remove("celebrate");
+    window.scrollTo(0, 0); // the phone's keyboard can leave the page scrolled a little; the title then sits under Safari's blurred status bar
     if (S.i >= S.items.length) return endGame();
     ENGINES[G.type](S.items[S.i]);
   }
@@ -88,7 +89,7 @@
     stage.innerHTML = head(null) + revealHTML + '<p class="status ' + cls + '">' + esc(text) + " " + points + (points === 1 ? " point." : " points.") + "</p>" +
       '<button class="primary" id="nextBtn" type="button">' + (S.i + 1 < S.items.length ? "Next" : "See your score") + "</button>";
     $("nextBtn").onclick = () => { S.i++; next(); };
-    $("nextBtn").focus();
+    $("nextBtn").focus({ preventScroll: true }); window.scrollTo(0, 0);
   }
   function endGame() { Shell.finish(summary()); }
 
