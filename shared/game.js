@@ -230,12 +230,13 @@
       const points = () => Math.max(0, found() - hints);
       const draw = () => {
         let h = head(started ? undefined : "Read the word, then tap Start.") + (started && timed() ? CLOCK : "");
+        // The words before the live one, as small tile rows: the start in grey, each found rung in green, a lost one in grey.
+        if (step) h += '<div class="trail" aria-label="The words so far">' + [[p.start, "start"]].concat(p.steps.slice(0, step - 1).map((s, j) => [s[1], got[j] ? "got" : "lost"])).map(([w, cls]) => '<div class="row ' + cls + '">' + w.split("").map(ch => '<span class="t">' + ch + "</span>").join("") + "</div>").join("") + "</div>";
         if (started) h += clue("Clue " + (step + 1) + " of 3", p.steps[step][0]);
         h += '<div class="tiles row">' + word.split("").map((c, i) => '<button class="tile' + (i === sel ? " sel" : "") + (i === hintedTile ? " hinted" : "") + (i === flipTile ? " flip" : "") + '" type="button" data-i="' + i + '"' + (started ? "" : " disabled") + ' aria-label="Letter ' + c + '">' + c + "</button>").join("") + "</div>";
         h += '<p class="status" id="msg" aria-live="polite">' + (started ? (sel < 0 ? "Tap the letter to change." : "Now tap its replacement.") : "") + "</p>";
         if (started) h += '<div class="keys">' + ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"].map(row => '<div class="keyrow">' + row.split("").map(c => '<button class="key" type="button" data-k="' + c + '"' + (sel < 0 ? " disabled" : "") + ">" + c + "</button>").join("") + "</div>").join("") + "</div>";
         else h += '<button class="primary" id="go" type="button">Start</button>';
-        if (step) h += '<p class="rungs">' + [p.start].concat(p.steps.slice(0, step).map((s, j) => got[j] ? "<b>" + s[1] + "</b>" : s[1])).join(" → ") + "</p>";
         if (started) h += buttons();
         stage.innerHTML = h;
         flipTile = -1; // the flip plays on the draw right after a correct swap, never on later redraws

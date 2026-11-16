@@ -297,7 +297,7 @@ dialog.help .ver { margin: 10px 0 0; text-align: center; color: var(--muted); fo
   .tiles.stack .tile { padding: 8px 12px; font-size: 1.1rem; }
   button, .btn { min-height: 44px; }
   .opt { min-height: 44px; }
-  .key { min-height: 40px; }
+  .key { min-height: 38px; }
   .keys { gap: 4px; }
   .keyrow { gap: 3px; }
   .status { min-height: 2em; padding: 6px 12px; font-size: 0.9rem; }
