@@ -195,6 +195,14 @@ button.confirm { border-color: var(--part); background: var(--part-soft); color:
 .bar.low span { background: var(--part); }
 .secs { font-family: var(--mono); font-weight: 700; font-variant-numeric: tabular-nums; min-width: 3ch; text-align: right; }
 
+/* ---- the words so far in a chain game: the start word in grey, each found word in green, as small tile
+   rows above the clue, so the whole whittle is in view while the live word stays the big row below ---- */
+.trail { display: flex; flex-direction: column; gap: 5px; align-items: center; }
+.trail .row { display: flex; gap: 4px; flex-wrap: nowrap; }
+.trail .t { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; font-family: var(--display); font-weight: 800; font-size: 1rem; background: var(--surface); border: 1.5px solid var(--line); color: var(--muted); }
+.trail .got .t { background: var(--good-soft); border-color: var(--good); color: var(--ink); }
+.trail .lost .t { color: var(--muted); }
+
 /* ---- the ladder of solved words ---- */
 .rungs { margin: 0; font-family: var(--mono); font-weight: 700; font-size: 0.9rem; color: var(--muted); letter-spacing: 0.06em; text-align: center; }
 .rungs b { color: var(--good); }
@@ -294,6 +302,8 @@ dialog.help .ver { margin: 10px 0 0; text-align: center; color: var(--muted); fo
   .keyrow { gap: 3px; }
   .status { min-height: 2em; padding: 6px 12px; font-size: 0.9rem; }
   .ladder li { padding: 7px 12px 8px; }
+  .trail { gap: 4px; }
+  .trail .t { width: 27px; height: 27px; font-size: 0.9rem; }
   .recap li { padding: 7px 0; }
   .card { padding: 14px; }
 }
