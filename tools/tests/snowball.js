@@ -28,8 +28,8 @@ const fails = []; const check = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') 
   check(await page.$eval('#msg', e => e.textContent === 'Not that one. Try again.'), 'wrong word');
   await page.fill('#a0', chain.steps[0][1].toLowerCase()); await page.press('#a0', 'Enter'); await page.waitForTimeout(200);
   check((await tiles()) === chain.steps[0][1] && (await page.$('.tiles .tile.new')) === null, 'right word: tiles grow, nothing coloured');
-  check(await page.$eval('.group .lbl', e => e.textContent === 'The word so far'), 'label becomes The word so far');
-  check(await page.$eval('.rungs', (e, want) => e.textContent.replace(/\s/g, '') === want, chain.start + '→' + chain.steps[0][1]), 'rungs show the chain so far');
+  check((await page.$('.group .lbl')) === null, 'once the trail shows, the big row has no label');
+  check(await page.$$eval('.trail .row', (r, want) => r.map(x => x.textContent).join('>') === want, chain.start), 'the words before the live one show as tile rows above');
   check(await page.$eval('.field .lbl', e => e.textContent === 'Clue 2 of 3 · add one letter'), 'clue 2 label');
   await page.screenshot({ path: path.join(out, 'sb-mid.png') });
   // hint marks the gap at the right place

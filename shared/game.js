@@ -186,11 +186,14 @@
       // where one letter was added to go from a to b, keeping the rest in order
       const addedAt = (a, b) => { for (let i = 0; i < b.length; i++) if (b.slice(0, i) + b.slice(i + 1) === a) return i; return -1; };
       const tiles = () => '<div class="tiles row">' + word.split("").map((c, i) => (i === gapAt ? '<div class="gap" aria-hidden="true"></div>' : "") + '<div class="tile">' + c + "</div>").join("") + (gapAt === word.length ? '<div class="gap" aria-hidden="true"></div>' : "") + "</div>";
+      // The words before the live one, as small tile rows above it: the start in grey, each found word in
+      // green. The live word itself is the big row, so it is not repeated here.
+      const trail = () => '<div class="trail" aria-label="The words so far">' + [[p.start, "start"]].concat(p.steps.slice(0, step - 1).map(s => [s[1], "got"])).map(([w, cls]) => '<div class="row ' + cls + '">' + w.split("").map(ch => '<span class="t">' + ch + "</span>").join("") + "</div>").join("") + "</div>";
       const draw = () => {
-        let h = head() + group(step ? "The word so far" : "Start with", tiles());
+        // Once the trail is showing, the big row needs no label: the rows above say what it is.
+        let h = head() + (step ? trail() + tiles() : group("Start with", tiles()));
         h += '<form id="f" autocomplete="off"><label class="field"><span class="lbl">Clue ' + (step + 1) + ' of 3 · add one letter</span><span class="q">' + esc(p.steps[step][0]) + '</span><input type="text" id="a0" placeholder="Type your answer here" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go"></label><button class="primary" type="submit">Check</button></form>';
         h += '<p class="status" id="msg" aria-live="polite"></p>';
-        if (pts) h += '<p class="rungs">' + [p.start].concat(p.steps.slice(0, pts).map(s => "<b>" + s[1] + "</b>")).join(" → ") + "</p>";
         h += buttons();
         stage.innerHTML = h;
         $("f").onsubmit = e => {
