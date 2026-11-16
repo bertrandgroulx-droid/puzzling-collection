@@ -111,7 +111,7 @@
         if (p.lead) h += '<div class="clues">' + p.lead.map((t, j) => clue("Clue " + (j + 1), t)).join("") + "</div>";
         h += '<form id="f" autocomplete="off">';
         // Each answer box says what goes in it: the clue it answers, or, in Splice, the blend.
-        const fields = p.clues ? p.clues.map((c, j) => [G.each ? (j ? "Bonus clue" : "Clue") : "Clue " + (j + 1) + (j === 1 && G.secondNote ? " · " + G.secondNote : ""), c, "Type your answer here"])
+        const fields = p.clues ? p.clues.map((c, j) => ["Clue " + (j + 1) + (j === 1 && G.secondNote ? " · " + G.secondNote : ""), c, "Type your answer here"])
           : [["Your answer", "", "Both words blended into one"]];
         fields.forEach(([lab, c, ph], j) => {
           if (G.each && j > k) return;
@@ -126,7 +126,7 @@
             if (val("a" + k) === p.answers[k]) {
               found++; k++;
               if (k === n) return settle(pointsNow(), reveal(true), "Both found.", true);
-              draw(); say("Right. Now the bonus word.", "good"); $("a" + k).focus();
+              draw(); say("Right. Now the second word.", "good"); $("a" + k).focus();
             } else { say("Not that one. Try again.", "bad"); bump($("a" + k)); }
             return;
           }

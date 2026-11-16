@@ -19,12 +19,12 @@
     location.replace("https://shozbot.com" + location.pathname.replace(/^\/puzzling-collection(\/|$)/, "/puzzling/") + location.search + location.hash);
   })();
 </script>
-<meta name="description" content="An anagram game: rearrange the letters to fit the clue, then find a bonus word in the same letters.">
+<meta name="description" content="An anagram game: rearrange the letters to fit the clue, then find a second word in the same letters.">
 <!-- The card an app shows when a link to this game is pasted into a chat; a ?daily= link shows it too. -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://shozbot.com/puzzling/tumble/">
 <meta property="og:title" content="Tumble — a daily word game from Puzzling">
-<meta property="og:description" content="An anagram game: rearrange the letters to fit the clue, then find a bonus word in the same letters.">
+<meta property="og:description" content="An anagram game: rearrange the letters to fit the clue, then find a second word in the same letters.">
 <meta property="og:image" content="https://shozbot.com/assets/og-puzzling.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -41,7 +41,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../shared/style.css?v=20261116-190701">
+<link rel="stylesheet" href="../shared/style.css?v=20261116-191651">
 </head>
 <body>
 <main class="app">
@@ -55,10 +55,10 @@
   <dialog class="help" id="help"></dialog>
 </main>
 
-<script src="puzzles.js?v=20261116-190701"></script>
-<script src="../shared/keys.js?v=20261116-190701"></script>
-<script src="../shared/shell.js?v=20261116-190701"></script>
-<script src="../shared/game.js?v=20261116-190701"></script>
+<script src="puzzles.js?v=20261116-191651"></script>
+<script src="../shared/keys.js?v=20261116-191651"></script>
+<script src="../shared/shell.js?v=20261116-191651"></script>
+<script src="../shared/game.js?v=20261116-191651"></script>
 <script>
 // The settings for this game. Puzzles live in puzzles.js; the look in ../shared/style.css.
 startGame({
@@ -70,16 +70,17 @@ startGame({
   per: 5,             // puzzles per game
   max: 2,             // points per puzzle
   timed: { title: "Five puzzles, 30 seconds each", rules: "Both words in 30 seconds. 1 point per word." },
+  secondNote: "same letters",
   instruction: "Make an anagram: use every letter to fit the clue, then tap Check.",
   how: {
     goal: "An anagram game. Rearrange the letters into the word the clue describes, then find a second word in the same letters.",
     steps: [
       "The letters of a real word are shown, five or six of them. Type a word that uses every letter and matches the clue, then tap Check.",
-      "Once the first word is right, a bonus clue asks for a second word made from the same letters.",
+      "Once the first word is right, a second clue asks for another word made from the same letters.",
       "1 point for each word. 30 seconds for both, unless the timer is off.",
       "<b>Hint</b> shows the first letter of the word you are on and costs 1 point. <b>Give up</b> (tapped twice) ends the puzzle and keeps what you have scored."
     ],
-    example: "<b>HEART</b> with the clue “the ground beneath you” is <b>EARTH</b>. The bonus clue “someone full of dislike” is <b>HATER</b>."
+    example: "<b>HEART</b> with the clue “the ground beneath you” is <b>EARTH</b>. The second clue “someone full of dislike” is <b>HATER</b>."
   },
   puzzles: window.TUMBLE_PUZZLES
 });
