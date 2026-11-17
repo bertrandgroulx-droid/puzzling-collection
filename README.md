@@ -90,6 +90,11 @@ starts unexpectedly.
 - **First visit.** The Instructions block above the first puzzle opens out
   to show the goal, the example, and Got it; Got it shrinks it back to the
   one-line instruction. Nothing pops up over the game.
+- **The ladder.** The three chain games (Whittle, Snowball, Switcheroo) draw
+  one ladder, top to bottom: the start word, each settled step with its clue
+  as a label, then the live rung with the clue card, the big tiles or keys,
+  and one line of instruction or feedback under them. Found steps are green,
+  lost ones grey, the live one blue.
 - **Labels.** Every part of a puzzle says what it is in a small grey label
   ("Puzzle 1 of 5", "Clue 1", "The letters", "Your answer"). Clues are set in
   the reading face; the bold display face is kept for the puzzle's own words.

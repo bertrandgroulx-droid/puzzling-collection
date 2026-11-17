@@ -41,7 +41,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../shared/style.css?v=20261116-191651">
+<link rel="stylesheet" href="../shared/style.css?v=20261117-021243">
 </head>
 <body>
 <main class="app">
@@ -54,17 +54,13 @@
 
   <section id="play" class="stack" data-game-ui>
     <div class="progress"><span class="count" id="count"></span><div class="pips" id="pips" aria-hidden="true"></div></div>
-    <p class="instr" id="instr"></p>
     <div class="clock" id="clockRow">
       <div class="bar" id="bar"><span id="barFill"></span></div>
       <div class="secs" id="secs">25</div>
     </div>
-    <div class="trail" id="trail" hidden aria-label="The words so far"></div>
-    <p class="clue" id="clueRow"><span id="clueLabel"></span><b id="clueText"></b></p>
-    <div class="tiles row" id="tiles"></div>
-    <p class="status" id="msg" aria-live="polite"></p>
+    <div id="chain"></div>
+    <p class="status" id="msg" aria-live="polite" hidden></p>
     <button class="primary" id="go" type="button">Start</button>
-    <ul class="ladder" id="ladder"></ul>
     <div class="row" id="helpRow" hidden>
       <button id="hintBtn" type="button">Hint (−1 point)</button>
       <button id="giveUp" type="button">Give up</button>
@@ -74,30 +70,23 @@
   <dialog class="help" id="help"></dialog>
 </main>
 
-<script src="puzzles.js?v=20261116-191651"></script>
-<script src="../shared/keys.js?v=20261116-191651"></script>
-<script src="../shared/shell.js?v=20261116-191651"></script>
+<script src="puzzles.js?v=20261117-021243"></script>
+<script src="../shared/keys.js?v=20261117-021243"></script>
+<script src="../shared/shell.js?v=20261117-021243"></script>
 <script>
 // Chains live in puzzles.js: a six-letter start, then three [clue, answer] steps.
 const RAW = window.WHITTLE_PUZZLES || [];
 const CHAINS = RAW.map(c => ({ start: c.start.toUpperCase(), steps: c.steps.map(s => [s[0], s[1].toUpperCase()]) }));
 const PER_GAME = 4, MAX = 3, SECONDS = 25, PENALTY = 3;
 const $ = id => document.getElementById(id);
-let queue = [], game = [], ci = 0, step = 0, word = "", got = [], misses = 0, hints = 0, score = 0, results = [], running = false, timed = true, deadline = 0, raf = 0, meta = null;
+let queue = [], game = [], ci = 0, step = 0, word = "", got = [], misses = 0, hints = 0, hintedAt = -1, score = 0, results = [], running = false, timed = true, deadline = 0, raf = 0, meta = null;
 // Points for the chain so far: one per clue found, less one per hint.
 const found = () => got.filter(Boolean).length;
+const points = () => Math.max(0, found() - hints);
 
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-function say(text, cls) { $("msg").textContent = text; $("msg").className = "status " + (cls || ""); }
-const points = () => Math.max(0, found() - hints);
-// Show an instruction; the block pulses once whenever the text changes or it reappears.
-function instruct(text) {
-  const el = $("instr");
-  if (!text) { el.hidden = true; el.textContent = ""; return; }
-  const changed = el.hidden || el.textContent !== text;
-  el.hidden = false; el.textContent = text;
-  if (changed) { el.classList.remove("pulse"); void el.offsetWidth; el.classList.add("pulse"); }
-}
+// The one line under the live tiles (instruction or feedback), or the result line once the chain is settled.
+function say(text, cls) { const el = $("liveMsg") || $("msg"); el.textContent = text; el.className = "status " + (cls || ""); el.hidden = false; }
 
 // m comes from the shell: { mode: "daily", items, number, date } or { mode: "practice" }.
 function newGame(m) {
@@ -120,9 +109,20 @@ function drawPips() {
   }).join("");
 }
 
-function drawTiles(enabled, hintedIndex) {
-  $("tiles").innerHTML = word.split("").map((ch, i) =>
-    '<button class="tile' + (i === hintedIndex ? " hinted" : "") + '" type="button" data-i="' + i + '" aria-label="Take away ' + ch + '"' + (enabled ? "" : " disabled") + ">" + ch + "</button>").join("");
+// The ladder: the start word, each settled step with its clue, and the live rung with the clue card,
+// the big tiles and the one line under them. Drawn whole each time; the line's text is kept.
+function tiles(enabled) {
+  return '<div class="tiles row">' + word.split("").map((ch, i) =>
+    '<button class="tile' + (i === hintedAt ? " hinted" : "") + '" type="button" data-i="' + i + '" aria-label="Take away ' + ch + '"' + (enabled ? "" : " disabled") + ">" + ch + "</button>").join("") + "</div>";
+}
+function draw(just) {
+  const c = game[ci], settled = results[ci] !== undefined;
+  const line = (text, cls) => '<p class="status ' + cls + '" id="liveMsg" aria-live="polite">' + text + "</p>";
+  const live = settled ? null : running
+    ? { label: "Clue " + (step + 1) + " · " + Shell.toGo(3 - step, "letter"), verb: "Take one letter away so it means", clue: c.steps[step][0], body: tiles(true), line: line("Tap the letter to take away.", "note") }
+    : { label: "Start word", verb: null, clue: null, body: tiles(false), line: line("Read the word, then tap Start.", "note") };
+  $("chain").innerHTML = Shell.chain({ start: c.start, steps: c.steps, got, step, live, just });
+  $("msg").hidden = !settled;
 }
 
 function drawClock(ms) {
@@ -135,33 +135,21 @@ function drawClock(ms) {
 // The timer setting is read at the start of each word, so a change applies from the next one.
 function readyChain() {
   const c = game[ci];
-  step = 0; got = []; misses = 0; hints = 0; word = c.start; running = false;
+  step = 0; got = []; misses = 0; hints = 0; hintedAt = -1; word = c.start; running = false;
   $("play").classList.remove("celebrate");
   timed = Shell.timerOn();
-  $("clockRow").hidden = true; $("clueRow").hidden = true;
-  instruct("Read the word, then tap Start.");
-  say("");
-  $("ladder").innerHTML = ""; $("trail").hidden = true; $("trail").innerHTML = ""; $("helpRow").hidden = true;
-  drawTiles(false); drawClock(SECONDS * 1000); drawPips();
+  $("clockRow").hidden = true; $("helpRow").hidden = true; $("msg").hidden = true; $("msg").textContent = "";
+  drawClock(SECONDS * 1000); drawPips(); draw();
   if (timed) { $("go").hidden = false; $("go").textContent = "Start"; }
   else { $("go").hidden = true; begin(); }
 }
 
 function begin() {
   running = true; $("go").hidden = true; $("helpRow").hidden = false;
-  instruct("Tap the letter to take away.");
-  $("clueRow").hidden = false; $("clockRow").hidden = !timed;
+  $("clockRow").hidden = !timed;
   $("hintBtn").disabled = false; $("hintBtn").innerHTML = "Hint (−1 point)";
-  showStep();
+  draw();
   if (timed) { deadline = performance.now() + SECONDS * 1000; tick(); }
-}
-
-function showStep() {
-  $("clueText").className = "";
-  misses = 0;
-  $("clueLabel").textContent = "Clue " + (step + 1) + " of 3";
-  $("clueText").textContent = game[ci].steps[step][0];
-  drawTiles(true, -1);
 }
 
 function tick() {
@@ -179,13 +167,9 @@ function finish(why) {
   $("play").classList.toggle("celebrate", found() === 3);
   results[ci] = p; score += p;
   if (ci + 1 >= game.length) Shell.record(summary()); // the last word: the day's score is saved now, not on See your score
-  $("ladder").innerHTML = c.steps.map((s, i) =>
-    '<li class="' + (got[i] ? "got" : "miss") + '"><span class="w">' + s[1] + '</span><span class="d">' + s[0] + "</span></li>").join("");
-  instruct(""); $("clockRow").hidden = true;
-  $("clueLabel").textContent = "Started from";
-  $("clueText").textContent = c.start; $("clueText").className = "w";
+  $("clockRow").hidden = true; $("helpRow").hidden = true;
+  step = 3; draw();
   say((found() === 3 ? "All three found." : why) + " " + p + (p === 1 ? " point." : " points."), p === MAX ? "good" : p > 0 ? "part" : "bad");
-  $("tiles").innerHTML = ""; $("trail").hidden = true; $("helpRow").hidden = true;
   $("go").hidden = false; $("go").textContent = ci + 1 < game.length ? "Next" : "See your score";
   $("go").focus({ preventScroll: true }); window.scrollTo(0, 0);
   drawPips();
@@ -201,38 +185,33 @@ $("go").addEventListener("click", () => {
   begin();
 });
 
-$("tiles").addEventListener("click", e => {
+$("chain").addEventListener("click", e => {
   const b = e.target.closest(".tile");
-  if (!b || !running) return;
+  if (!b || !running || b.disabled) return;
   const i = Number(b.dataset.i);
   const cand = word.slice(0, i) + word.slice(i + 1);
   const c = game[ci];
-  // The words before the live one, as small tile rows above the clue: the start in grey, each found
-  // word in green. The live word is the big row, so it is not repeated here.
-  const rungs = () => {
-    const row = (w, cls) => '<div class="row ' + cls + '">' + w.split("").map(ch => '<span class="t">' + ch + "</span>").join("") + "</div>";
-    $("trail").hidden = false;
-    $("trail").innerHTML = row(c.start, "start") + c.steps.slice(0, step).map((s, i) => row(s[1], got[i] ? "got" : "lost")).join("");
-  };
+  // A step settles: the live rung becomes a settled rung in place (flashing once), and a new live
+  // rung appears below with the next clue; or, after the third, the chain is finished.
   const advance = () => {
     $("hintBtn").disabled = false; $("hintBtn").innerHTML = "Hint (−1 point)";
-    step++;
+    hintedAt = -1; misses = 0;
+    const done = step; step++;
     if (step === 3) { finish("Done."); return; }
-    showStep();
-    $("tiles").querySelectorAll(".tile").forEach(b => b.classList.add("flip"));
+    draw(done);
   };
   if (cand === c.steps[step][1]) {
-    got[step] = true; word = cand; rungs();
-    say(cand + " is right.", "good");
+    got[step] = true; word = cand;
     advance();
   } else {
     misses++;
     if (timed) deadline -= PENALTY * 1000;
     if (misses >= 2) {
       // The second wrong tap on a clue loses it: the word moves on, this clue scores nothing.
-      got[step] = false; word = c.steps[step][1]; rungs();
-      say("Not that one either. It was " + word + ". No point for this clue.", "bad");
+      got[step] = false; word = c.steps[step][1];
+      const lost = word;
       advance();
+      if (running) say("Not that one either. It was " + lost + ". No point for that clue.", "bad");
       return;
     }
     say("Not that letter." + (timed ? " " + PENALTY + " seconds lost." : "") + " One more try.", "bad");
@@ -243,8 +222,8 @@ $("hintBtn").addEventListener("click", () => {
   if (!running) return;
   hints++;
   const ans = game[ci].steps[step][1];
-  const i = [...word].findIndex((_, k) => word.slice(0, k) + word.slice(k + 1) === ans);
-  drawTiles(true, i);
+  hintedAt = [...word].findIndex((_, k) => word.slice(0, k) + word.slice(k + 1) === ans);
+  draw();
   $("hintBtn").disabled = true; $("hintBtn").textContent = "Hint used";
   say("Take away the marked letter.", "part");
 });
@@ -257,7 +236,7 @@ Shell.init({
     goal: "Take one letter away at a time so the word matches each clue, from six letters down to three.",
     steps: [
       "A six-letter word is shown. Each clue describes the word you get by removing one letter and keeping the rest in order.",
-      "Tap the letter to take away. Three clues, three taps.",
+      "Each clue sits on its own rung of a ladder. Tap the letter to take away so the word means what the clue says. Three clues, three taps.",
       "1 point for each clue. 25 seconds for all three, and a wrong tap costs 3 seconds, unless the timer is off. Two wrong taps on the same clue lose that clue.",
       "<b>Hint</b> marks the letter to take away and costs 1 point. <b>Give up</b> (tapped twice) shows the rest and keeps what you have scored."
     ],

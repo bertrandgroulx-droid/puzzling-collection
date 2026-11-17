@@ -177,32 +177,28 @@
       Shell.confirmGiveUp($("giveUp"), () => settle(0, reveal(), "The connection was: " + p.options[0].toLowerCase() + "."));
     },
 
-    // Snowball: the word grows by one letter a step. Type the longer word; Hint marks the gap
-    // where the new letter goes, for a point. The tiles simply grow: no colour on the new letter.
+    // Snowball: the word grows by one letter a step, drawn as the shell's ladder. Type the longer
+    // word; Hint marks the gap where the new letter goes, for a point.
     grow(p) {
       let step = 0, word = p.start, pts = 0, hints = 0, gapAt = -1;
+      const got = [];
       const points = () => Math.max(0, pts - hints);
-      const reveal = () => clue("Started from", p.start, true) + rows(p.steps.map((s, j) => [s[1], s[0], j < pts]));
+      const reveal = () => Shell.chain({ start: p.start, steps: p.steps, got, step: 3, live: null });
       // where one letter was added to go from a to b, keeping the rest in order
       const addedAt = (a, b) => { for (let i = 0; i < b.length; i++) if (b.slice(0, i) + b.slice(i + 1) === a) return i; return -1; };
       const tiles = () => '<div class="tiles row">' + word.split("").map((c, i) => (i === gapAt ? '<div class="gap" aria-hidden="true"></div>' : "") + '<div class="tile">' + c + "</div>").join("") + (gapAt === word.length ? '<div class="gap" aria-hidden="true"></div>' : "") + "</div>";
-      // The words before the live one, as small tile rows above it: the start in grey, each found word in
-      // green. The live word itself is the big row, so it is not repeated here.
-      const trail = () => '<div class="trail" aria-label="The words so far">' + [[p.start, "start"]].concat(p.steps.slice(0, step - 1).map(s => [s[1], "got"])).map(([w, cls]) => '<div class="row ' + cls + '">' + w.split("").map(ch => '<span class="t">' + ch + "</span>").join("") + "</div>").join("") + "</div>";
-      const draw = () => {
-        // Once the trail is showing, the big row needs no label: the rows above say what it is.
-        let h = head() + (step ? trail() + tiles() : group("Start with", tiles()));
-        h += '<form id="f" autocomplete="off"><label class="field"><span class="lbl">Clue ' + (step + 1) + ' of 3 · add one letter</span><span class="q">' + esc(p.steps[step][0]) + '</span><input type="text" id="a0" placeholder="Type your answer here" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go"></label><button class="primary" type="submit">Check</button></form>';
-        h += '<p class="status" id="msg" aria-live="polite"></p>';
-        h += buttons();
-        stage.innerHTML = h;
+      const draw = (just) => {
+        const body = tiles() + '<form id="f" autocomplete="off"><input type="text" id="a0" placeholder="Type the longer word here" aria-label="The longer word" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go"><button class="primary" type="submit">Check</button></form>';
+        const live = { label: "Clue " + (step + 1) + " · " + Shell.toGo(3 - step, "letter"), verb: "Add one letter so it means", clue: p.steps[step][0], body, line: '<p class="status note" id="msg" aria-live="polite">Type the longer word, then tap Check.</p>' };
+        stage.innerHTML = head(null) + Shell.chain({ start: p.start, steps: p.steps, got, step, live, just }) + buttons();
         $("f").onsubmit = e => {
           e.preventDefault();
           const g = val("a0"), want = p.steps[step][1];
           if (g === want) {
-            pts++; word = want; step++; gapAt = -1;
+            got[step] = true; pts++; word = want; gapAt = -1;
+            const done = step; step++;
             if (step === 3) return settle(points(), reveal(), "All three found.", true);
-            draw(); say(want + " is right. Now the next clue.", "good"); $("a0").focus();
+            draw(done); $("a0").focus({ preventScroll: true });
             return;
           }
           if (g.length !== word.length + 1) say("It needs exactly one more letter than " + word + ".", "bad");
@@ -212,31 +208,33 @@
         $("hintBtn").onclick = () => {
           hints++; gapAt = addedAt(word, p.steps[step][1]);
           draw(); say("The new letter goes in the marked gap.", "part");
-          $("hintBtn").disabled = true; $("hintBtn").textContent = "Hint used"; $("a0").focus();
+          $("hintBtn").disabled = true; $("hintBtn").textContent = "Hint used"; $("a0").focus({ preventScroll: true });
         };
         if (gapAt >= 0) { $("hintBtn").disabled = true; $("hintBtn").textContent = "Hint used"; }
         Shell.confirmGiveUp($("giveUp"), () => settle(points(), reveal(), "Given up."));
       };
       draw();
-      $("a0").focus();
+      $("a0").focus({ preventScroll: true });
     },
 
-    // Word ladder: tap a tile, then pick its replacement letter. Hint marks the tile to change.
-    // A second wrong letter on the same rung loses it: the word moves on, that rung scores nothing.
+    // Word ladder, drawn as the shell's ladder: tap a tile, then pick its replacement letter. Hint
+    // marks the tile to change. A second wrong letter on the same rung loses it: the word moves on,
+    // that rung scores nothing.
     swap(p) {
       let step = 0, word = p.start, sel = -1, got = [], misses = 0, hints = 0, started = !timed(), hintedTile = -1, flipTile = -1;
       const found = () => got.filter(Boolean).length;
-      const reveal = () => clue("Started from", p.start, true) + rows(p.steps.map((s, j) => [s[1], s[0], !!got[j]]));
+      const reveal = () => Shell.chain({ start: p.start, steps: p.steps, got, step: 3, live: null });
       const points = () => Math.max(0, found() - hints);
-      const draw = () => {
-        let h = head(started ? undefined : "Read the word, then tap Start.") + (started && timed() ? CLOCK : "");
-        // The words before the live one, as small tile rows: the start in grey, each found rung in green, a lost one in grey.
-        if (step) h += '<div class="trail" aria-label="The words so far">' + [[p.start, "start"]].concat(p.steps.slice(0, step - 1).map((s, j) => [s[1], got[j] ? "got" : "lost"])).map(([w, cls]) => '<div class="row ' + cls + '">' + w.split("").map(ch => '<span class="t">' + ch + "</span>").join("") + "</div>").join("") + "</div>";
-        if (started) h += clue("Clue " + (step + 1) + " of 3", p.steps[step][0]);
-        h += '<div class="tiles row">' + word.split("").map((c, i) => '<button class="tile' + (i === sel ? " sel" : "") + (i === hintedTile ? " hinted" : "") + (i === flipTile ? " flip" : "") + '" type="button" data-i="' + i + '"' + (started ? "" : " disabled") + ' aria-label="Letter ' + c + '">' + c + "</button>").join("") + "</div>";
-        h += '<p class="status" id="msg" aria-live="polite">' + (started ? (sel < 0 ? "Tap the letter to change." : "Now tap its replacement.") : "") + "</p>";
-        if (started) h += '<div class="keys">' + ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"].map(row => '<div class="keyrow">' + row.split("").map(c => '<button class="key" type="button" data-k="' + c + '"' + (sel < 0 ? " disabled" : "") + ">" + c + "</button>").join("") + "</div>").join("") + "</div>";
-        else h += '<button class="primary" id="go" type="button">Start</button>';
+      const draw = (just, line) => {
+        let h = head(null) + (started && timed() ? CLOCK : "");
+        const tiles = '<div class="tiles row">' + word.split("").map((c, i) => '<button class="tile' + (i === sel ? " sel" : "") + (i === hintedTile ? " hinted" : "") + (i === flipTile ? " flip" : "") + '" type="button" data-i="' + i + '"' + (started ? "" : " disabled") + ' aria-label="Letter ' + c + '">' + c + "</button>").join("") + "</div>";
+        const keys = '<div class="keys">' + ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"].map(row => '<div class="keyrow">' + row.split("").map(c => '<button class="key" type="button" data-k="' + c + '"' + (sel < 0 ? " disabled" : "") + ">" + c + "</button>").join("") + "</div>").join("") + "</div>";
+        const msg = (text, cls) => '<p class="status ' + cls + '" id="msg" aria-live="polite">' + text + "</p>";
+        const live = started
+          ? { label: "Clue " + (step + 1) + " · " + Shell.toGo(3 - step, "step"), verb: "Change one letter so it means", clue: p.steps[step][0], body: tiles + msg(line || (sel < 0 ? "Tap the letter to change." : "Now tap its replacement."), line ? "bad" : "note") + keys, line: "" }
+          : { label: "Start word", verb: null, clue: null, body: tiles, line: msg("Read the word, then tap Start.", "note") };
+        h += Shell.chain({ start: p.start, steps: p.steps, got, step, live, just });
+        if (!started) h += '<button class="primary" id="go" type="button">Start</button>';
         if (started) h += buttons();
         stage.innerHTML = h;
         flipTile = -1; // the flip plays on the draw right after a correct swap, never on later redraws
@@ -254,23 +252,22 @@
         if (t) { sel = Number(t.dataset.i); draw(); return; }
         if (!key || sel < 0) return;
         const cand = word.slice(0, sel) + key.dataset.k + word.slice(sel + 1), want = p.steps[step][1];
-        const advance = () => { step++; sel = -1; hintedTile = -1; misses = 0; };
+        const advance = () => { const done = step; step++; sel = -1; hintedTile = -1; misses = 0; return done; };
         if (cand === want) {
-          flipTile = sel; got[step] = true; word = cand; advance();
+          flipTile = sel; got[step] = true; word = cand; const done = advance();
           if (step === 3) return settle(points(), reveal(), "Ladder complete.", true);
-          draw(); say(cand + " is right. Tap the next letter to change.", "good");
+          draw(done);
         } else {
           misses++;
           if (timed()) clockEnd -= 3000;
           if (misses >= 2) {
             // The second wrong letter on a rung loses it: the word moves on, this rung scores nothing.
-            got[step] = false; word = want; advance();
+            got[step] = false; word = want; const done = advance();
             if (step === 3) return settle(points(), reveal(), "Ladder complete.");
-            draw(); say(cand + " does not fit either. It was " + want + ". No point for this rung.", "bad");
+            draw(done, "It was " + want + ". No point for that step.");
             return;
           }
-          sel = -1; draw();
-          say(cand + " does not fit." + (timed() ? " 3 seconds lost." : "") + " One more try.", "bad");
+          sel = -1; draw(undefined, "Not that one." + (timed() ? " 3 seconds lost." : "") + " One more try.");
         }
       };
       draw();

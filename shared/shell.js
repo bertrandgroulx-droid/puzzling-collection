@@ -291,6 +291,37 @@
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") checkForUpdate(); });
   window.addEventListener("pageshow", e => { if (e.persisted) checkForUpdate(); });
 
+  // ---- the ladder for the chain games (Whittle, Snowball, Switcheroo) ----
+  // One column, one rung per word, read top to bottom: the start word, then each settled step
+  // with its clue as a small label, then the live rung, which carries its own label, the clue on
+  // the warm card (with the verb: "Take one letter away so it means"), the big tiles or keys, and
+  // the one line of instruction or feedback under them. A thin rail with a dot per rung ties them.
+  //   o.start   the start word
+  //   o.steps   [[clue, word], ...]
+  //   o.got     got[j] true for a step found, false for one lost
+  //   o.step    how many steps are settled (0 to 3)
+  //   o.live    null once the chain is settled, else { label, verb, clue, body, line }; verb and
+  //             clue may be null before a timed game starts; body is the tiles (and keys or
+  //             field); line is the status element under them
+  //   o.just    the index of a step that was settled on this draw, so its rung can flash
+  const smallTiles = w => '<div class="small">' + String(w).split("").map(ch => '<span class="t">' + esc(ch) + "</span>").join("") + "</div>";
+  function chain(o) {
+    let h = '<ol class="chain" aria-label="The ladder so far">';
+    h += '<li class="rung start"><span class="rl">Start</span>' + smallTiles(o.start) + "</li>";
+    for (let j = 0; j < o.step; j++) {
+      h += '<li class="rung ' + (o.got[j] ? "got" : "lost") + (o.just === j ? " just" : "") + '"><span class="rl">Clue ' + (j + 1) + " · " + esc(o.steps[j][0]) + "</span>" + smallTiles(o.steps[j][1]) + "</li>";
+    }
+    if (o.live) {
+      const L = o.live;
+      h += '<li class="rung live"><span class="rl">' + esc(L.label) + "</span>" +
+        (L.clue ? '<p class="clue"><span>' + esc(L.verb) + "</span><b>" + esc(L.clue) + "</b></p>" : "") +
+        L.body + (L.line || "") + "</li>";
+    }
+    return h + "</ol>";
+  }
+  // "three letters to go", "two letters to go", "one more letter to go"
+  function toGo(n, unit) { return n === 1 ? "one more " + unit + " to go" : (n === 2 ? "two" : n === 3 ? "three" : String(n)) + " " + unit + "s to go"; }
+
   // ---- the share icon in the header ----
   // One link per state, built from the page's canonical address (never location.href: the same
   // file is also served from github.io, and saved progress lives per address). A specific day's
@@ -369,6 +400,6 @@
       showResults(Object.assign({ first }, res), true);
     },
     record,
-    timerOn, label, showPast, showHelp, confirmGiveUp, streak, shareLink, current: () => current
+    timerOn, label, showPast, showHelp, confirmGiveUp, streak, shareLink, chain, toGo, current: () => current
   };
 })();

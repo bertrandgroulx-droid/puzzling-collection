@@ -16,18 +16,19 @@ const fails = []; const check = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') 
   let word = chain.start;
   let wi = wrongIndex(word, chain.steps[0][1]);
   await page.click(`.tile[data-i="${wi}"]`); await page.waitForTimeout(100);
-  check(await page.$eval('#msg', e => e.textContent === 'Not that letter. One more try.'), 'whittle: first wrong tap is a warning (clock off, no seconds lost)');
-  check(await page.$eval('#clueLabel', e => e.textContent === 'Clue 1 of 3'), 'whittle: still on clue 1');
+  check(await page.$eval('#liveMsg', e => e.textContent === 'Not that letter. One more try.'), 'whittle: first wrong tap is a warning (clock off, no seconds lost)');
+  check(await page.$eval('.rung.live .rl', e => e.textContent.startsWith('Clue 1 ·')), 'whittle: still on clue 1');
   wi = wrongIndex(word, chain.steps[0][1]);
   await page.click(`.tile[data-i="${wi}"]`); await page.waitForTimeout(100);
-  check(await page.$eval('#msg', (e, w) => e.textContent === 'Not that one either. It was ' + w + '. No point for this clue.', chain.steps[0][1]), 'whittle: second wrong tap loses the clue and shows the word');
-  check(await page.$eval('#clueLabel', e => e.textContent === 'Clue 2 of 3'), 'whittle: moved on to clue 2');
+  check(await page.$eval('#liveMsg', (e, w) => e.textContent === 'Not that one either. It was ' + w + '. No point for that clue.', chain.steps[0][1]), 'whittle: second wrong tap loses the clue and shows the word');
+  check(await page.$eval('.rung.live .rl', e => e.textContent.startsWith('Clue 2 ·')), 'whittle: moved on to clue 2');
+  check(await page.$eval('.rung.lost .rl', (e, w) => e.textContent === 'Clue 1 · ' + w, chain.steps[0][0]), 'whittle: the lost clue stays on its rung');
   check(await page.$$eval('.tile', t => t.map(x => x.textContent).join('')) === chain.steps[0][1], 'whittle: tiles show the clue\'s word');
   // now get clues 2 and 3 right
   word = chain.steps[0][1];
   for (const k of [1, 2]) { const want = chain.steps[k][1]; const ri = [...word].findIndex((_, i) => word.slice(0, i) + word.slice(i + 1) === want); await page.click(`.tile[data-i="${ri}"]`); await page.waitForTimeout(150); word = want; }
   check(await page.$eval('#msg', e => e.textContent === 'Done. 2 points.'), 'whittle: chain settles with 2 of 3 points');
-  check(await page.$$eval('.ladder li', l => l.map(x => x.className).join(',') === 'miss,got,got'), 'whittle: ladder shows miss, got, got');
+  check(await page.$$eval('.chain .rung', l => l.filter(x => !x.classList.contains('start')).map(x => x.classList.contains('got') ? 'got' : 'lost').join(',') === 'lost,got,got'), 'whittle: ladder shows lost, got, got');
   await page.close();
   // ---- Switcheroo ----
   page = await ctx.newPage(); page.on('pageerror', e => errors.push('switcheroo: ' + e.message));
@@ -38,16 +39,16 @@ const fails = []; const check = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') 
   let w = lad.start, want = lad.steps[0][1], di = diff(w, want);
   const wrongKey = want[di] === 'Q' ? 'W' : 'Q';
   await page.click(`.tile[data-i="${di}"]`); await page.click(`[data-k="${wrongKey}"]`); await page.waitForTimeout(100);
-  check(await page.$eval('#msg', e => / does not fit\. One more try\.$/.test(e.textContent)), 'switcheroo: first wrong letter is a warning');
-  check(await page.$eval('.clue span', e => e.textContent === 'Clue 1 of 3'), 'switcheroo: still on clue 1');
+  check(await page.$eval('#msg', e => e.textContent === 'Not that one. One more try.'), 'switcheroo: first wrong letter is a warning');
+  check(await page.$eval('.rung.live .rl', e => e.textContent.startsWith('Clue 1 ·')), 'switcheroo: still on clue 1');
   await page.click(`.tile[data-i="${di}"]`); await page.click(`[data-k="${wrongKey}"]`); await page.waitForTimeout(100);
-  check(await page.$eval('#msg', (e, w) => e.textContent.endsWith('It was ' + w + '. No point for this rung.'), want), 'switcheroo: second wrong letter loses the rung');
-  check(await page.$eval('.clue span', e => e.textContent === 'Clue 2 of 3'), 'switcheroo: moved on to clue 2');
+  check(await page.$eval('#msg', (e, w) => e.textContent.endsWith('It was ' + w + '. No point for that step.'), want), 'switcheroo: second wrong letter loses the rung');
+  check(await page.$eval('.rung.live .rl', e => e.textContent.startsWith('Clue 2 ·')), 'switcheroo: moved on to clue 2');
   check(await page.$$eval('.tile', t => t.map(x => x.textContent).join('')) === want, 'switcheroo: tiles show the rung\'s word');
   w = want;
   for (const k of [1, 2]) { want = lad.steps[k][1]; di = diff(w, want); await page.click(`.tile[data-i="${di}"]`); await page.click(`[data-k="${want[di]}"]`); await page.waitForTimeout(150); w = want; }
   check(await page.$eval('.status', e => e.textContent === 'Ladder complete. 2 points.'), 'switcheroo: ladder settles with 2 of 3 points');
-  check(await page.$$eval('.ladder li', l => l.map(x => x.className).join(',') === 'miss,got,got'), 'switcheroo: ladder shows miss, got, got');
+  check(await page.$$eval('.chain .rung', l => l.filter(x => !x.classList.contains('start')).map(x => x.classList.contains('got') ? 'got' : 'lost').join(',') === 'lost,got,got'), 'switcheroo: ladder shows lost, got, got');
   check(errors.length === 0, 'no page errors' + (errors.length ? ': ' + errors.join(' | ') : ''));
   await browser.close(); srv.close(); console.log(fails.length ? fails.length + ' FAILED' : 'all passed');
 })();

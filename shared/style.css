@@ -203,6 +203,34 @@ button.confirm { border-color: var(--part); background: var(--part-soft); color:
 .trail .got .t { background: var(--good-soft); border-color: var(--good); color: var(--ink); }
 .trail .lost .t { color: var(--muted); }
 
+/* ---- the chain games' ladder: one column, a rung per word, a rail with a dot per rung ----
+   Settled rungs are small tiles with the clue as a label; the live rung is big, with the clue card,
+   the tiles or keys, and the one line under them. Green for found, grey for lost, blue for live. */
+.chain { list-style: none; margin: 0; padding: 0 0 0 20px; position: relative; display: flex; flex-direction: column; gap: 10px; }
+.chain::before { content: ""; position: absolute; left: 5px; top: 12px; bottom: 12px; width: 2px; border-radius: 1px; background: var(--line); }
+.rung { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.rung::before { content: ""; position: absolute; left: -19px; top: 5px; width: 10px; height: 10px; border-radius: 50%; background: var(--line); box-shadow: 0 0 0 3px var(--bg); }
+.rung.got::before { background: var(--good); }
+.rung.lost::before { background: var(--muted); }
+.rung.live::before { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.rung .rl { font-size: 0.78rem; font-weight: 700; color: var(--muted); line-height: 1.3; }
+.rung.got .rl { color: var(--good); }
+.rung.live .rl { color: var(--accent); }
+.rung .small { display: flex; gap: 4px; }
+.rung .small .t { width: 27px; height: 27px; display: grid; place-items: center; border-radius: 8px; font-family: var(--display); font-weight: 800; font-size: 0.95rem; background: var(--surface); border: 1.5px solid var(--line); color: var(--muted); }
+.rung.got .small .t { background: var(--good-soft); border-color: var(--good); color: var(--ink); }
+.rung.live { gap: 8px; width: 100%; }
+.rung.live .clue { width: 100%; text-align: left; text-wrap: pretty; }
+.rung.live .clue span { text-align: left; }
+.rung.live .tiles.row { width: 100%; justify-content: flex-start; }
+.rung.live form, .rung.live .keys { width: 100%; }
+.rung.live .status { width: 100%; justify-content: flex-start; text-align: left; }
+.rung.live .status.note { background: transparent; color: var(--muted); padding-left: 0; padding-right: 0; }
+/* A step just settled: its rung flashes once as it turns green (or grey), then rests. */
+@keyframes rungFlash { 0% { box-shadow: 0 0 0 0 var(--good); } 40% { box-shadow: 0 0 0 4px var(--good-soft), 0 0 0 5px var(--good); } 100% { box-shadow: 0 0 0 0 transparent; } }
+.rung.just .small { border-radius: 10px; animation: rungFlash 0.9s ease-out both; }
+.rung.just .small .t { animation: flipGood 0.45s ease both; }
+
 /* ---- the ladder of solved words ---- */
 .rungs { margin: 0; font-family: var(--mono); font-weight: 700; font-size: 0.9rem; color: var(--muted); letter-spacing: 0.06em; text-align: center; }
 .rungs b { color: var(--good); }
@@ -273,7 +301,7 @@ dialog.help .ver { margin: 10px 0 0; text-align: center; color: var(--muted); fo
 
 @keyframes shake { 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
 .shake { animation: shake 0.3s; }
-@media (prefers-reduced-motion: reduce) { .shake, .instr.pulse, .tile.flip, .celebrate *, .reveal * { animation: none !important; } .toggle input, .toggle input::before, .toast { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .shake, .instr.pulse, .tile.flip, .celebrate *, .reveal *, .rung.just, .rung.just * { animation: none !important; } .toggle input, .toggle input::before, .toast { transition: none; } }
 
 /* Short screens (older or smaller phones): a notch tighter everywhere, so a puzzle fits without scrolling. */
 @media (max-height: 720px) {
@@ -304,6 +332,17 @@ dialog.help .ver { margin: 10px 0 0; text-align: center; color: var(--muted); fo
   .ladder li { padding: 7px 12px 8px; }
   .trail { gap: 4px; }
   .trail .t { width: 27px; height: 27px; font-size: 0.9rem; }
+  /* The ladder on a short screen: tighter gaps, the start rung on one line, a slimmer note line and
+     keys, so Switcheroo's third clue, keyboard and all, still fits 375 by 667. */
+  .chain { gap: 6px; }
+  .rung { gap: 3px; }
+  .rung.live { gap: 5px; }
+  .rung.start { flex-direction: row; align-items: center; gap: 8px; }
+  .rung .small .t { width: 25px; height: 25px; font-size: 0.88rem; }
+  .rung.live .status { min-height: 0; padding: 2px 8px; }
+  .rung.live .status::before { display: none; }
+  .rung.live .keys .key { min-height: 33px; }
+  .rung.live .keys { gap: 3px; }
   .recap li { padding: 7px 0; }
   .card { padding: 14px; }
 }

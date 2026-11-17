@@ -12,14 +12,16 @@ const fails = []; const check = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') 
   await page.goto(base + 'snowball/'); await page.waitForTimeout(400);
   check(await page.$eval('#welcome', e => e.textContent.includes('MORSEL')), 'first visit shows the instructions block with the example');
   await page.click('#welcomeClose');
-  check(await page.$eval('.instr', e => e.textContent.includes('Add one letter')), 'instruction line');
+  check((await page.$('.instr')) === null, 'no separate instructions card: the line lives under the live tiles');
   check(await page.$eval('.progress .count', e => e.textContent === 'Puzzle 1 of 4'), 'Puzzle 1 of 4');
   const chain = await page.evaluate(() => { const set = Shell.current(); return set.items[0]; });
   const tiles = async () => page.$$eval('.tiles .tile', t => t.map(x => x.textContent).join(''));
   check((await tiles()) === chain.start, 'tiles show the start word ' + chain.start);
-  check(await page.$eval('.group .lbl', e => e.textContent === 'Start with'), 'label reads Start with');
-  check(await page.$eval('.field .lbl', e => e.textContent === 'Clue 1 of 3 · add one letter'), 'clue label');
-  check(await page.$eval('#a0', e => e.placeholder === 'Type your answer here'), 'placeholder');
+  check(await page.$eval('.rung.live .rl', e => e.textContent === 'Clue 1 · three letters to go'), 'live rung label reads Clue 1 · three letters to go');
+  check(await page.$eval('.rung.start .small', (e, s) => e.textContent === s, chain.start), 'the start rung shows the start word');
+  check(await page.$eval('.rung.live .clue span', e => e.textContent === 'Add one letter so it means'), 'the clue card carries the verb');
+  check(await page.$eval('#a0', e => e.placeholder === 'Type the longer word here'), 'placeholder');
+  check(await page.$eval('#msg', e => e.textContent === 'Type the longer word, then tap Check.' && e.classList.contains('note')), 'the one line under the tiles is the instruction');
   await page.screenshot({ path: path.join(out, 'sb-start.png') });
   // a wrong length, then a wrong word, then the right one
   await page.fill('#a0', chain.start + 'XX'); await page.click('button[type=submit]');
@@ -28,9 +30,9 @@ const fails = []; const check = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') 
   check(await page.$eval('#msg', e => e.textContent === 'Not that one. Try again.'), 'wrong word');
   await page.fill('#a0', chain.steps[0][1].toLowerCase()); await page.press('#a0', 'Enter'); await page.waitForTimeout(200);
   check((await tiles()) === chain.steps[0][1] && (await page.$('.tiles .tile.new')) === null, 'right word: tiles grow, nothing coloured');
-  check((await page.$('.group .lbl')) === null, 'once the trail shows, the big row has no label');
-  check(await page.$$eval('.trail .row', (r, want) => r.map(x => x.textContent).join('>') === want, chain.start), 'the words before the live one show as tile rows above');
-  check(await page.$eval('.field .lbl', e => e.textContent === 'Clue 2 of 3 · add one letter'), 'clue 2 label');
+  check(await page.$$eval('.rung.got', r => r.length === 1), 'the found word is now a settled rung');
+  check(await page.$eval('.rung.got .rl', (e, c) => e.textContent === 'Clue 1 · ' + c, chain.steps[0][0]), 'the settled rung keeps its clue as a label');
+  check(await page.$eval('.rung.live .rl', e => e.textContent === 'Clue 2 · two letters to go'), 'clue 2 label');
   await page.screenshot({ path: path.join(out, 'sb-mid.png') });
   // hint marks the gap at the right place
   await page.click('#hintBtn'); await page.waitForTimeout(100);
@@ -42,8 +44,8 @@ const fails = []; const check = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') 
   await page.fill('#a0', want); await page.press('#a0', 'Enter'); await page.waitForTimeout(200);
   await page.fill('#a0', chain.steps[2][1]); await page.press('#a0', 'Enter'); await page.waitForTimeout(400);
   check(await page.$eval('.status', e => e.textContent === 'All three found. 2 points.'), 'settled: 3 steps minus 1 hint = 2 points');
-  check(await page.$$eval('.ladder li.got', l => l.length === 3), 'all three rungs green');
-  check(await page.$eval('.clue b.w', (e, s) => e.textContent === s, chain.start), 'Started from shows the start');
+  check(await page.$$eval('.rung.got', l => l.length === 3) && (await page.$('.rung.live')) === null, 'all three rungs green, no live rung');
+  check(await page.$eval('.rung.start .small', (e, s) => e.textContent === s, chain.start), 'the settled ladder starts from the start word');
   await page.screenshot({ path: path.join(out, 'sb-settled.png') });
   // chain 2: give up at once scores 0
   await page.click('#nextBtn'); await page.waitForTimeout(200);
