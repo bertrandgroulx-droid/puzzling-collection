@@ -104,9 +104,10 @@ def splice():
     return [rect(4, 20, 60, 38), rect(36, 42, 60, 38), rect(36, 42, 28, 16, MOVE, r=0)]
 
 def puzzling():
-    # The collection: a block P, its last piece (white) just dropping into place.
-    return [rect(20, 6, 19, 88), rect(20, 6, 58, 19), rect(20, 47, 58, 19, r=0), rect(20, 47, 58, 19),
-            rect(61, 25, 19, 22, MOVE, rot=12)]
+    # The collection: a block P with its bowl closed in blue, and its last piece (white) just dropping
+    # into the bowl's top corner. The bowl is drawn whole so the blue reads as a P, not an F.
+    return [rect(20, 6, 19, 88), rect(20, 6, 40, 19), rect(59, 24, 19, 42), rect(20, 47, 58, 19),
+            rect(60, 5, 18, 18, MOVE, rot=-12)]
 
 GLYPHS = {
     "common-thread": common_thread, "whittle": whittle, "snowball": snowball, "tumble": tumble, "stowaway": stowaway,
